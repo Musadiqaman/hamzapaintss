@@ -64,7 +64,7 @@ app.use(
 // 🛡 SECURITY LAYER 3 → CORS (Local + Vercel ready)
 // =======================================================
 const allowedOrigins = process.env.NODE_ENV === "production"
-  ? ["https://paintsstore.vercel.app"]  
+  ? ["https://paintsstore.vercel.app/"]  
   : ["http://localhost:3000"];
 
 app.use(cors({
