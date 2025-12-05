@@ -62,23 +62,40 @@ app.use(
 // =======================================================
 // 🛡 SECURITY LAYER 3 → CORS+ORIGIN (Local + Vercel ready)
 // =======================================================
+// ===== Allowed origins =====
 const allowedOrigins = process.env.NODE_ENV === "production"
-  ? ["https://paintsstore.vercel.app"]  
-  : ["http://localhost:3000"];
+  ? ["https://paintsstore.vercel.app"]  // Production main domain
+  : ["http://localhost:3000"];          // Development localhost
 
+// ===== Strict CORS Middleware =====
 app.use(cors({
-  origin: allowedOrigins,
+  origin: function(origin, callback) {
+    // Strict: Only allow listed origins
+    if (origin && allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+
+    // Reject all others
+    return callback(new Error("❌ Forbidden: Origin not allowed"));
+  },
   methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
 
+// ===== Extra Middleware for Safety =====
 app.use((req, res, next) => {
   const origin = req.headers.origin;
-  if (!allowedOrigins.includes(origin)) {
-    next();
-  } else {
-    res.status(403).send({ success: false, message: "❌ Forbidden: Origin not allowed" });
+
+  // Only allow exact domains
+  if (origin && allowedOrigins.includes(origin)) {
+    return next();
   }
+
+  // Block undefined origin too (strict)
+  return res.status(403).json({
+    success: false,
+    message: "❌ Forbidden: Origin not allowed"
+  });
 });
 
 
