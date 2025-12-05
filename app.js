@@ -64,6 +64,7 @@ app.use(
 // 🛡 SECURITY LAYER 3 → CORS+ORIGIN (Local + Vercel ready)
 // =======================================================
 // Allowed origins
+
 const allowedOrigins = process.env.NODE_ENV === "production"
   ? ["https://hamzapaints.vercel.app"]   // Add your production domain(s) here
   : ["http://localhost:3000"];           // Localhost for dev
@@ -100,7 +101,6 @@ app.use((req, res, next) => {
     message: "❌ Forbidden: Origin not allowed"
   });
 });
-
 
 
 // =======================================================
