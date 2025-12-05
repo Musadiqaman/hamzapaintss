@@ -73,14 +73,14 @@ app.use(cors({
   credentials: true
 }));
 
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin || allowedOrigins.includes(origin)) {
-    next();
-  } else {
-    return res.status(403).json({ success: false, message: "❌ Forbidden: Origin not allowed" });
-  }
-});
+// app.use((req, res, next) => {
+//   const origin = req.headers.origin;
+//   if (!origin || allowedOrigins.includes(origin)) {
+//     next();
+//   } else {
+//     return res.status(403).json({ success: false, message: "❌ Forbidden: Origin not allowed" });
+//   }
+// });
 
 
 
