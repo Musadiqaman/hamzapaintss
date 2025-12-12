@@ -48,6 +48,8 @@
 
   const productOptions = {
   "Weather Shield": [
+
+    { code: "1951", colour: "White" },
     { code: "1952", colour: "Off White" },
     { code: "7030", colour: "Apricot" },
     { code: "1948", colour: "Sugar Cane" },
@@ -111,7 +113,8 @@
 
   ],
   "Emulsion": [
-  
+    
+    { code: "0", colour: "White" },
     { code: "10", colour: "Off White" },
     { code: "43", colour: "Kitten White" },
     { code: "97", colour: "Rose White" },
@@ -185,7 +188,8 @@
   ],
   "Enamel": [
 
-
+    { code: "241", colour: "Black" },
+    { code: "0", colour: "White" },
     { code: "222", colour: "Bone White" },
     { code: "272", colour: "Apricot (New)" },
     { code: "4022", colour: "Lemon" },
@@ -271,147 +275,186 @@ const colourFilter = document.getElementById('colourNameFilter');
 const unitFilter = document.getElementById('unitFilter');
 const refundFilter = document.getElementById('refundFilter');
 const dateFilter = document.getElementById('filter');
+// --- NEW: Custom Date Inputs ko define kar rahe hain ---
+const fromInput = document.getElementById("from");
+const toInput = document.getElementById("to"); 
 
-// Functions
+
+// Functions (populate functions remain the same)
 function populateItemFilter(brand) {
-  itemFilter.innerHTML = '<option value="all">All Items</option>';
-  if (!brand || brand === 'all') { 
-    itemFilter.disabled = true; 
-    return; 
-  }
-  itemFilter.disabled = false;
-  (brandItems[brand] || []).forEach(it => {
-    const o = document.createElement('option'); 
-    o.value = it; 
-    o.textContent = it;
-    if (itemFilter.dataset.value === it) o.selected = true;
-    itemFilter.appendChild(o);
-  });
-  const oOther = document.createElement('option'); 
-  oOther.value = 'Other'; 
-  oOther.textContent = 'Other';
-  if (itemFilter.dataset.value === 'Other') oOther.selected = true;
-  itemFilter.appendChild(oOther);
+  itemFilter.innerHTML = '<option value="all">All Items</option>';
+  if (!brand || brand === 'all') { 
+    itemFilter.disabled = true; 
+    return; 
+  }
+  itemFilter.disabled = false;
+  (brandItems[brand] || []).forEach(it => {
+    const o = document.createElement('option'); 
+    o.value = it; 
+    o.textContent = it;
+    if (itemFilter.dataset.value === it) o.selected = true;
+    itemFilter.appendChild(o);
+  });
+  const oOther = document.createElement('option'); 
+  oOther.value = 'Other'; 
+  oOther.textContent = 'Other';
+  if (itemFilter.dataset.value === 'Other') oOther.selected = true;
+  itemFilter.appendChild(oOther);
 }
 
 function populateUnitFilter(brand) {
-  unitFilter.innerHTML = '<option value="all">All Units</option>';
-  if (!brand || brand === 'all') { 
-    unitFilter.disabled = true; 
-    return; 
-  }
-  (brandUnits[brand] || []).forEach(u => {
-    const o = document.createElement('option'); 
-    o.value = u; 
-    o.textContent = u;
-    if (unitFilter.dataset.value === u) o.selected = true;
-    unitFilter.appendChild(o);
-  });
-  unitFilter.disabled = false;
+  unitFilter.innerHTML = '<option value="all">All Units</option>';
+  if (!brand || brand === 'all') { 
+    unitFilter.disabled = true; 
+    return; 
+  }
+  (brandUnits[brand] || []).forEach(u => {
+    const o = document.createElement('option'); 
+    o.value = u; 
+    o.textContent = u;
+    if (unitFilter.dataset.value === u) o.selected = true;
+    unitFilter.appendChild(o);
+  });
+  unitFilter.disabled = false;
 }
 
 function populateColourFilter(brand, item) {
-  colourFilter.innerHTML = '<option value="all">All Colours</option>';
-  if (brand === 'Weldon Paints' && productOptions[item]) {
-    productOptions[item].forEach(c => {
-      const o = document.createElement('option'); 
-      o.value = c.colour; 
-      o.textContent = c.colour;
-      if (colourFilter.dataset.value === c.colour) o.selected = true;
-      colourFilter.appendChild(o);
-    });
-    colourFilter.disabled = false;
-  } else {
-    colourFilter.disabled = true;
-    if (colourFilter.dataset.value && colourFilter.dataset.value !== 'all') {
-      const o = document.createElement('option'); 
-      o.value = colourFilter.dataset.value; 
-      o.textContent = colourFilter.dataset.value; 
-      o.selected = true;
-      colourFilter.appendChild(o);
-    }
-  }
+  colourFilter.innerHTML = '<option value="all">All Colours</option>';
+  
+  const selectedColourValue = colourFilter.dataset.value; // Pehle se select hui value
+
+  if (brand === 'Weldon Paints' && productOptions[item]) {
+    productOptions[item].forEach(c => {
+      // Database se match karne wali poori string tayyar karein:
+      const actualValue = c.code ? `${c.colour} (Code: ${c.code})` : c.colour;
+                        
+      const o = document.createElement('option');
+      o.value = actualValue; 
+      o.textContent = actualValue; // Dropdown mein Code bhi dikhega
+
+      // Selection check poori string par
+      if (selectedColourValue === actualValue) {
+        o.selected = true;
+      }
+      colourFilter.appendChild(o);
+    });
+    colourFilter.disabled = false;
+  } else {
+    colourFilter.disabled = true;
+    // Agar Weldon nahi hai aur koi colour pehle se select tha, toh usko dikhao
+    if (selectedColourValue && selectedColourValue !== 'all') {
+      const o = document.createElement('option'); 
+      o.value = selectedColourValue; 
+      o.textContent = selectedColourValue; 
+      o.selected = true;
+      colourFilter.appendChild(o);
+    }
+  }
 }
 
 function toggleDateInputs(value) {
-  const from = document.getElementById("from");
-  const to = document.getElementById("to");
-  if (value === "custom") { 
-    from.style.display = "inline-block"; 
-    to.style.display = "inline-block"; 
-  } else { 
-    from.style.display = "none"; 
-    to.style.display = "none"; 
-  }
+  const from = document.getElementById("from");
+  const to = document.getElementById("to");
+  if (value === "custom") { 
+    from.style.display = "inline-block"; 
+    to.style.display = "inline-block"; 
+  } else { 
+    from.style.display = "none"; 
+    to.style.display = "none"; 
+  }
 }
 
 async function deleteSale(saleId) {
-  if (!confirm("Are you sure you want to delete this sale?")) return;
-  try {
-    const res = await fetch(`/sales/delete-sale/${saleId}`, { method: "DELETE" });
-    const data = await res.json();
-    if (data.success) { 
-      alert("Sale deleted successfully!"); 
-      location.reload(); 
-    } else alert(data.message || "Failed to delete sale");
-  } catch (err) { 
-    alert("Error deleting sale"); 
-  }
+  if (!confirm("Are you sure you want to delete this sale?")) return;
+  try {
+    const res = await fetch(`/sales/delete-sale/${saleId}`, { method: "DELETE" });
+    const data = await res.json();
+    if (data.success) { 
+      alert("Sale deleted successfully!"); 
+      location.reload(); 
+    } else alert(data.message || "Failed to delete sale");
+  } catch (err) { 
+    alert("Error deleting sale"); 
+  }
 }
+
 
 // Init
 window.addEventListener('DOMContentLoaded', () => {
-  // Populate dependent filters
-  populateItemFilter(brandFilter.dataset.value === 'all' ? 'all' : brandFilter.dataset.value);
-  populateUnitFilter(brandFilter.dataset.value === 'all' ? null : brandFilter.dataset.value);
-  populateColourFilter(brandFilter.dataset.value, itemFilter.dataset.value === 'all' ? '' : itemFilter.dataset.value);
+  // Populate dependent filters
+  populateItemFilter(brandFilter.dataset.value === 'all' ? 'all' : brandFilter.dataset.value);
+  populateUnitFilter(brandFilter.dataset.value === 'all' ? null : brandFilter.dataset.value);
+  populateColourFilter(brandFilter.dataset.value, itemFilter.dataset.value === 'all' ? '' : itemFilter.dataset.value);
 
-  // Set initial values
-  if (brandFilter.dataset.value) brandFilter.value = brandFilter.dataset.value;
-  if (itemFilter.dataset.value) itemFilter.value = itemFilter.dataset.value;
-  if (unitFilter.dataset.value) unitFilter.value = unitFilter.dataset.value;
-  if (colourFilter.dataset.value && colourFilter.querySelector(`option[value="${colourFilter.dataset.value}"]`)) {
-    colourFilter.value = colourFilter.dataset.value;
-  }
+  // Set initial values
+  if (brandFilter.dataset.value) brandFilter.value = brandFilter.dataset.value;
+  if (itemFilter.dataset.value) itemFilter.value = itemFilter.dataset.value;
+  if (unitFilter.dataset.value) unitFilter.value = unitFilter.dataset.value;
+  if (colourFilter.dataset.value && colourFilter.querySelector(`option[value="${colourFilter.dataset.value}"]`)) {
+    colourFilter.value = colourFilter.dataset.value;
+  }
 
-  // Set refund filter value
-  if (refundFilter.dataset.value && refundFilter.querySelector(`option[value="${refundFilter.dataset.value}"]`)) {
-    refundFilter.value = refundFilter.dataset.value;
-  } else {
-    refundFilter.value = 'all';
-  }
+  // Set refund filter value
+  if (refundFilter.dataset.value && refundFilter.querySelector(`option[value="${refundFilter.dataset.value}"]`)) {
+    refundFilter.value = refundFilter.dataset.value;
+  } else {
+    refundFilter.value = 'all';
+  }
 
-  // Set date filter value
-  if (dateFilter.dataset.value && dateFilter.querySelector(`option[value="${dateFilter.dataset.value}"]`)) {
-    dateFilter.value = dateFilter.dataset.value;
-  } else {
-    dateFilter.value = 'all';
-  }
-  toggleDateInputs(dateFilter.value);
+  // Set date filter value
+  if (dateFilter.dataset.value && dateFilter.querySelector(`option[value="${dateFilter.dataset.value}"]`)) {
+    dateFilter.value = dateFilter.dataset.value;
+  } else {
+    dateFilter.value = 'all';
+  }
+  toggleDateInputs(dateFilter.value);
 
-  // Event Listeners
-  brandFilter.addEventListener('change', () => {
-    populateItemFilter(brandFilter.value);
-    populateUnitFilter(brandFilter.value);
-    populateColourFilter(brandFilter.value, itemFilter.value);
-    brandFilter.form.submit();
-  });
+  // Event Listeners
+  brandFilter.addEventListener('change', () => {
+    populateItemFilter(brandFilter.value);
+    populateUnitFilter(brandFilter.value);
+    populateColourFilter(brandFilter.value, itemFilter.value);
+    brandFilter.form.submit();
+  });
 
-  itemFilter.addEventListener('change', () => {
-    populateColourFilter(brandFilter.value, itemFilter.value);
-    itemFilter.form.submit();
-  });
+  itemFilter.addEventListener('change', () => {
+    populateColourFilter(brandFilter.value, itemFilter.value);
+    itemFilter.form.submit();
+  });
 
-  [unitFilter, colourFilter, refundFilter, dateFilter].forEach(f => {
-    f.addEventListener('change', () => f.form.submit());
-  });
-
-  document.querySelectorAll('.delete-sale').forEach(btn => {
-    btn.addEventListener('click', e => {
-      const saleId = e.currentTarget.dataset.id;
-      deleteSale(saleId);
+    // --- FIX 1: Unit, Colour, Refund ko alag submit karwa rahe hain ---
+  [unitFilter, colourFilter, refundFilter].forEach(f => {
+    f.addEventListener('change', () => f.form.submit());
+  });
+    
+    // --- FIX 2: Date Dropdown ka listener change (Custom select hone par submit nahi hoga) ---
+    dateFilter.addEventListener('change', () => {
+        toggleDateInputs(dateFilter.value);
+        if (dateFilter.value !== 'custom') { 
+            dateFilter.form.submit();
+        }
     });
-  });
+
+    // --- FIX 3: Custom Date Inputs (From/To) par listener lagana ---
+    // Jab From ya To input date change ho, toh filter ko 'custom' set karke submit karein
+    [fromInput, toInput].forEach(input => {
+        input.addEventListener('change', () => {
+            // Dropdown ko 'custom' par set karein
+            dateFilter.value = 'custom';
+            // Inputs ko show karein
+            toggleDateInputs('custom'); 
+            // Form submit karein
+            input.form.submit(); 
+        });
+    });
+
+
+  document.querySelectorAll('.delete-sale').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const saleId = e.currentTarget.dataset.id;
+      deleteSale(saleId);
+    });
+  });
 });
 
 

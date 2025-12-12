@@ -112,8 +112,6 @@
 
   ],
   "Emulsion": [
-
-    
     { code: "0", colour: "White" },
     { code: "10", colour: "Off White" },
     { code: "43", colour: "Kitten White" },
@@ -144,7 +142,7 @@
     { code: "21", colour: "Blossom Pink" },
     { code: "112", colour: "Classical" },
     { code: "22", colour: "Sea Blue" },
-    { code: "101", colour: "Swiss Grey New" },
+    { code: "101", colour: "Swiss Grey (New)" },
     { code: "23", colour: "Tea Rose" },
     { code: "111", colour: "Dark Pink" },
     { code: "74", colour: "Moods" },
@@ -319,25 +317,44 @@ function populateUnitFilter(brand) {
   unitFilter.disabled = false;
 }
 
+// allProducts.js mein is function ko replace karein:
+
 function populateColourFilter(brand, item) {
-  colourFilter.innerHTML = '<option value="all">All Colours</option>';
-  if (brand === 'Weldon Paints' && productOptions[item]) {
-    productOptions[item].forEach(c => {
-      const o = document.createElement('option');
-      o.value = c.colour; o.textContent = c.colour;
-      if (selectedColour === c.colour) o.selected = true;
-      colourFilter.appendChild(o);
-    });
-    colourFilter.disabled = false;
-  } else {
-    colourFilter.disabled = true;
-    if (selectedColour && selectedColour !== 'all') {
-      const o = document.createElement('option'); 
-      o.value = selectedColour; o.textContent = selectedColour; o.selected = true;
-      colourFilter.appendChild(o);
-    }
-  }
+  colourFilter.innerHTML = '<option value="all">All Colours</option>';
+  
+  if (brand === 'Weldon Paints' && productOptions[item]) {
+    productOptions[item].forEach(c => {
+      
+      // Database se match karne wali poori string tayyar karein:
+      const actualValue = c.code ? `${c.colour} (Code: ${c.code})` : c.colour;
+                        
+      const displayColour = actualValue; // Dropdown mein yahi poori string dikhegi
+
+      const o = document.createElement('option');
+      o.value = actualValue; 
+      o.textContent = displayColour; // Ab yahan Code bhi dikhega
+
+      if (selectedColour === actualValue) {
+        o.selected = true;
+      }
+      colourFilter.appendChild(o);
+    });
+    colourFilter.disabled = false;
+  } else {
+    colourFilter.disabled = true;
+    // Agar Weldon nahi hai aur koi colour pehle se select tha, toh usko dikhao (just in case)
+    if (selectedColour && selectedColour !== 'all') {
+      const o = document.createElement('option'); 
+      o.value = selectedColour; 
+      o.textContent = selectedColour; 
+      o.selected = true;
+      colourFilter.appendChild(o);
+    }
+  }
 }
+
+// Ensure ki aapne Node.js Route mein Exact Match wapis laga diya hai:
+// query.colourName = new RegExp(`^${colourName}$`, "i");}
 
 function toggleDateInputs(value) {
   if (value === "custom") {

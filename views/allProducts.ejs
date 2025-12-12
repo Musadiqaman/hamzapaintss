@@ -20,7 +20,7 @@
     <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
     <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
     <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+    <option hidden value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
   </select>
 
   <!-- Brand Name Filter -->
@@ -65,7 +65,7 @@
 
   <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
   <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-  <button type="submit" id="apply">Apply</button>
+  <button hidden type="submit" id="apply">Apply</button>
 </form>
 
 <!-- Stats Section -->

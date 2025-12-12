@@ -124,6 +124,10 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
 ================================ */
 
 
+function escapeRegExp(string) {
+    return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 router.get("/all",isLoggedIn,allowRoles("admin"), async (req, res) => {
   const role=req.user.role;
   try {
@@ -170,21 +174,28 @@ router.get("/all",isLoggedIn,allowRoles("admin"), async (req, res) => {
       else if (brand === "Other Paints") query.brandName = /Other Paints|Other/i;
     }
 
-    // --- Item filter ---
-    if (itemName && itemName !== "all") {
-      const knownNames = ["Weather Shield","Emulsion","Enamel"];
-      if (itemName === "Other") {
-        // items not in knownNames
-        query.itemName = { $nin: knownNames };
-      } else {
-        query.itemName = new RegExp(itemName, "i");
-      }
-    }
+    
+   // --- Item filter ---
+if (itemName && itemName !== "all") {
+  const knownNames = ["Weather Shield","Emulsion","Enamel"];
+  if (itemName === "Other") {
+    // items not in knownNames
+    query.itemName = { $nin: knownNames };
+  } else {
+    // FIX: Item name ko bhi exact match kiya
+    query.itemName = new RegExp(`^${itemName}$`, "i"); // <-- Change applied here
+  }
+}
 
     // --- Colour: only apply if brand is Weldon Paints (server-side safety)
-    if (colourName && colourName !== "all" && (brand === "Weldon Paints" || !brand)) {
-      query.colourName = new RegExp(colourName, "i");
-    }
+    // --- Colour: only apply if brand is Weldon Paints (server-side safety)
+if (colourName && colourName !== "all" && (brand === "Weldon Paints" || !brand)) {
+    // FIX: RegEx Special Characters ko Escape karein
+    const escapedColourName = escapeRegExp(colourName);
+
+    // FIX: Ab escaped string par exact match RegEx lagayein
+    query.colourName = new RegExp(`^${escapedColourName}$`, "i"); // <-- Change applied here
+}
 
     // --- Unit filter (qty field stores unit string in your schema) ---
     if (unit && unit !== "all") {

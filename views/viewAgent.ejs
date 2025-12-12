@@ -10,7 +10,9 @@
 <%- include('partials/navbar') %>
 
 <main>
-<h1>View Agent - <%= agent.name %></h1>
+<h1>View Agent - <span style="color: #2196F3;"><%= agent.name %></span></h1>
+
+
 
 <!-- Filter Section -->
 <form class="filter-container" method="GET" action="/agents/view-agent/<%= agent._id %>">
@@ -20,7 +22,7 @@
     <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
     <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
     <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+    <option hidden value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
   </select>
 
   <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
@@ -31,15 +33,15 @@
 <!-- Stats Section -->
 <div class="stats">
   <div class="stat-box">
-    <h3>Total % Amount</h3>
+    <h3>Total % Commission</h3>
     <p>Rs <%= stats.totalPercentageAmount.toFixed(2) %></p>
   </div>
   <div class="stat-box">
-    <h3>Total % Paid</h3>
+    <h3>Paid % Commission</h3>
     <p>Rs <%= stats.totalPercentageAmountGiven.toFixed(2) %></p>
   </div>
   <div class="stat-box">
-    <h3>Total % Left</h3>
+    <h3>Left % Commission</h3>
     <p>Rs <%= stats.totalPercentageAmountLeft.toFixed(2) %></p>
   </div>
 </div>
@@ -81,7 +83,7 @@
             <% } %>
           </td>
           <td>Rs <%= i.paidAmount %></td>
-          <td>Rs <%= i.percentageAmount - i.paidAmount %></td>
+          <td>Rs <%= (i.percentageAmount - i.paidAmount).toFixed(2) %></td>
           <td><%= new Date(i.createdAt).toLocaleDateString() %></td>
           <td class="actions">
             <button class="pay-btn"  id="pay" data-id="<%= i._id %>" data-total="<%= i.percentageAmount %>" data-paid="<%= i.paidAmount %>">Pay</button>

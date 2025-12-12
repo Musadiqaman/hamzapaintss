@@ -34,14 +34,18 @@
       <option value="">Select Unit</option>
     </select>
 
-    <!-- Colour dropdown -->
+     <select id="allColours" disabled>
+      <option value="">Select colour</option>
+    </select>
+
+    <!-- yay option ka drop down hai likan iska name galat hai bas aor theak hai-->
     <select id="colourSelect" disabled>
-      <option value="">Select Colour</option>
+      <option value="">Select Option</option>
     </select>
 
     <!-- Quantity and Rate -->
     <input id="quantitySold" type="number" placeholder="Quantity Sold" min="1" />
-    <input id="rate" type="number" placeholder="Rate" min="1" />
+    <input id="rate" type="number" placeholder="Rate" min="1" max="100000" />
 
     <!-- Total Stock (hidden) -->
     <input id="totalStock" type="number" placeholder="Total Stock" hidden />
@@ -57,7 +61,7 @@
     </select>
 
     <!-- Agent percentage -->
-    <input id="agentPercentage" type="number" placeholder="Agent Percentage" min="0" max="100" style="display:none;" />
+    <input id="agentPercentage" type="number" placeholder="Agent %" min="1" max="50" style="display:none;" />
 
     <button id="add">Add Sale</button>
   </div>
@@ -91,3 +95,4 @@
 
 </body>
 </html>
+

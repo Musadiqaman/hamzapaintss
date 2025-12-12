@@ -20,11 +20,11 @@
     <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
     <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
     <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+    <option hidden value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
   </select>
 
-  <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-  <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+  <input  type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+  <input  type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
   <button type="submit" id="apply">Apply</button>
 </form>
 
@@ -36,17 +36,17 @@
   </div>
 
   <div class="stat-box">
-    <h3>Total % Amount</h3>
+    <h3>Total % Commission</h3>
     <p>Rs <%= stats.totalPercentageAmount.toFixed(2) %></p>
   </div>
 
   <div class="stat-box">
-    <h3>Total % Paid</h3>
+    <h3>Paid % Commission</h3>
     <p>Rs <%= stats.totalPercentageAmountGiven.toFixed(2) %></p>
   </div>
 
   <div class="stat-box">
-    <h3>Total % Left</h3>
+    <h3>Left % Commission</h3>
     <p>Rs <%= stats.totalPercentageAmountLeft.toFixed(2) %></p>
   </div>
 </div>

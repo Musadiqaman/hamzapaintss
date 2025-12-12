@@ -42,8 +42,8 @@
       padding: 10px;
       border: 1px solid #ccc;
       border-radius: 8px;
-      width: 130px;
-      font-size: 13px;
+      width: 115px;
+      font-size: 12.5px;
       margin-bottom: 10px; /* Space between inputs */
       transition: border-color 0.3s ease-in-out;
     }
@@ -96,10 +96,10 @@
     background-color: #FFC5C5;   /* Light red background color */
     color: #DF0404;               /* Red text color */
     border: 2px solid #DF0404;    /* Red border */
-    padding: 6px;
+    padding: 4px;
     border-radius: 8px;           /* Rounded corners */
-    width: 80px;
-    font-size: 15px;
+    width: 60px;
+    font-size: 13px;
     margin-bottom: 10px;          /* Space between inputs */
     transition: all 0.3s ease;    /* Smooth transition for background, border, and scale */
     cursor: pointer;
@@ -129,7 +129,7 @@
 
 
     th, td {
-      border-bottom: 1px solid #ddd;
+      /* border-bottom: 1px solid #ddd; */
       padding: 5px;
       text-align: center;
       font-size: 15px;

@@ -120,7 +120,6 @@ const productOptions = {
 
   ],
   "Emulsion": [
-    
     { code: "0", colour: "White" },
     { code: "10", colour: "Off White" },
     { code: "43", colour: "Kitten White" },
@@ -132,7 +131,7 @@ const productOptions = {
     { code: "8", colour: "Cream" },
     { code: "88", colour: "Cameo" },
     { code: "94", colour: "Orange" },
-    { code: "103", colour: "Smart Off White New" },
+    { code: "103", colour: "Smart Off White (New)" },
     { code: "46", colour: "Orchid White" },
     { code: "40", colour: "Autumn Stone" },
     { code: "93", colour: "Lemon" },
@@ -194,7 +193,6 @@ const productOptions = {
 
   ],
   "Enamel": [
-    
     { code: "241", colour: "Black" },
     { code: "0", colour: "White" },
     { code: "222", colour: "Bone White" },
