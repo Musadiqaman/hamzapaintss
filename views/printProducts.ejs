@@ -38,8 +38,8 @@
         <td><%= p.colourName %></td>
         <td><%= p.qty %></td>
         <td><%= p.totalProduct %></td>
-       <td>Rs <%= parseFloat(p.rate).toFixed(2) %></td>
-        <td><%= total %></td>
+        <td>Rs <%= parseFloat(p.rate).toFixed(2) %></td>
+        <td>Rs <%= total.toFixed(2) %></td>
       </tr>
       <% }) %>
     </tbody>
@@ -47,7 +47,7 @@
 
   <div class="footer">
     <span>Total Items: <%= products.length %></span>
-    <span>Total Amount: <%= totalAmount %></span>
+    <span>Total Amount: Rs <%= totalAmount.toFixed(2) %></span>
   </div>
 
 <script src="/javascripts/printProducts.js"></script>

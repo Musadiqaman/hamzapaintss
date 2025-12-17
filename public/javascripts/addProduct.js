@@ -1,6 +1,4 @@
-
 // ====================== BRAND-WISE ITEMS =========================
-
 const brandItems = {
   "Weldon Paints": [
     "Weather Shield", "Emulsion", "Enamel", "Betek Emulsion", "Betek Wall Putty",
@@ -25,20 +23,22 @@ const brandItems = {
     "Emulsion", "Primer", "Wall Putty", "Exterior Primer", "Enamel"
   ],
   "Other Paints": [
-    "PEARL PASTE 1000G", "PEARL PASTE 500G","PEARL PASTE 100G","MASKAN TAPE 2",
+    "Oil Tupe","Paints SPRAY","WALL PUTTY","GODKA WALLPUTTY","EMULSION","GODKA EMULSION","ENAMEL","PEARL PASTE 1000G", "PEARL PASTE 500G","PEARL PASTE 100G","MASKAN TAPE 2",
     "MASKAN TAPE 1","MASKAN TAPE 1/2","MASKAN TAPE 2 SOTTER","MASKAN TAPE 1 SOTTER",
     "BRUSH EMULSION 6","BRUSH EMULSION 5","BRUSH EMULSION 4","BRUSH TIGER PAINT 4",
     "BRUSH TIGER PAINT 3","BRUSH TIGER PAINT 2 Double","BRUSH TIGER PAINT 2 Single",
-    "BRUSH TIGER PAINT 1 Double","BRUSH TIGER PAINT 3 Single","MARSHAL BRUSH 3",
+    "BRUSH TIGER PAINT 1 Double","BRUSH TIGER PAINT 1 Single","MARSHAL BRUSH 3",
     "COMMANDER BURSH 2","CAPTAN BRUSH 4","CAPTAN BRUSH 3 Double","CAPTAN BRUSH 2 Double",
-    "CAPTAN BRUSH 2 Single","ROBINA QALAM","WHITE QALAM","CHAPA","BOADE CHAPA","BRUSH EMULSION 5 SINGLE",
-    "BRUSH EMULSION 5 SINGLE","CAPTAN BRUSH 3 SINGLE","MATTI OIL 1500G","MATTI OIL 1000G","MATTI OIL DAMIND",
-    "MATTI OIL 500G","MATTI OIL 300G","RAGMAL ADDID","RAGMAL ROLLE","RAGMAL KERMALA","COMMANDER ROLLER",
-    "SADA ROLLER","ROLA STAKE","ROLLER 4","ROLLA PUFF ADDID","BALCAK ROLLER","BLACAK ROLLA PUFF","NEEL PKT 100G",
-    "NEEL PKT 40G","NEEL","CHAK MATTI","PARIS","GLUE 1KG","GLUE 1/2 KG","GLUE DABBI","NOBLE GLUE","ACRYLIC 1 KG",
-    "ACRYLIC 1/2 KG","DIKOO SET","MITTI OIL SMALL","SAMAD BOND","OIL TUBE ADDID","CAHILLANGER ADDID",
+    "CAPTAN BRUSH 2 Single","ROBINA QALAM","WHITE QALAM","STENSEL","STENSEL BOADER","CHAPA","BOADE CHAPA","CAPTAN BRUSH 3 SINGLE",
+    "MATTI OIL 1500G","MATTI OIL 1000G","MATTI OIL 900G","MATTI OIL DAMIND",
+    "MATTI OIL 500G","MATTI OIL 250G","MATTI OIL 300G","RAGMAL ADDID","RAGMAL ROLLE","RAGMAL FUFF","RAGMAL KERMALA","COMMANDER ROLLER",
+    "SADA ROLLER","ROLA STAKE","ROLLER 4","ROLLA PUFF 4","ROLLA PUFF ADDID","BALCAK ROLLER","BLACAK ROLLA PUFF 8","NEEL PKT 100G",
+    "NEEL PKT 40G","NEEL","CHAK MATTI KG","PARIS","GLUE 1KG","GLUE 1/2 KG","GLUE DABBI","NOBLE GLUE","ACRYLIC 1 KG",
+    "ACRYLIC 1/2 KG","DIKOO SET","MITTI OIL SMALL","SAMAD BOND DABBI","OIL TUBE ADDID","CAHILLANGER ADDID",
     "SPRAY MUBAH","SPRAY STEEL","SPRAY GOLDEN","SPRAY ZANG","MAGIC","SCRAPER 8","SCRAPER 4","SCRAPER SAFAYE",
     "PATRA","TURKEY UMBER","YELLOW UMBER","R/O UMBER","BLACK UMBER","CHOONA","FARMKEA GANKE","MALMAL",
+    "Tinter Tube","Challanger Tube","Samad Bond Tube","Sycle Pump","Sycle","Hickory","20KG H.D Putty",
+    "5KG H.D Putty","5KG Wallcoat","White Cement","Lakdana","Chamky",
   ]
 };
 
@@ -49,13 +49,13 @@ const brandUnits = {
   "Sparco Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"],
   "Value Paints":  ["Gallons", "Quarters", "Drumi", "Dabbi"],
   "Corona Paints": ["Gallons", "Quarters", "Drumi", "Dabbi", "Ponts"],
-  "Other Paints":  []
+  "Other Paints":  ["Gallons", "Quarters", "Drumi", "Dabbi"]
 };
 
-// ===================== COLOURS FOR SELECT ITEMS ONLY ==============
+// ===================== COLOURS FOR SELECT ITEMS + BRAND ONLY ==============
 
 const productOptions = {
-  "Weather Shield": [
+  "Weldon Paints-Weather Shield": [
     { code: "1951", colour: "White" },
     { code: "1952", colour: "Off White" },
     { code: "7030", colour: "Apricot" },
@@ -117,10 +117,9 @@ const productOptions = {
     { code: "2088", colour: "Avocado" },
     { code: "7056", colour: "Expresso (New)" },
     { code: "6853", colour: "Green Yellow" },
-
   ],
-  "Emulsion": [
-    { code: "0", colour: "White" },
+  "Weldon Paints-Emulsion": [
+     { code: "0", colour: "White" },
     { code: "10", colour: "Off White" },
     { code: "43", colour: "Kitten White" },
     { code: "97", colour: "Rose White" },
@@ -188,12 +187,9 @@ const productOptions = {
     { code: "36", colour: "Spring Leaf" },
     { code: "72", colour: "Jonquil" },
     { code: "90", colour: "Jade" },
-
-
-
   ],
-  "Enamel": [
-    { code: "241", colour: "Black" },
+  "Weldon Paints-Enamel": [
+     { code: "241", colour: "Black" },
     { code: "0", colour: "White" },
     { code: "222", colour: "Bone White" },
     { code: "272", colour: "Apricot (New)" },
@@ -266,135 +262,132 @@ const productOptions = {
     { code: "5107", colour: "Golden Dust" },
     { code: "5120", colour: "Sea Blue" },
     { code: "5109", colour: "Brilliant Green" },
-    
-
+  ],
+  "Other Paints-Oil Tupe": [
+    { code: "106", colour: "White" },
+    { code: "443", colour: "Blue" }, 
+    { code: "560", colour: "Viridian" },  
+    { code: "227", colour: "Yellow" },  
+    { code: "794", colour: "Lamp Black" },  
+    { code: "313", colour: "Orange Red" },  
+    { code: "453", colour: "Cobalt Blue" }, 
+    { code: "559", colour: "Emerald Green" },   
+    { code: "676", colour: "Yellow Ochre" },
+    { code: "302", colour: "Scarlet" },  
+    { code: "688", colour: "Raw Umber" },  
+    { code: "601", colour: "Raw Siena" },
+    { code: "687", colour: "Burnt Umber" },
+    { code: "215", colour: "Lemon Yellow" },
+    { code: "684", colour: "Burnt Siena" },
+    { code: "336", colour: "Rose" },  
+    { code: "402", colour: "Mauve" },
+  ],
+  "Other Paints-Paints SPRAY": [
+    { code: "37", colour: "Onion Green" },
+    { code: "23", colour: "Red" }, 
+    { code: "39", colour: "Black" },  
+    { code: "30", colour: "Pink" },  
+    { code: "21", colour: "Vivdid Blue" },  
+    { code: "22", colour: "Medium Grey" },  
+    { code: "36", colour: "Silver" }, 
+    { code: "35", colour: "Gold" },   
+    { code: "318", colour: "Chrome" },
+    { code: "25", colour: "Yellow" },  
+    { code: "15", colour: "Sky Blue" },  
+    { code: "40", colour: "white" },
+    { code: "29", colour: "Brown" },  
   ]
 };
 
-
-
-// =================== BRAND CHANGE HANDLER ========================
-
-document.getElementById("brandName").addEventListener("change", function () {
-  const brand = this.value;
-  const itemDropdown = document.getElementById("itemName");
-  const unitDropdown = document.getElementById("quantitative");
-  const colourDropdown = document.getElementById("colourCode");
-
-  // Reset dropdowns
-  itemDropdown.innerHTML = `<option value="">Select Item</option>`;
-  unitDropdown.innerHTML = `<option value="">Select Unit</option>`;
-  colourDropdown.innerHTML = `<option value="">Select Colour</option>`;
-  colourDropdown.disabled = true;
-
-  if (brand && brandItems[brand]) {
-    // Load Items
-    brandItems[brand].forEach(i => {
-      const opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = i;
-      itemDropdown.appendChild(opt);
-    });
-
-    // Load Units
-    brandUnits[brand].forEach(u => {
-      const opt = document.createElement("option");
-      opt.value = u;
-      opt.textContent = u;
-      unitDropdown.appendChild(opt);
-    });
-  }
-});
-
-// ================== ITEM CHANGE: LOAD COLORS ONLY 3 ITEMS FOR WELDON =============
-
-document.getElementById("itemName").addEventListener("change", function () {
-  const selectedItem = this.value;
-  const colourDropdown = document.getElementById("colourCode");
-  const brand = document.getElementById("brandName").value;
-
-  colourDropdown.innerHTML = '<option value="">Select Colour</option>';
-
-  // Only show colors if Weldon Paints and item is in productOptions
-  if (brand === "Weldon Paints" && productOptions[selectedItem]) {
-    productOptions[selectedItem].forEach(opt => {
-      const el = document.createElement("option");
-      el.value = opt.code;
-      el.textContent = `${opt.colour} (Code: ${opt.code})`;
-      colourDropdown.appendChild(el);
-    });
-    colourDropdown.disabled = false;
-  } else {
-    colourDropdown.disabled = true;
-  }
-});
+const brandNameSelect = document.getElementById("brandName");
+const itemNameSelect = document.getElementById("itemName");
+const quantitativeSelect = document.getElementById("quantitative");
+const colourCodeSelect = document.getElementById("colourCode");
 
 let tempProducts = [];
 
-// ===================== STOCK ID GENERATOR =========================
+// --- Brand Change ---
+brandNameSelect.addEventListener("change", function () {
+  const brand = this.value;
+  itemNameSelect.innerHTML = `<option value="">Select Item</option>`;
+  quantitativeSelect.innerHTML = `<option value="">Select Unit</option>`;
+  colourCodeSelect.innerHTML = `<option value="">Select Colour</option>`;
+  colourCodeSelect.disabled = true;
+
+  if (brand && brandItems[brand]) {
+    brandItems[brand].forEach(i => {
+      const opt = document.createElement("option");
+      opt.value = i; opt.textContent = i;
+      itemNameSelect.appendChild(opt);
+    });
+    brandUnits[brand].forEach(u => {
+      const opt = document.createElement("option");
+      opt.value = u; opt.textContent = u;
+      quantitativeSelect.appendChild(opt);
+    });
+  }
+});
+
+// --- Item Change ---
+itemNameSelect.addEventListener("change", function () {
+  const selectedBrand = brandNameSelect.value;
+  const selectedItem = this.value;
+  const lookupKey = `${selectedBrand}-${selectedItem}`;
+  
+  colourCodeSelect.innerHTML = '<option value="">Select Colour</option>';
+
+  if (productOptions[lookupKey]) {
+    productOptions[lookupKey].forEach(opt => {
+      const el = document.createElement("option");
+      el.value = `${opt.colour} (Code: ${opt.code})`;
+      el.textContent = `${opt.colour} (Code: ${opt.code})`;
+      colourCodeSelect.appendChild(el);
+    });
+    colourCodeSelect.disabled = false;
+  } else {
+    const el = document.createElement("option");
+    el.value = ""; 
+    el.textContent = "No Colour Required";
+    colourCodeSelect.appendChild(el);
+    colourCodeSelect.value = ""; 
+    colourCodeSelect.disabled = true; 
+  }
+});
 
 function generateStockID(itemName) {
-  const prefix = itemName.slice(0, 3).toUpperCase();
-  const time = Date.now().toString().slice(-5);
-  const random = Math.floor(Math.random() * 90 + 10);
-  return `${prefix}-${time}${random}`;
+  return `${(itemName || "PRO").slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-5)}`;
 }
 
-
-// ===================== ADD PRODUCT ================================
-
+// --- Add Product ---
 function addProduct() {
-  const brandName = document.getElementById("brandName").value;
-  const itemName = document.getElementById("itemName").value;
-  const colourDropdown = document.getElementById("colourCode");
-  const qty = document.getElementById("quantitative").value;
+  const brandName = brandNameSelect.value;
+  const itemName = itemNameSelect.value;
+  let colourName = colourCodeSelect.value;
+  const qty = quantitativeSelect.value;
   const totalProduct = parseInt(document.getElementById("totalProduct").value);
   const rate = parseFloat(document.getElementById("rate").value);
-  
 
-  let colourCombined = "";
-  if (!colourDropdown.disabled && colourDropdown.value !== "") {
-    const selected = colourDropdown.options[colourDropdown.selectedIndex];
-    colourCombined = selected.text;
-  }
-
-  if (!brandName || !itemName || !totalProduct || !rate) {
-    alert("⚠️ Please fill all fields before adding!");
+  if (!brandName || !itemName || isNaN(totalProduct) || isNaN(rate)) {
+    alert("⚠️ Please fill all required fields!");
     return;
   }
 
-  const total = totalProduct * rate;
-  const stockID = generateStockID(itemName);
+  // Agar value "N/A" hai ya khali hai, toh bilkul khali string rakho
+  if (!colourName || colourName.toUpperCase() === "N/A") {
+    colourName = "";
+  }
 
   tempProducts.push({
-    stockID,
-    brandName,
-    itemName,
-    colourName: colourCombined,
-    qty,
-    totalProduct,
-    rate,
-    total,
+    stockID: generateStockID(itemName),
+    brandName, itemName, colourName, qty, totalProduct, rate,
+    total: totalProduct * rate
   });
 
   renderTable();
   clearFields();
 }
 
-// ===================== CLEAR FIELDS ===============================
-
-function clearFields() {
-  document.getElementById("brandName").value = "";
-  document.getElementById("itemName").innerHTML = `<option value="">Select Item</option>`;
-  document.getElementById("colourCode").innerHTML = '<option value="">Select Colour</option>';
-  document.getElementById("colourCode").disabled = true;
-  document.getElementById("quantitative").innerHTML = `<option value="">Select Unit</option>`;
-  document.getElementById("totalProduct").value = "";
-  document.getElementById("rate").value = "";
-}
-
-// ===================== RENDER TABLE ===============================
-
+// --- Render Table ---
 function renderTable() {
   const tbody = document.getElementById("tableBody");
   tbody.innerHTML = "";
@@ -409,72 +402,67 @@ function renderTable() {
       <tr>
         <td>${p.brandName}</td>
         <td>${p.itemName}</td>
-        <td>${p.colourName}</td>
+        <td>${p.colourName}</td> 
         <td>${p.qty}</td>
         <td>${p.totalProduct}</td>
-        <td>${p.rate}</td>
-        <td>${p.total}</td>
+        <td>Rs ${p.rate.toFixed(2)}</td>
+        <td>Rs ${p.total.toFixed(2)}</td>
         <td><button class="delete-temp" id="delete" data-index="${i}">Delete</button></td>
       </tr>`;
   });
 
-  attachDeleteButtons(); // VERY IMPORTANT
+  attachDeleteButtons();
 }
-
-
 
 function attachDeleteButtons() {
   document.querySelectorAll(".delete-temp").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const index = parseInt(btn.getAttribute("data-index"));
+    btn.onclick = function() {
+      const index = parseInt(this.getAttribute("data-index"));
       tempProducts.splice(index, 1);
       renderTable();
-    });
+    };
   });
 }
 
-// ===================== SUBMIT + PRINT =============================
+function clearFields() {
+  brandNameSelect.value = "";
+  itemNameSelect.innerHTML = `<option value="">Select Item</option>`;
+  colourCodeSelect.innerHTML = '<option value="">Select Colour</option>';
+  colourCodeSelect.disabled = true;
+  quantitativeSelect.innerHTML = `<option value="">Select Unit</option>`;
+  document.getElementById("totalProduct").value = "";
+  document.getElementById("rate").value = "";
+}
 
+// --- Submit Data (Print Added Back) ---
 async function submitData() {
   if (tempProducts.length === 0) {
     alert("⚠️ Please add at least one product!");
     return;
   }
-
   try {
     const res = await fetch("/products/add-multiple", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ products: tempProducts }),
     });
+    const data = await res.json();
+    if (res.ok && data.success) {
+      alert("✅ Saved Successfully!");
+      
+      // Print logic
+      const printData = encodeURIComponent(JSON.stringify(tempProducts));
+      window.open(`/products/print?data=${printData}`, "_blank");
 
-    const text = await res.text();
-    let data;
-    try { data = JSON.parse(text); } catch { throw new Error("Invalid server response"); }
-
-    if (!res.ok || !data.success) throw new Error(data.message || "Failed to save");
-
-    alert("✅ Products saved successfully!");
-
-    const printData = encodeURIComponent(JSON.stringify(tempProducts));
-    window.open(`/products/print?data=${printData}`, "_blank");
-
-    tempProducts = [];
-    renderTable();
-
-  } catch (err) {
-    alert("❌ Error: " + err.message);
-    console.error(err);
-  }
+      tempProducts = [];
+      renderTable();
+    } else {
+       throw new Error(data.message || "Failed to save");
+    }
+  } catch (err) { alert("Error: " + err.message); }
 }
 
-renderTable();
-
-
-
-// Add product button
 document.getElementById("add").addEventListener("click", addProduct);
-
-// Submit & Save button
 document.querySelector(".submit-btn").addEventListener("click", submitData);
+renderTable();
 

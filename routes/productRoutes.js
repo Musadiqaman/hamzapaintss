@@ -3,7 +3,7 @@ import Product from "../models/Product.js";
 import Sale from "../models/Sale.js";
 import { isLoggedIn } from "../middleware/isLoggedIn.js";
 import { allowRoles } from "../middleware/allowRoles.js";
-
+import moment from 'moment-timezone'; // 🟢 Library Import
 
 
 const router = express.Router();
@@ -69,128 +69,123 @@ router.post("/add-multiple",isLoggedIn,allowRoles("admin", "worker"), async (req
    -> Shows all products with stats
 ================================ */
 // 🟢 3️⃣ All Products Page (GET) — with filters
+
+const PKT_TIMEZONE = "Asia/Karachi"; // 🟢 Standard Timezone
+
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-router.get("/all",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
-  const role=req.user.role;
-  
-  try {
-    let { filter, from, to, brand, itemName, colourName, unit, stockStatus, refund } = req.query;
-    let query = {};
-    const now = new Date();
-    let start, end;
+// 🟢 ALL PRODUCTS ROUTE
+router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+    const role = req.user.role;
 
-    // --- Date Filters (Single date and Range support) ---
-    if (filter === "today") {
-      const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0,0,0,0);
-      const todayEnd = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59,999);
-      start = todayStart; end = todayEnd;
-    } else if (filter === "yesterday") {
-      const y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-      start = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 0,0,0,0);
-      end = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23,59,59,999);
-    } else if (filter === "month") {
-      start = new Date(now.getFullYear(), now.getMonth(), 1, 0,0,0,0);
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59,999);
-    } else if (filter === "lastMonth") {
-      const lmYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-      const lmMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-      start = new Date(lmYear, lmMonth, 1, 0,0,0,0);
-      end = new Date(lmYear, lmMonth, new Date(lmYear, lmMonth + 1, 0).getDate(), 23,59,59,999);
-    } else if (filter === "custom" && (from || to)) {
-      // FIX: Custom Range Logic with single date support
-      const f = from ? new Date(from) : null;
-      const t = to ? new Date(to) : null;
+    try {
+        let { filter, from, to, brand, itemName, colourName, unit, stockStatus, refund } = req.query;
+        let query = {};
+        let start, end;
 
-      if (f && t && f <= t) { // Case 1: Both FROM and TO are selected (Range)
-        start = new Date(f.getFullYear(), f.getMonth(), f.getDate(), 0, 0, 0, 0);
-        end = new Date(t.getFullYear(), t.getMonth(), t.getDate(), 23, 59, 59, 999);
-      } else if (f && !t) { // Case 2: Only FROM is selected (Single Day Filter)
-        start = new Date(f.getFullYear(), f.getMonth(), f.getDate(), 0, 0, 0, 0);
-        end = new Date(f.getFullYear(), f.getMonth(), f.getDate(), 23, 59, 59, 999);
-      } else if (t && !f) { // Case 3: Only TO is selected (Single Day Filter)
-        start = new Date(t.getFullYear(), t.getMonth(), t.getDate(), 0, 0, 0, 0);
-        end = new Date(t.getFullYear(), t.getMonth(), t.getDate(), 23, 59, 59, 999);
-      }
-    }
+        // --- 🟢 Moment Timezone Logic (Same as All Sales) ---
+        if (filter === "today") {
+            start = moment.tz(PKT_TIMEZONE).startOf('day').toDate();
+            end = moment.tz(PKT_TIMEZONE).endOf('day').toDate();
+        } else if (filter === "yesterday") {
+            start = moment.tz(PKT_TIMEZONE).subtract(1, 'days').startOf('day').toDate();
+            end = moment.tz(PKT_TIMEZONE).subtract(1, 'days').endOf('day').toDate();
+        } else if (filter === "month") {
+            start = moment.tz(PKT_TIMEZONE).startOf('month').toDate();
+            end = moment.tz(PKT_TIMEZONE).endOf('day').toDate();
+        } else if (filter === "lastMonth") {
+            start = moment.tz(PKT_TIMEZONE).subtract(1, 'months').startOf('month').toDate();
+            end = moment.tz(PKT_TIMEZONE).subtract(1, 'months').endOf('month').toDate();
+        } else if (filter === "custom" && (from || to)) {
+            const fromDate = from ? moment.tz(from, PKT_TIMEZONE).startOf('day') : null;
+            const toDate = to ? moment.tz(to, PKT_TIMEZONE).endOf('day') : (fromDate ? fromDate.clone().endOf('day') : null);
+            if (fromDate) start = fromDate.toDate();
+            if (toDate) end = toDate.toDate();
+        }
 
-    if (start && end) query.createdAt = { $gte: start, $lte: end };
+        if (start && end) {
+            query.createdAt = { $gte: start, $lte: end };
+        }
 
-    // --- Brand filter mapping (Exact Match RegEx used for better safety) ---
-    if (brand && brand !== "all") {
-      if (brand === "Weldon Paints") query.brandName = /^Weldon Paints$/i;
-      else if (brand === "Sparco Paints") query.brandName = /^Sparco Paints$/i;
-      else if (brand === "Value Paints") query.brandName = /^Value Paints$/i;
-      else if (brand === "Corona Paints") query.brandName = /^Corona Paints$/i;
-      else if (brand === "Other Paints") query.brandName = /Other Paints|Other/i;
-    }
+        // 🔵 CONSOLE LOGS (Debugging for Atlas)
+        console.log("--- 🟢 PRODUCT FILTER DEBUG ---");
+        console.log("Filter Type:", filter);
+        console.log("PKT Start:", start ? moment(start).tz(PKT_TIMEZONE).format() : "N/A");
+        console.log("PKT End:", end ? moment(end).tz(PKT_TIMEZONE).format() : "N/A");
+        console.log("UTC Start (Atlas):", start ? start.toISOString() : "N/A");
+        console.log("UTC End (Atlas):", end ? end.toISOString() : "N/A");
+        console.log("-------------------------------");
 
-    // --- Item filter (FIX: Exact Match) ---
-    if (itemName && itemName !== "all") {
-      const knownNames = ["Weather Shield","Emulsion","Enamel"];
-      if (itemName === "Other") {
-        // items not in knownNames
-        query.itemName = { $nin: knownNames };
-      } else {
-        // FIX: Item name ko bhi exact match kiya
-        query.itemName = new RegExp(`^${itemName}$`, "i");
-      }
-    }
+        // --- Brand filter mapping ---
+        if (brand && brand !== "all") {
+            if (brand === "Weldon Paints") query.brandName = /^Weldon Paints$/i;
+            else if (brand === "Sparco Paints") query.brandName = /^Sparco Paints$/i;
+            else if (brand === "Value Paints") query.brandName = /^Value Paints$/i;
+            else if (brand === "Corona Paints") query.brandName = /^Corona Paints$/i;
+            else if (brand === "Other Paints") query.brandName = /Other Paints|Other/i;
+        }
 
-    
-    // --- Colour: only apply if brand is Weldon Paints (FIX: Exact Match)
-if (colourName && colourName !== "all" && (brand === "Weldon Paints" || !brand)) {
-    // FIX: RegEx Special Characters ko Escape karein
-    const escapedColourName = escapeRegExp(colourName);
+        // --- Item filter ---
+        if (itemName && itemName !== "all") {
+            const knownNames = ["Weather Shield", "Emulsion", "Enamel"];
+            if (itemName === "Other") {
+                query.itemName = { $nin: knownNames };
+            } else {
+                query.itemName = new RegExp(`^${itemName}$`, "i");
+            }
+        }
 
-    // Ab escaped string par exact match RegEx lagayein
-    query.colourName = new RegExp(`^${escapedColourName}$`, "i");
-}
+        // --- Colour filter ---
+       // Pehle yahan (brand === "Weldon Paints") laga tha, maine wo hata diya hai
+        if (colourName && colourName !== "all") {
+            const escapedColourName = escapeRegExp(colourName);
+            query.colourName = new RegExp(`^${escapedColourName}$`, "i");
+        }
 
-    // --- Unit filter (qty field stores unit string in your schema) ---
-    if (unit && unit !== "all") {
-      query.qty = new RegExp(unit, "i");
-    }
+        // --- Unit filter ---
+        if (unit && unit !== "all") {
+            query.qty = new RegExp(unit, "i");
+        }
 
-    // --- Stock status
-    if (stockStatus && stockStatus !== "all") {
-      query.remaining = stockStatus === "in" ? { $gt: 0 } : { $eq: 0 };
-    }
+        // --- Stock status ---
+        if (stockStatus && stockStatus !== "all") {
+            query.remaining = stockStatus === "in" ? { $gt: 0 } : { $eq: 0 };
+        }
 
-    // --- Refund status
-    if (refund && refund !== "all") query.refundStatus = refund;
+        // --- Refund status ---
+        if (refund && refund !== "all") query.refundStatus = refund;
 
-    // --- Fetch Products ---
-    const filteredProducts = await Product.find(query).sort({ createdAt: -1 });
+        // --- Fetch & Sort ---
+        const filteredProducts = await Product.find(query).sort({ createdAt: -1 });
 
-    // --- Stats (FIX: Variable definition is correct) ---
-    let totalStock = 0, totalRemaining = 0, totalValue = 0, remaining = 0, totalRefundedValue = 0;
-    filteredProducts.forEach(p => {
-      totalStock += p.totalProduct || 0;
-      totalValue += (p.totalProduct || 0) * (p.rate || 0);
-      totalRemaining += Math.min(p.remaining || 0, p.totalProduct || 0);
-      totalRefundedValue += Math.min(p.refundQuantity || 0, p.totalProduct || 0) * (p.rate || 0);
-      remaining += (p.remaining || 0) * (p.rate || 0);
-    });
+        // --- Stats Calculation ---
+        let totalStock = 0, totalRemaining = 0, totalValue = 0, remainingValue = 0, totalRefundedValue = 0;
+        filteredProducts.forEach(p => {
+            totalStock += p.totalProduct || 0;
+            totalValue += (p.totalProduct || 0) * (p.rate || 0);
+            totalRemaining += Math.min(p.remaining || 0, p.totalProduct || 0);
+            totalRefundedValue += Math.min(p.refundQuantity || 0, p.totalProduct || 0) * (p.rate || 0);
+            remainingValue += (p.remaining || 0) * (p.rate || 0);
+        });
 
-    res.render("allProducts", {
-      products: filteredProducts,
-      stats: { totalStock, totalRemaining, totalValue, remaining, totalRefundedValue },
-      filter, from, to,
-      selectedBrand: brand || "all",
-      selectedItem: itemName || "all",
-      selectedColour: colourName || "all",
-      selectedUnit: unit || "all",
-      stockStatus: stockStatus || "all",
-      selectedRefund: refund || "all",
-      role
-    });
-  } catch (err) {
-    console.error("❌ Error loading All Products:", err);
-    res.status(500).send("Error loading products page");
-  }
+        res.render("allProducts", {
+            products: filteredProducts,
+            stats: { totalStock, totalRemaining, totalValue, remaining: remainingValue, totalRefundedValue },
+            filter, from, to,
+            selectedBrand: brand || "all",
+            selectedItem: itemName || "all",
+            selectedColour: colourName || "all",
+            selectedUnit: unit || "all",
+            stockStatus: stockStatus || "all",
+            selectedRefund: refund || "all",
+            role
+        });
+    } catch (err) {
+        console.error("❌ Error loading All Products:", err);
+        res.status(500).send("Error loading products page");
+    }
 });
 
 
@@ -299,10 +294,22 @@ router.get('/print',isLoggedIn,allowRoles("admin", "worker"), (req, res) => {
       console.error("Error parsing print data:", err);
     }
   }
-  const currentDate = new Date().toLocaleString('en-US', { 
-    weekday:'long', year:'numeric', month:'long', day:'numeric', 
-    hour:'2-digit', minute:'2-digit', second:'2-digit'
+ let currentDate;
+if (process.env.NODE_ENV === 'production') {
+  // deployed server, force PKT
+  currentDate = new Date().toLocaleString('en-US', { 
+    timeZone: 'Asia/Karachi',
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
+} else {
+  // localhost, just use local time
+  currentDate = new Date().toLocaleString('en-US', { 
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+}
+
   res.render('printProducts', { products, currentDate });
 });
 

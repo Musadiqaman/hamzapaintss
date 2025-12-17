@@ -1,4 +1,5 @@
-  const brandItems = {
+// ====================== BRAND-WISE ITEMS =========================
+const brandItems = {
   "Weldon Paints": [
     "Weather Shield", "Emulsion", "Enamel", "Betek Emulsion", "Betek Wall Putty",
     "Wall Putty", "Metallic", "Under Coat", "Red Oxide Primer", "Varnish",
@@ -22,32 +23,39 @@
     "Emulsion", "Primer", "Wall Putty", "Exterior Primer", "Enamel"
   ],
   "Other Paints": [
-    "PEARL PASTE 1000G", "PEARL PASTE 500G","PEARL PASTE 100G","MASKAN TAPE 2",
+    "Oil Tupe","Paints SPRAY","WALL PUTTY","GODKA WALLPUTTY","EMULSION","GODKA EMULSION","ENAMEL","PEARL PASTE 1000G", "PEARL PASTE 500G","PEARL PASTE 100G","MASKAN TAPE 2",
     "MASKAN TAPE 1","MASKAN TAPE 1/2","MASKAN TAPE 2 SOTTER","MASKAN TAPE 1 SOTTER",
     "BRUSH EMULSION 6","BRUSH EMULSION 5","BRUSH EMULSION 4","BRUSH TIGER PAINT 4",
     "BRUSH TIGER PAINT 3","BRUSH TIGER PAINT 2 Double","BRUSH TIGER PAINT 2 Single",
-    "BRUSH TIGER PAINT 1 Double","BRUSH TIGER PAINT 3 Single","MARSHAL BRUSH 3",
+    "BRUSH TIGER PAINT 1 Double","BRUSH TIGER PAINT 1 Single","MARSHAL BRUSH 3",
     "COMMANDER BURSH 2","CAPTAN BRUSH 4","CAPTAN BRUSH 3 Double","CAPTAN BRUSH 2 Double",
-    "CAPTAN BRUSH 2 Single","ROBINA QALAM","WHITE QALAM","CHAPA","BOADE CHAPA","BRUSH EMULSION 5 SINGLE",
-    "BRUSH EMULSION 5 SINGLE","CAPTAN BRUSH 3 SINGLE","MATTI OIL 1500G","MATTI OIL 1000G","MATTI OIL DAMIND",
-    "MATTI OIL 500G","MATTI OIL 300G","RAGMAL ADDID","RAGMAL ROLLE","RAGMAL KERMALA","COMMANDER ROLLER",
-    "SADA ROLLER","ROLA STAKE","ROLLER 4","ROLLA PUFF ADDID","BALCAK ROLLER","BLACAK ROLLA PUFF","NEEL PKT 100G",
-    "NEEL PKT 40G","NEEL","CHAK MATTI","PARIS","GLUE 1KG","GLUE 1/2 KG","GLUE DABBI","NOBLE GLUE","ACRYLIC 1 KG",
-    "ACRYLIC 1/2 KG","DIKOO SET","MITTI OIL SMALL","SAMAD BOND","OIL TUBE ADDID","CAHILLANGER ADDID",
+    "CAPTAN BRUSH 2 Single","ROBINA QALAM","WHITE QALAM","STENSEL","STENSEL BOADER","CHAPA","BOADE CHAPA","CAPTAN BRUSH 3 SINGLE",
+    "MATTI OIL 1500G","MATTI OIL 1000G","MATTI OIL 900G","MATTI OIL DAMIND",
+    "MATTI OIL 500G","MATTI OIL 250G","MATTI OIL 300G","RAGMAL ADDID","RAGMAL ROLLE","RAGMAL FUFF","RAGMAL KERMALA","COMMANDER ROLLER",
+    "SADA ROLLER","ROLA STAKE","ROLLER 4","ROLLA PUFF 4","ROLLA PUFF ADDID","BALCAK ROLLER","BLACAK ROLLA PUFF 8","NEEL PKT 100G",
+    "NEEL PKT 40G","NEEL","CHAK MATTI KG","PARIS","GLUE 1KG","GLUE 1/2 KG","GLUE DABBI","NOBLE GLUE","ACRYLIC 1 KG",
+    "ACRYLIC 1/2 KG","DIKOO SET","MITTI OIL SMALL","SAMAD BOND DABBI","OIL TUBE ADDID","CAHILLANGER ADDID",
     "SPRAY MUBAH","SPRAY STEEL","SPRAY GOLDEN","SPRAY ZANG","MAGIC","SCRAPER 8","SCRAPER 4","SCRAPER SAFAYE",
     "PATRA","TURKEY UMBER","YELLOW UMBER","R/O UMBER","BLACK UMBER","CHOONA","FARMKEA GANKE","MALMAL",
+    "Tinter Tube","Challanger Tube","Samad Bond Tube","Sycle Pump","Sycle","Hickory","20KG H.D Putty",
+    "5KG H.D Putty","5KG Wallcoat","White Cement","Lakdana","Chamky",
   ]
 };
 
-  const brandUnits = {
+// ====================== BRAND-WISE UNITS =========================
+
+const brandUnits = {
   "Weldon Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"],
   "Sparco Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"],
   "Value Paints":  ["Gallons", "Quarters", "Drumi", "Dabbi"],
-  "Corona Paints": ["Gallons", "Quarters", "Drumi", "Dabbi", "Ponts"]
+  "Corona Paints": ["Gallons", "Quarters", "Drumi", "Dabbi", "Ponts"],
+  "Other Paints":  ["Gallons", "Quarters", "Drumi", "Dabbi"]
 };
 
-  const productOptions = {
-  "Weather Shield": [
+// ===================== COLOURS FOR SELECT ITEMS + BRAND ONLY ==============
+
+const productOptions = {
+  "Weldon Paints-Weather Shield": [
     { code: "1951", colour: "White" },
     { code: "1952", colour: "Off White" },
     { code: "7030", colour: "Apricot" },
@@ -109,10 +117,9 @@
     { code: "2088", colour: "Avocado" },
     { code: "7056", colour: "Expresso (New)" },
     { code: "6853", colour: "Green Yellow" },
-
   ],
-  "Emulsion": [
-    { code: "0", colour: "White" },
+  "Weldon Paints-Emulsion": [
+     { code: "0", colour: "White" },
     { code: "10", colour: "Off White" },
     { code: "43", colour: "Kitten White" },
     { code: "97", colour: "Rose White" },
@@ -180,13 +187,9 @@
     { code: "36", colour: "Spring Leaf" },
     { code: "72", colour: "Jonquil" },
     { code: "90", colour: "Jade" },
-
-
-
   ],
-  "Enamel": [
-
-    { code: "241", colour: "Black" },
+  "Weldon Paints-Enamel": [
+     { code: "241", colour: "Black" },
     { code: "0", colour: "White" },
     { code: "222", colour: "Bone White" },
     { code: "272", colour: "Apricot (New)" },
@@ -259,13 +262,45 @@
     { code: "5107", colour: "Golden Dust" },
     { code: "5120", colour: "Sea Blue" },
     { code: "5109", colour: "Brilliant Green" },
-    
-
+  ],
+  "Other Paints-Oil Tupe": [
+    { code: "106", colour: "White" },
+    { code: "443", colour: "Blue" }, 
+    { code: "560", colour: "Viridian" },  
+    { code: "227", colour: "Yellow" },  
+    { code: "794", colour: "Lamp Black" },  
+    { code: "313", colour: "Orange Red" },  
+    { code: "453", colour: "Cobalt Blue" }, 
+    { code: "559", colour: "Emerald Green" },   
+    { code: "676", colour: "Yellow Ochre" },
+    { code: "302", colour: "Scarlet" },  
+    { code: "688", colour: "Raw Umber" },  
+    { code: "601", colour: "Raw Siena" },
+    { code: "687", colour: "Burnt Umber" },
+    { code: "215", colour: "Lemon Yellow" },
+    { code: "684", colour: "Burnt Siena" },
+    { code: "336", colour: "Rose" },  
+    { code: "402", colour: "Mauve" },
+  ],
+  "Other Paints-Paints SPRAY": [
+    { code: "37", colour: "Onion Green" },
+    { code: "23", colour: "Red" }, 
+    { code: "39", colour: "Black" },  
+    { code: "30", colour: "Pink" },  
+    { code: "21", colour: "Vivdid Blue" },  
+    { code: "22", colour: "Medium Grey" },  
+    { code: "36", colour: "Silver" }, 
+    { code: "35", colour: "Gold" },   
+    { code: "318", colour: "Chrome" },
+    { code: "25", colour: "Yellow" },  
+    { code: "15", colour: "Sky Blue" },  
+    { code: "40", colour: "white" },
+    { code: "29", colour: "Brown" },  
   ]
 };
 
 
-// Variables from DOM
+// DOM Variables
 const brandFilter = document.getElementById('brandFilter');
 const itemFilter = document.getElementById('itemNameFilter');
 const colourFilter = document.getElementById('colourNameFilter');
@@ -274,14 +309,14 @@ const filterSelect = document.getElementById('filter');
 const fromDate = document.getElementById('from');
 const toDate = document.getElementById('to');
 
-// Selected values (pass via EJS to JS using data-attributes or window object)
+// Global Selected Values (from Server)
 const selectedBrand = window.selectedBrand || 'all';
 const selectedItem = window.selectedItem || 'all';
 const selectedColour = window.selectedColour || 'all';
 const selectedUnit = window.selectedUnit || 'all';
 
+// ===================== POPULATE FUNCTIONS =========================
 
-// Populate Functions
 function populateItemFilter(brand) {
   itemFilter.innerHTML = '<option value="all">All Items</option>';
   if (!brand || brand === 'all') {
@@ -296,10 +331,6 @@ function populateItemFilter(brand) {
     if (selectedItem === it) o.selected = true;
     itemFilter.appendChild(o);
   });
-  const oOther = document.createElement('option'); 
-  oOther.value = 'Other'; oOther.textContent = 'Other';
-  if (selectedItem === 'Other') oOther.selected = true;
-  itemFilter.appendChild(oOther);
 }
 
 function populateUnitFilter(brand) {
@@ -317,61 +348,62 @@ function populateUnitFilter(brand) {
   unitFilter.disabled = false;
 }
 
-// allProducts.js mein is function ko replace karein:
-
 function populateColourFilter(brand, item) {
-  colourFilter.innerHTML = '<option value="all">All Colours</option>';
-  
-  if (brand === 'Weldon Paints' && productOptions[item]) {
-    productOptions[item].forEach(c => {
-      
-      // Database se match karne wali poori string tayyar karein:
-      const actualValue = c.code ? `${c.colour} (Code: ${c.code})` : c.colour;
-                        
-      const displayColour = actualValue; // Dropdown mein yahi poori string dikhegi
+  colourFilter.innerHTML = '<option value="all">All Colours</option>';
+  
+  // Maslan: "Other Paints-EMULSION"
+  const lookupKey = `${brand}-${item}`;
 
-      const o = document.createElement('option');
-      o.value = actualValue; 
-      o.textContent = displayColour; // Ab yahan Code bhi dikhega
+  if (productOptions[lookupKey]) {
+    productOptions[lookupKey].forEach(c => {
+      // Database value match logic
+      const actualValue = c.code ? `${c.colour} (Code: ${c.code})` : c.colour;
 
-      if (selectedColour === actualValue) {
-        o.selected = true;
-      }
-      colourFilter.appendChild(o);
-    });
-    colourFilter.disabled = false;
-  } else {
-    colourFilter.disabled = true;
-    // Agar Weldon nahi hai aur koi colour pehle se select tha, toh usko dikhao (just in case)
-    if (selectedColour && selectedColour !== 'all') {
-      const o = document.createElement('option'); 
-      o.value = selectedColour; 
-      o.textContent = selectedColour; 
-      o.selected = true;
-      colourFilter.appendChild(o);
-    }
-  }
-}
+      const o = document.createElement('option');
+      o.value = actualValue; 
+      o.textContent = actualValue; 
 
-// Ensure ki aapne Node.js Route mein Exact Match wapis laga diya hai:
-// query.colourName = new RegExp(`^${colourName}$`, "i");}
-
-function toggleDateInputs(value) {
-  if (value === "custom") {
-    fromDate.style.display = "inline-block";
-    toDate.style.display = "inline-block";
+      if (selectedColour === actualValue) {
+        o.selected = true;
+      }
+      colourFilter.appendChild(o);
+    });
+    colourFilter.disabled = false;
   } else {
-    fromDate.style.display = "none";
-    toDate.style.display = "none";
+    colourFilter.disabled = true;
+    // Fallback if colour already selected
+    if (selectedColour && selectedColour !== 'all') {
+      const o = document.createElement('option'); 
+      o.value = selectedColour; 
+      o.textContent = selectedColour; 
+      o.selected = true;
+      colourFilter.appendChild(o);
+    }
   }
 }
 
-// Event Listeners
+function toggleDateInputs(value) {
+  const applyBtn = document.getElementById('apply');
+  if (value === "custom") {
+    fromDate.style.display = "inline-block";
+    toDate.style.display = "inline-block";
+    if(applyBtn) applyBtn.style.display = "inline-block";
+  } else {
+    fromDate.style.display = "none";
+    toDate.style.display = "none";
+    if(applyBtn) applyBtn.style.display = "none";
+  }
+}
+
+// =================== EVENT LISTENERS ========================
+
 brandFilter.addEventListener('change', function() {
   const b = this.value;
   populateItemFilter(b);
   populateUnitFilter(b);
-  populateColourFilter(b, itemFilter.value);
+  // Reset item and refresh colour filter based on brand alone
+  itemFilter.value = 'all';
+  populateColourFilter(b, 'all');
   this.form.submit();
 });
 
@@ -380,20 +412,22 @@ itemFilter.addEventListener('change', function() {
   this.form.submit();
 });
 
+// dhonodo ye wala hissa: [unitFilter, colourFilter, filterSelect].forEach...
+// aur uski jagah ye pura block paste kar dein:
 
-[unitFilter, colourFilter, filterSelect].forEach(f => {
-  f.addEventListener('change', function() { this.form.submit(); });
+const stockStatusFilter = document.getElementById('stockStatusFilter');
+const refundFilter = document.getElementById('refundFilter');
+
+[unitFilter, colourFilter, filterSelect, stockStatusFilter, refundFilter].forEach(f => {
+  if(f) {
+    f.addEventListener('change', function() { 
+        console.log("Filter Changed: Submitting Form..."); // sirf check karne ke liye
+        this.form.submit(); 
+    });
+  }
 });
 
-
-document.getElementById('stockStatusFilter').addEventListener('change', function() {
-  this.form.submit();
-});
-document.getElementById('refundFilter').addEventListener('change', function() {
-  this.form.submit();
-});
-
-
+// Delete Product
 document.querySelectorAll('.delete-btn').forEach(btn => {
   btn.addEventListener('click', async function() {
     const productId = this.dataset.id;
@@ -409,19 +443,14 @@ document.querySelectorAll('.delete-btn').forEach(btn => {
       }
     } catch (err) {
       alert("Error deleting product");
-      console.error(err);
     }
   });
 });
 
-// Initialize on DOMContentLoaded
+// Initialize
 window.addEventListener('DOMContentLoaded', () => {
   populateItemFilter(selectedBrand);
   populateUnitFilter(selectedBrand);
   populateColourFilter(selectedBrand, selectedItem);
   toggleDateInputs(filterSelect.value);
 });
-
-
-
-

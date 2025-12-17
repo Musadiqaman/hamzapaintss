@@ -4,7 +4,7 @@ import Agent from '../models/Agent.js';
 import Item from '../models/Item.js';
 import { isLoggedIn } from "../middleware/isLoggedIn.js";
 import { allowRoles } from "../middleware/allowRoles.js";
-
+import moment from 'moment-timezone';
 
 router.get('/add',isLoggedIn,allowRoles("admin", "worker"),(req,res)=>{
 const role=req.user.role;
@@ -54,89 +54,64 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
 
 
 
-router.get("/all",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
-   const role=req.user.role;
- 
-  try {
-    let { filter, from, to } = req.query;
-    let query = {};
-    const now = new Date();
-    let start, end;
 
-    // --------------------------
-    // DATE FILTERS
-    // --------------------------
-    if (filter === "today") {
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0,0,0,0);
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59,999);
-    } else if (filter === "yesterday") {
-      const y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-      start = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 0,0,0,0);
-      end = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23,59,59,999);
-    } else if (filter === "month") {
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23,59,59,999);
-    } else if (filter === "lastMonth") {
-      const lmYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-      const lmMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-      start = new Date(lmYear, lmMonth, 1);
-      end = new Date(lmYear, lmMonth + 1, 0, 23,59,59,999);
-    } else if (filter === "custom" && from && to) {
-      const f = new Date(from);
-      const t = new Date(to);
-      if (!isNaN(f) && !isNaN(t)) {
-        start = new Date(f.getFullYear(), f.getMonth(), f.getDate(), 0, 0, 0, 0);
-        end = new Date(t.getFullYear(), t.getMonth(), t.getDate(), 23, 59, 59, 999);
-      }
+const PKT_TIMEZONE = "Asia/Karachi";
+
+router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+    const role = req.user.role;
+    try {
+        let { filter, from, to } = req.query;
+        let query = {};
+        
+        // PKT ke mutabiq 'Today' ka start aur end nikalna
+        const nowPKT = moment.tz(PKT_TIMEZONE);
+        let start, end;
+
+        if (filter === "today") {
+            start = nowPKT.clone().startOf('day').toDate();
+            end = nowPKT.clone().endOf('day').toDate();
+        } else if (filter === "yesterday") {
+            start = nowPKT.clone().subtract(1, 'days').startOf('day').toDate();
+            end = nowPKT.clone().subtract(1, 'days').endOf('day').toDate();
+        } else if (filter === "month") {
+            start = nowPKT.clone().startOf('month').toDate();
+            end = nowPKT.clone().endOf('day').toDate();
+        } else if (filter === "lastMonth") {
+            start = nowPKT.clone().subtract(1, 'months').startOf('month').toDate();
+            end = nowPKT.clone().subtract(1, 'months').endOf('month').toDate();
+        } else if (filter === "custom" && from) {
+            start = moment.tz(from, PKT_TIMEZONE).startOf('day').toDate();
+            end = to ? moment.tz(to, PKT_TIMEZONE).endOf('day').toDate() : moment.tz(from, PKT_TIMEZONE).endOf('day').toDate();
+        }
+
+        if (start && end) {
+            query.createdAt = { $gte: start, $lte: end };
+            console.log(`Agent Query (UTC): ${start.toISOString()} to ${end.toISOString()}`);
+        }
+
+        const agents = await Agent.find(query).populate("items").sort({ createdAt: -1 });
+
+        // Stats Calculation
+        let totalPercentageAmount = 0, totalPercentageAmountGiven = 0, totalPercentageAmountLeft = 0;
+        agents.forEach(agent => {
+            agent.items.forEach(item => {
+                totalPercentageAmount += Number(item.percentageAmount || 0);
+                totalPercentageAmountGiven += Number(item.paidAmount || 0);
+                totalPercentageAmountLeft += (Number(item.percentageAmount || 0) - Number(item.paidAmount || 0));
+            });
+        });
+
+        res.render("allAgents", {
+            role, agents, filter, from, to,
+            stats: { totalAgents: agents.length, totalPercentageAmount, totalPercentageAmountGiven, totalPercentageAmountLeft }
+        });
+    } catch (err) {
+        console.error("❌ Error:", err);
+        res.status(500).send("Server Error");
     }
-
-    if (start && end) {
-      query.createdAt = { $gte: start, $lte: end };
-    }
-
-    // --------------------------
-    // FETCH AGENTS + ITEMS
-    // --------------------------
-    const agents = await Agent.find(query).populate("items").sort({ createdAt: -1 });
-
-    // --------------------------
-    // GLOBAL STATS
-    // --------------------------
-    let totalAgents = agents.length;
-    let totalPercentageAmount = 0;
-    let totalPercentageAmountGiven = 0;
-    let totalPercentageAmountLeft = 0;
-
-    agents.forEach(agent => {
-      agent.items.forEach(item => {
-        totalPercentageAmount += Number(item.percentageAmount || 0);
-        totalPercentageAmountGiven += Number(item.paidAmount || 0);
-        totalPercentageAmountLeft += Number(item.percentageAmount || 0) - Number(item.paidAmount || 0);
-      });
-    });
-
-    // --------------------------
-    // SEND TO EJS
-    // --------------------------
-    res.render("allAgents", {
-      role,
-      agents,
-      stats: {
-        totalAgents,
-        totalPercentageAmount,
-        totalPercentageAmountGiven,
-        totalPercentageAmountLeft
-      },
-      filter,
-      from,
-      to
-    });
-
-  } catch (err) {
-    console.error("❌ Error in /all agents route:", err);
-    res.status(500).send("Error loading agents page");
-  }
 });
+
+
 
 
 
@@ -158,41 +133,37 @@ router.delete("/delete-agent/:id",isLoggedIn,allowRoles("admin"), async (req, re
 
 
 
-
 router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
-  const role=req.user.role;
+  const role = req.user.role;
 
   try {
     let { filter, from, to } = req.query;
     let query = {};
-    const now = new Date();
+    
+    // Pakistan Timezone ke mutabiq current time
+    const nowPKT = moment.tz(PKT_TIMEZONE);
     let start, end;
 
     // --------------------------
-    // DATE FILTERS
+    // DATE FILTERS (Corrected for Atlas/UTC)
     // --------------------------
     if (filter === "today") {
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 0, 0, 0, 0);
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      start = nowPKT.clone().startOf('day').toDate();
+      end = nowPKT.clone().endOf('day').toDate();
     } else if (filter === "yesterday") {
-      const y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
-      start = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 0, 0, 0, 0);
-      end = new Date(y.getFullYear(), y.getMonth(), y.getDate(), 23, 59, 59, 999);
+      const yesterday = nowPKT.clone().subtract(1, 'days');
+      start = yesterday.clone().startOf('day').toDate();
+      end = yesterday.clone().endOf('day').toDate();
     } else if (filter === "month") {
-      start = new Date(now.getFullYear(), now.getMonth(), 1);
-      end = new Date(now.getFullYear(), now.getMonth(), now.getDate(), 23, 59, 59, 999);
+      start = nowPKT.clone().startOf('month').toDate();
+      end = nowPKT.clone().endOf('day').toDate();
     } else if (filter === "lastMonth") {
-      const lmYear = now.getMonth() === 0 ? now.getFullYear() - 1 : now.getFullYear();
-      const lmMonth = now.getMonth() === 0 ? 11 : now.getMonth() - 1;
-      start = new Date(lmYear, lmMonth, 1);
-      end = new Date(lmYear, lmMonth + 1, 0, 23, 59, 59, 999);
+      const lastMonth = nowPKT.clone().subtract(1, 'months');
+      start = lastMonth.clone().startOf('month').toDate();
+      end = lastMonth.clone().endOf('month').toDate();
     } else if (filter === "custom" && from && to) {
-      const f = new Date(from);
-      const t = new Date(to);
-      if (!isNaN(f) && !isNaN(t)) {
-        start = new Date(f.getFullYear(), f.getMonth(), f.getDate(), 0, 0, 0, 0);
-        end = new Date(t.getFullYear(), t.getMonth(), t.getDate(), 23, 59, 59, 999);
-      }
+      start = moment.tz(from, PKT_TIMEZONE).startOf('day').toDate();
+      end = moment.tz(to, PKT_TIMEZONE).endOf('day').toDate();
     }
 
     if (start && end) {
@@ -212,7 +183,7 @@ router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (
       return res.status(404).send("Agent not found");
     }
 
-    // Safe access to items
+    // Safe access to items (for stats calculation only)
     const items = agent.items || [];
 
     // --------------------------
@@ -266,7 +237,6 @@ router.delete("/delete-item/:id",isLoggedIn,allowRoles("admin"), async (req, res
     res.status(500).json({ success: false, message: "Error deleting Item" });
   }
 });
-
 
 
 
