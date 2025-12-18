@@ -1,11 +1,26 @@
+
 // Toggle Date Inputs
-document.getElementById("filter").addEventListener("change", function() {
-  const value = this.value;
-  const from = document.getElementById("from");
-  const to = document.getElementById("to");
-  from.style.display = value === "custom" ? "inline-block" : "none";
-  to.style.display = value === "custom" ? "inline-block" : "none";
+const filterSelect = document.getElementById("filter");
+function toggleDateInputs(value) {
+    const from = document.getElementById("from");
+    const to = document.getElementById("to");
+    if (value === "custom") {
+        from.style.display = "inline-block";
+        to.style.display = "inline-block";
+    } else {
+        from.style.display = "none";
+        to.style.display = "none";
+    }
+}
+
+filterSelect.addEventListener("change", function() {
+    toggleDateInputs(this.value);
 });
+
+// Initial load check
+toggleDateInputs(filterSelect.value);
+
+// --- Baqi Pay/Delete logic (Same as yours) ---
 
 // Pay button toggle
 document.querySelectorAll(".pay-btn").forEach(btn => {

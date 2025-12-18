@@ -22,7 +22,7 @@
     <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
     <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
     <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option hidden value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
   </select>
 
   <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
@@ -84,7 +84,13 @@
           </td>
           <td>Rs <%= i.paidAmount %></td>
           <td>Rs <%= (i.percentageAmount - i.paidAmount).toFixed(2) %></td>
-          <td><%= new Date(i.createdAt).toLocaleDateString() %></td>
+          <td>
+  <%= new Date(i.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' }) %>
+  <br>
+  <small style="color: #007bff; font-weight: bold;">
+    <%= new Date(i.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' }) %>
+  </small>
+</td>
           <td class="actions">
             <button class="pay-btn"  id="pay" data-id="<%= i._id %>" data-total="<%= i.percentageAmount %>" data-paid="<%= i.paidAmount %>">Pay</button>
             <% if(role=="admin"){ %>
