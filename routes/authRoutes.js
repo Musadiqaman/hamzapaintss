@@ -27,124 +27,125 @@ router.get("/login",isAlreadyLoggedIn, (req, res) => {
 // CREATE ADMIN (ONLY ONCE)
 // =========================
 
-router.get("/create-admin", async (req, res) => {
-  try {
-    // check if admin already exists
-    const alreadyAdmin = await Admin.findOne({ role: "admin" });
-    if (alreadyAdmin) {
-      return res.status(400).json({
-        success: false,
-        message: "Admin already exists!"
-      });
-    }
 
-    const username = process.env.ADMIN_USERNAME;
-    const password = process.env.ADMIN_PASSWORD;
+// router.get("/create-admin", async (req, res) => {
+//   try {
+//     // check if admin already exists
+//     const alreadyAdmin = await Admin.findOne({ role: "admin" });
+//     if (alreadyAdmin) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Admin already exists!"
+//       });
+//     }
 
-    if (!username || !password) {
-      return res.status(500).json({
-        success: false,
-        message: "ENV credentials missing!"
-      });
-    }
+//     const username = process.env.ADMIN_USERNAME;
+//     const password = process.env.ADMIN_PASSWORD;
 
-    // check if username already exists (IMPORTANT)
-    const usernameTaken = await Admin.findOne({ username });
-    if (usernameTaken) {
-      return res.status(400).json({
-        success: false,
-        message: "This username is already used! Choose another."
-      });
-    }
+//     if (!username || !password) {
+//       return res.status(500).json({
+//         success: false,
+//         message: "ENV credentials missing!"
+//       });
+//     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(password, salt);
+//     // check if username already exists (IMPORTANT)
+//     const usernameTaken = await Admin.findOne({ username });
+//     if (usernameTaken) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This username is already used! Choose another."
+//       });
+//     }
 
-    const admin = await Admin.create({
-      username,
-      role: "admin",
-      password: hashed
-    });
+//     const salt = await bcrypt.genSalt(10);
+//     const hashed = await bcrypt.hash(password, salt);
 
-    return res.json({
-      success: true,
-      message: "Admin created successfully!",
-      admin: {
-        username: admin.username,
-        createdAt: admin.createdAt
-      }
-    });
+//     const admin = await Admin.create({
+//       username,
+//       role: "admin",
+//       password: hashed
+//     });
 
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      success: false,
-      message: "Server error creating admin!"
-    });
-  }
-});
+//     return res.json({
+//       success: true,
+//       message: "Admin created successfully!",
+//       admin: {
+//         username: admin.username,
+//         createdAt: admin.createdAt
+//       }
+//     });
+
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error creating admin!"
+//     });
+//   }
+// });
 
 
 // ===========================
 // CREATE WORKER (ONLY ONCE)
 // ===========================
 
-router.get("/create-worker", async (req, res) => {
-  try {
-    // check if worker already exists
-    const alreadyWorker = await Admin.findOne({ role: "worker" });
-    if (alreadyWorker) {
-      return res.status(400).json({
-        success: false,
-        message: "Worker already exists!"
-      });
-    }
+// router.get("/create-worker", async (req, res) => {
+//   try {
+//     // check if worker already exists
+//     const alreadyWorker = await Admin.findOne({ role: "worker" });
+//     if (alreadyWorker) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "Worker already exists!"
+//       });
+//     }
 
-    const username = process.env.WORKER_USERNAME;
-    const password = process.env.WORKER_PASSWORD;
+//     const username = process.env.WORKER_USERNAME;
+//     const password = process.env.WORKER_PASSWORD;
 
-    if (!username || !password) {
-      return res.status(500).json({
-        success: false,
-        message: "ENV credentials missing!"
-      });
-    }
+//     if (!username || !password) {
+//       return res.status(500).json({
+//         success: false,
+//         message: "ENV credentials missing!"
+//       });
+//     }
 
-    // check if username already exists (IMPORTANT)
-    const usernameTaken = await Admin.findOne({ username });
-    if (usernameTaken) {
-      return res.status(400).json({
-        success: false,
-        message: "This username is already used! Choose another."
-      });
-    }
+//     // check if username already exists (IMPORTANT)
+//     const usernameTaken = await Admin.findOne({ username });
+//     if (usernameTaken) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "This username is already used! Choose another."
+//       });
+//     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashed = await bcrypt.hash(password, salt);
+//     const salt = await bcrypt.genSalt(10);
+//     const hashed = await bcrypt.hash(password, salt);
 
-    const worker = await Admin.create({
-      username,
-      role: "worker",
-      password: hashed
-    });
+//     const worker = await Admin.create({
+//       username,
+//       role: "worker",
+//       password: hashed
+//     });
 
-    return res.json({
-      success: true,
-      message: "Worker created successfully!",
-      worker: {
-        username: worker.username,
-        createdAt: worker.createdAt
-      }
-    });
+//     return res.json({
+//       success: true,
+//       message: "Worker created successfully!",
+//       worker: {
+//         username: worker.username,
+//         createdAt: worker.createdAt
+//       }
+//     });
 
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({
-      success: false,
-      message: "Server error creating worker!"
-    });
-  }
-});
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error creating worker!"
+//     });
+//   }
+// });
 
 
 
