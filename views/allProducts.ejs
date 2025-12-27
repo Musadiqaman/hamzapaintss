@@ -67,7 +67,6 @@
   <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
   <button type="submit" id="apply" style="display:none;">Apply Range</button>
 </form>
-
 <!-- Stats Section -->
 <div class="stats">
   <div class="stat-box">
@@ -91,9 +90,9 @@
     <p id="refund-stock">Rs <%= stats.totalRefundedValue ? stats.totalRefundedValue.toFixed(2) : '0.00' %></p>
   </div>
 </div>
-
 <!-- Product Table -->
-<table>
+ <div class="table-container">
+  <table>
   <thead>
     <tr>
       <th>Brand</th>
@@ -150,10 +149,8 @@
     <% } %>
   </tbody>
 </table>
-
+</div>
 </main>
-
-
 <script>
   window.selectedBrand = "<%= selectedBrand || 'all' %>";
   window.selectedItem = "<%= selectedItem || 'all' %>";

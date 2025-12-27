@@ -1,23 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<link rel="stylesheet" href="/stylesheets/navbar.css">
+    <link rel="stylesheet" href="/stylesheets/navbar.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
 
-  <div class="sidebar">
+  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+
+  <div class="sidebar" id="sidebar">
     <div class="logo">
       <img src="/images/weldon-paints-logo.png" />
       <h3>Hamza Paints</h3>
     </div>
 
     <ul>
-      <!-- Home -->
       <li><a href="/home" class="dropdown">
         <div class="menu-left">🏠 Home</div>
       </a></li>
 
-      <!-- Products -->
       <div class="menu-group">
         <li class="dropdown">
           <div class="menu-left">📦 Products</div>
@@ -30,7 +31,6 @@
         </ul>
       </div>
 
-      <!-- Sales -->
       <div class="menu-group">
         <li class="dropdown">
           <div class="menu-left">📊 Sales</div>
@@ -40,12 +40,10 @@
           <li><a href="/sales/add">Add Sale</a></li>
           <% if(role=="admin"){ %>
           <li><a href="/sales/all">All Sales</a></li>
-            <% } %>
-         
+          <% } %>
         </ul>
       </div>
 
-      <!-- Agents -->
       <div class="menu-group">
         <li class="dropdown">
           <div class="menu-left">👥 Agents</div>
@@ -57,14 +55,10 @@
         </ul>
       </div>
 
-      <!-- Logout -->
       <li><a href="/auth/logout" class="logout">🔓 Logout</a></li>
     </ul>
   </div>
 
-  
-
 <script src="/javascripts/navbar.js"></script>
-
 </body>
 </html>

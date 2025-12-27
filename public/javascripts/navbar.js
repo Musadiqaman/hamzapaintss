@@ -1,4 +1,7 @@
 // Submenu toggle
+function toggleSidebar() {
+    document.getElementById("sidebar").classList.toggle("mobile-open");
+}
     document.querySelectorAll(".menu-group").forEach(group => {
       const dropdown = group.querySelector(".dropdown");
       const submenu = group.querySelector(".submenu");

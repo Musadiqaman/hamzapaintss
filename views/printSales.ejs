@@ -2,69 +2,95 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sale Entry bill</title>
+  <title>Sale Entry Bill</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/printSales.css">
 </head>
-
 <body>
-  <button id="print-bill">print bill</button>
   <div class="print-area">
 
-  <h2> <img src="/images/weldon-paints-logo.png" id="logo"> <br> Hamza paints</h2>
-  <p><b>Entry date:</b> <%= currentDate %></p>
+    <!-- ===== SHOP HEADER ===== -->
+    <div class="shop-header">
 
-  <h3>Remarks:</h3>
+      <img src="/images/weldon-paints-logo.png" id="logo">
 
-  <table>
-    <thead>
-      <tr>
-        <th>Stock ID</th>
-        <th>Sale ID</th>
-        <th>Item Name</th>
-        <th>Colour Name</th>
-        <th>Unit</th>
-        <th>Total product</th>
-        <th>Price</th>
-        <th>Total</th>
-      </tr>
-    </thead>
-    <tbody>
-      <% let totalAmount = 0; %>
-      <% sales.forEach(s => { 
-           const total = parseFloat((s.quantitySold * s.rate).toFixed(2));
-           totalAmount += total;
-      %>
-        <tr>
-          <td><%= s.stockID %></td>
-          <td><%= s.saleID %></td>
-          <td><%= s.itemName %></td>
-          <td><%= s.colourName %></td>
-          <td><%= s.qty %></td>
-          <td><%= s.quantitySold %></td>
-          <td>Rs <%= parseFloat(s.rate).toFixed(2) %></td>
-          <td>Rs <%= total.toFixed(2) %></td>
-        </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      <div class="shop-name-en">
+      Hamza Weldon Paint & Hardware Store
+      </div>
 
-  <div class="footer">
-    <span>Total items: <%= sales.length %></span>
-    <span>Total amount: Rs <%= totalAmount.toFixed(2) %></span>
-  </div>
-    <div class="thank-you-section">
-    THANK YOU FOR VISITING HAMZA PAINTS
-  </div>
+      <div class="shop-name-ur">
+        حمزہ ویلڈن پینٹ اینڈ ہارڈویئر سٹور
+      </div>
 
-  <div class="dev-footer">
-    <span>Developed by: M. SHOUKAT</span>
-    <span>WhatsApp: 03358004900</span>
-  </div>
-
-   
+  <div class="shop-phones"><span dir="ltr">0319-9303154</span>(حمزہ)<span dir="ltr">0332-9780911</span>(اسماعیل)<span dir="ltr">0335-0502041</span>(مبارک شاہ)
 </div>
+<br><br>
+      <div class="divider-line">------------------------------------ کسٹمر نام </div>
+    </div>
+    <!-- ===== SHOP HEADER END ===== -->
 
-<script src="/javascripts/printSales.js"></script> 
+    <p><b>Entry date:</b> <%= currentDate %></p>
+
+    <h3>Remarks:</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Stock ID</th>
+          <th>Sale ID</th>
+          <th>Item</th>
+          <th>Color</th>
+          <th>Unit</th>
+          <th>Qty</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% let totalAmount = 0; %>
+        <% sales.forEach(s => { 
+             const total = parseFloat((s.quantitySold * s.rate).toFixed(2));
+             totalAmount += total;
+        %>
+          <tr>
+            <td><%= s.stockID %></td>
+            <td><%= s.saleID %></td>
+            <td><%= s.itemName %></td>
+            <td><%= s.colourName %></td>
+            <td><%= s.qty %></td>
+            <td><%= s.quantitySold %></td>
+            <td>Rs <%= parseFloat(s.rate).toFixed(2) %></td>
+            <td>Rs <%= total.toFixed(2) %></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <span>Total items: <%= sales.length %></span>
+      <span>Total amount: Rs <%= totalAmount.toFixed(2) %></span>
+    </div>
+
+    <!-- ===== URDU FOOTER ===== -->
+    <div class="urdu-footer">
+  پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6 کوہاٹ بورڈ ہائی وے چوک 
+     
+    </div>
+    
+    <div class="urdu-warning">
+    .بل کے بغیر واپسی نہیں ہوگی
+    </div>
+    <div class="thank-you-section">
+      THANK YOU FOR VISITING HAMZA PAINTS
+    </div>
+
+    <div class="dev-footer">
+      <span>Software Developed by: M.SHOUKAT (0335 8004900)</span><br>
+     
+    </div>
+
+  </div>
+
+<script src="/javascripts/printSales.js"></script>
 </body>
 </html>

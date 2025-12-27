@@ -1,42 +1,146 @@
-body{ 
-font-family: "Poppins", 
-sans-serif; 
-margin: 40px; 
-color: #222; 
+
+* {
+  box-sizing: border-box;
+  color: #000 !important;
+  background: transparent !important;
+  font-weight: 550;
+  margin: 0;
+  padding: 0;
 }
 
-h1,h2{ 
-text-align:center; 
-margin:5px 0; 
+body {
+  font-family: Arial, Courier, monospace;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
 }
 
-table{
-width:100%; 
-border-collapse: collapse; 
-margin-top: 20px;
+.print-area {
+  width: 76mm; /* Thermal printer width */
+  margin: 0;
+  padding: 0;
 }
 
-th, td{ 
-padding: 8px 12px; 
-border-bottom: 1px solid #ddd; 
-text-align:center; 
+/* ===== SHOP HEADER ===== */
+.shop-header {
+  text-align: center;
+  margin-top: 5px;
 }
 
-th{ 
-background:#f7f7f7; 
-font-weight:600; 
+#logo {
+  width: 70px;
+  display: block;
+  margin: 1px auto;
 }
 
-
-.footer{ 
-margin-top:10px; 
-font-weight:bold; 
-display:flex; 
-justify-content:space-between; 
+.shop-name-en {
+  font-size: 13px;
+  font-weight: 800;
 }
 
+.shop-name-ur {
+  font-size: 13.9px;
+  font-weight: 800;
+  /* margin-top: 2px; */
+}
 
-#logo{
-    width: 100px;
-    height: 80px;
+.shop-phones {
+  font-size: 10px;
+  font-weight: 700;
+  /* margin-top: 2px; */
+  white-space: nowrap;
+}
+
+.divider-line {
+  font-size: 10px;
+  margin: 1px 0;
+}
+
+/* ===== TABLE ===== */
+p {
+  font-size: 10px;
+  margin: 1px 0;
+}
+
+h3 {
+  text-align: start;
+  margin: 1px 0;
+  font-weight: 600;
+}
+
+table {
+ width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+th,
+td {
+ font-size: 9px;
+  padding: 1px;
+  text-align: center;
+  border-bottom: 1.2px dashed #000;
+  word-break: break-word;
+  font-weight: 700;
+}
+
+th {
+  font-weight: 800;
+}
+
+/* ===== TOTAL ===== */
+.footer {
+  margin-top: 3px;
+  font-size: 12px;
+  font-weight: 800;
+  display: flex;
+  justify-content: space-between;
+  padding: 0 4px;
+}
+
+/* ===== THANK YOU ===== */
+.thank-you-section {
+  margin-top: 10px;
+  font-size: 11px;
+  text-align: center;
+  font-weight: 800;
+}
+
+/* ===== URDU FOOTER ===== */
+.urdu-footer {
+  font-size: 11px;
+  text-align: center;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
+/* .urdu-warning {
+  font-size: 12px;
+  text-align: center;
+  font-weight: 900;
+  margin-top: 4px;
+} */
+
+/* ===== DEV FOOTER ===== */
+.dev-footer {
+  margin-top: 6px;
+  font-size: 10px;
+  text-align: center;
+  font-weight: 800;
+  padding-bottom: 5px;
+  border-bottom: 2px solid #000;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  html,
+  body {
+    width: 76mm;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
+   .print-area {
+    width: 76mm;
+  }
 }

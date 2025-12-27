@@ -77,65 +77,80 @@ justify-content:space-between;
   box-sizing: border-box;
   color: #000 !important;
   background: transparent !important;
-  font-weight: 700;
+  font-weight: 550;
 }
 
-/* ===== BODY ===== */
 body {
-  font-family: Arial, Courier, monospace; /* thermal best */
+  font-family: Arial, Courier, monospace;
   font-size: 12px;
   margin: 0;
   padding: 0;
 }
 
-/* ===== CENTER PRINT AREA ===== */
 .print-area {
-  width: 80mm;
-  margin: 0 auto;          /* PERFECT CENTER */
+  width: 76mm;
+  margin: 0;
   padding: 0;
 }
 
-/* ===== LOGO ===== */
+/* ===== SHOP HEADER ===== */
+.shop-header {
+  text-align: center;
+  margin-top: 5px;
+}
+
 #logo {
   width: 70px;
-  height: auto;
   display: block;
-  margin: 0 auto 5px auto;
+  margin: 1px auto;
 }
 
-/* ===== SHOP NAME ===== */
-h1 {
-  font-size: 16px;
-  text-align: center;
-  margin: 4px 0;
-  font-weight: 800;
-}
-
-h2 {
+.shop-name-en {
   font-size: 13px;
-  text-align: center;
-  margin: 2px 0;
   font-weight: 800;
 }
 
-/* ===== INFO TEXT ===== */
-p {
-  font-size: 11px;
-  margin: 2px 0;
+.shop-name-ur {
+  font-size: 13.9px;
+  font-weight: 800;
+}
+
+.shop-phones {
+  font-size: 10px;
+  font-weight: 700;
+  /* margin-top: 1px; */
+  white-space: nowrap;
+}
+
+.divider-line {
+  font-size: 10px;
+  margin: 1px 0;
 }
 
 /* ===== TABLE ===== */
+p {
+  font-size: 10px;
+  margin: 1px 0;
+}
+
+h3 {
+  text-align: start;
+  margin: 1px 0;
+  font-weight: 600;
+}
+
 table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 6px;
+  table-layout: fixed;
 }
 
 th, td {
-  font-size: 10.5px;       /* thermal clear */
-  padding: 2px 1px;
+  font-size: 9px;
+  padding: 1px;
   text-align: center;
-  border-bottom: 1px dashed #000;
+  border-bottom: 1.2px dashed #000;
+  word-break: break-word;
   font-weight: 700;
 }
 
@@ -143,9 +158,9 @@ th {
   font-weight: 800;
 }
 
-/* ===== TOTAL SECTION ===== */
+/* ===== TOTAL ===== */
 .footer {
-  margin-top: 6px;
+  margin-top: 3px;
   font-size: 12px;
   font-weight: 800;
   display: flex;
@@ -155,27 +170,46 @@ th {
 /* ===== THANK YOU ===== */
 .thank-you-section {
   margin-top: 10px;
-  font-size: 12px;
+  font-size: 11px;
   text-align: center;
   font-weight: 800;
 }
 
-/* ===== DEV FOOTER ===== */
-.dev-footer {
-  margin-top: 12px;
-  font-size: 9px;
+/* ===== URDU FOOTER ===== */
+.urdu-footer {
+  font-size: 13px;
   text-align: center;
-  font-weight: 700;
+  font-weight: 800;
+  margin-top: 6px;
 }
 
-/* ===== PRINT SETTINGS ===== */
+.urdu-warning {
+  font-size: 13px;
+  text-align: center;
+  font-weight: 900;
+  margin-top: 4px;
+}
+
+/* ===== DEV FOOTER ===== */
+.dev-footer {
+  margin-top: 3px;
+  font-size: 10px;
+  text-align: center;
+  font-weight: 800;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #000;
+}
+
+/* ===== PRINT ===== */
 @media print {
-  body {
+  html, body {
+    width: 76mm;
     margin: 0;
+    padding: 0;
+    overflow-x: hidden;
   }
 
   .print-area {
-    width: 80mm;
-    margin: 0 auto;
+    width: 76mm;
   }
 }
