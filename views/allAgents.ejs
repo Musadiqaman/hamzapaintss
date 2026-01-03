@@ -1,102 +1,124 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>All Agents</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/allAgents.css">
 </head>
+
 <body>
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<main>
-<h1>All Agents</h1>
+    <main>
 
-<!-- Filter Section -->
-<form class="filter-container" method="GET" action="/agents/all">
-  <select name="filter" id="filter">
-    <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Dates</option>
-    <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
-    <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
-    <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
-    <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
-  </select>
+      <h1>All Agents</h1>
 
-  <input  type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-  <input  type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-  <button type="submit" id="apply">Apply</button>
-</form>
+      <!-- Filter Section -->
+      <form class="filter-container" method="GET" action="/agents/all">
+        <select name="filter" id="filter">
+          <option value="all" <%=filter==='all' ? 'selected' : '' %>>All Dates</option>
+          <option value="today" <%=filter==='today' ? 'selected' : '' %>>Today</option>
+          <option value="yesterday" <%=filter==='yesterday' ? 'selected' : '' %>>Yesterday</option>
+          <option value="month" <%=filter==='month' ? 'selected' : '' %>>This Month</option>
+          <option value="lastMonth" <%=filter==='lastMonth' ? 'selected' : '' %>>Last Month</option>
+          <option value="custom" <%=filter==='custom' ? 'selected' : '' %>>Custom Range</option>
+        </select>
 
-<!-- Stats Section -->
-<div class="stats">
-  <div class="stat-box">
-    <h3>Total Agents</h3>
-    <p><%= stats.totalAgents %></p>
-  </div>
+        <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+        <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+        <button type="submit" id="apply">Apply</button>
+      </form>
 
-  <div class="stat-box">
-    <h3>Total % Commission</h3>
-    <p>Rs <%= stats.totalPercentageAmount.toFixed(2) %></p>
-  </div>
+      <!-- Stats Section -->
+      <div class="stats">
+        <div class="stat-box">
+          <h3><span style="font-size: 29px;">🕴️</span>Total Agents</h3>
+          <p>
+            <%= stats.totalAgents %>
+          </p>
+        </div>
 
-  <div class="stat-box">
-    <h3>Paid % Commission</h3>
-    <p>Rs <%= stats.totalPercentageAmountGiven.toFixed(2) %></p>
-  </div>
+        <div class="stat-box">
+          <h3>Total % Commission<span style="font-size: 20px;">💵</span></h3>
+          <p>Rs <%= stats.totalPercentageAmount.toFixed(2) %>
+          </p>
+        </div>
 
-  <div class="stat-box">
-    <h3>Left % Commission</h3>
-    <p>Rs <%= stats.totalPercentageAmountLeft.toFixed(2) %></p>
-  </div>
-</div>
+        <div class="stat-box">
+          <h3>Paid % Commission <span style="font-size: 18px;">✅</span></h3>
+          <p>Rs <%= stats.totalPercentageAmountGiven.toFixed(2) %>
+          </p>
+        </div>
 
-<!-- Agent Table -->
-<table>
-  <thead>
-    <tr>
-      <th>Agent Name</th>
-      <th>Agent Phone</th>
-      <th>Agent CNIC</th>
-      <th>Register Date</th>
-      <th>Action</th>
-    </tr>
-  </thead>
+        <div class="stat-box" id="negative">
+          <h3>Left % Commission <span style="font-size: 20px;"> ⏳</span></h3>
+          <p>Rs <%= stats.totalPercentageAmountLeft.toFixed(2) %>
+          </p>
+        </div>
+      </div>
 
-  <tbody>
-    <% if (agents.length === 0) { %>
-      <tr><td colspan="5" class="no-data">No agents found for the selected filter.</td></tr>
-    <% } else { %>
-      <% agents.forEach(a => { %>
-        <tr>
-          <td><%= a.name %></td>
-          <td><%= a.phone %></td>
-          <td><%= a.cnic %></td>
-         <td>
-  <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' }) %>
-  <br>
-  <small style="color: #007bff; font-weight: bold;">
-    <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' }) %>
-  </small>
-</td>
-          <td class="action-buttons">
-          <button id="view">
-          <a href="/agents/view-agent/<%= a._id %>" target="_blank" style="text-decoration: none; color: inherit;">View</a>
-           </button>
-          <% if(role=="admin"){ %>
-          <button id="delete" class="delete-btn" data-id="<%= a._id %>">Delete</button>
-          <% } %>
-         </td>
+      <!-- Agent Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Agent Name</th>
+              <th>Agent Phone</th>
+              <th>Agent CNIC</th>
+              <th>Register Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
 
-        </tr>
-      <% }) %>
-    <% } %>
-  </tbody>
-</table>
+          <tbody>
+            <% if (agents.length===0) { %>
+              <tr>
+                <td colspan="5" class="no-data">No agents found for the selected filter.</td>
+              </tr>
+              <% } else { %>
+                <% agents.forEach(a=> { %>
+                  <tr>
+                    <td>
+                      <%= a.name %>
+                    </td>
+                    <td>
+                      <%= a.phone %>
+                    </td>
+                    <td>
+                      <%= a.cnic %>
+                    </td>
+                    <td>
+                      <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day: '2-digit' , month: 'short' ,
+                        year: 'numeric' , timeZone: 'Asia/Karachi' }) %>
+                        <br>
+                        <small style="color: #007bff; font-weight: bold;">
+                          <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit' , minute: '2-digit' ,
+                            hour12: true, timeZone: 'Asia/Karachi' }) %>
+                        </small>
+                    </td>
+                    <td class="action-buttons">
+                      <button id="view">
+                        <a href="/agents/view-agent/<%= a._id %>"
+                          style="text-decoration: none; color: inherit;">View</a>
+                      </button>
+                      <% if(role=="admin" ){ %>
+                        <button id="delete" class="delete-btn" data-id="<%= a._id %>">Delete</button>
+                        <% } %>
+                    </td>
 
-</main>
+                  </tr>
+                  <% }) %>
+                    <% } %>
+          </tbody>
+        </table>
+      </div>
 
-<!-- External JS -->
-<script src="/javascripts/allAgents.js"></script>
+    </main>
+
+    <!-- External JS -->
+    <script src="/javascripts/allAgents.js"></script>
 </body>
+
 </html>

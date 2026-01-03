@@ -1,100 +1,105 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Add Sale</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/addSale.css">
 </head>
+
 <body>
 
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<main>
-  <h1>Add New Sales</h1>
+    <main>
+      <h1>Add New Sales</h1>
 
-  <div class="form-container">
+      <div class="form-container">
 
-    <!-- Brand dropdown -->
-    <select id="brandSelect">
-      <option value="">Select Brand</option>
-      <% const brands = [...new Set(products.map(p => p.brandName).filter(b => b && b.trim() !== ""))]; %>
-      <% brands.forEach(brand => { %>
-        <option value="<%= brand %>"><%= brand %></option>
-      <% }) %>
-    </select>
+        <!-- Brand dropdown -->
+        <select id="brandSelect">
+          <option value="">Select Brand</option>
+          <% const brands=[...new Set(products.map(p=> p.brandName).filter(b => b && b.trim() !== ""))]; %>
+            <% brands.forEach(brand=> { %>
+              <option value="<%= brand %>">
+                <%= brand %>
+              </option>
+              <% }) %>
+        </select>
 
-    <!-- Item dropdown -->
-    <select id="itemSelect" disabled>
-      <option value="">Select Item</option>
-    </select>
+        <!-- Item dropdown -->
+        <select id="itemSelect" disabled>
+          <option value="">Select Item</option>
+        </select>
 
-    <!-- Unit dropdown -->
-    <select id="unitSelect" disabled>
-      <option value="">Select Unit</option>
-    </select>
+        <!-- Unit dropdown -->
+        <select id="unitSelect" disabled>
+          <option value="">Select Unit</option>
+        </select>
 
-     <select id="allColours" disabled>
-      <option value="">Select colour</option>
-    </select>
+        <select id="allColours" disabled>
+          <option value="">Select colour</option>
+        </select>
 
-    <!-- yay option ka drop down hai likan iska name galat hai bas aor theak hai-->
-    <select id="colourSelect" disabled>
-      <option value="">Select Option</option>
-    </select>
+        <!-- yay option ka drop down hai likan iska name galat hai bas aor theak hai-->
+        <select id="colourSelect" disabled>
+          <option value="">Select Option</option>
+        </select>
 
-    <!-- Quantity and Rate -->
-    <input id="quantitySold" type="number" placeholder="Quantity Sold" min="1" />
-    <input id="rate" type="number" placeholder="Rate" min="1" max="100000" />
+        <!-- Quantity and Rate -->
+        <input id="quantitySold" type="number" placeholder="Quantity Sold" min="1" />
+        <input id="rate" type="number" placeholder="Rate" min="1" max="100000" />
 
-    <!-- Total Stock (hidden) -->
-    <input id="totalStock" type="number" placeholder="Total Stock" hidden />
+        <!-- Total Stock (hidden) -->
+        <input id="totalStock" type="number" placeholder="Total Stock" hidden />
 
-    <!-- Agent dropdown -->
-    <select id="agentSelect">
-      <option value="">Select Agent</option>
-      <% agents.forEach(agent => { %>
-        <option value="<%= agent.agentID %>">
-          <%= agent.name %> (<%= agent.phone %>)
-        </option>
-      <% }) %>
-    </select>
+        <!-- Agent dropdown -->
+        <select id="agentSelect">
+          <option value="">Select Agent</option>
+          <% agents.forEach(agent=> { %>
+            <option value="<%= agent.agentID %>">
+              <%= agent.name %> (<%= agent.phone %>)
+            </option>
+            <% }) %>
+        </select>
 
-    <!-- Agent percentage -->
-    <input id="agentPercentage" type="number" placeholder="Agent %" min="1" max="50" style="display:none;" />
+        <!-- Agent percentage -->
+        <input id="agentPercentage" type="number" placeholder="Agent %" min="1" max="50" style="display:none;" />
 
-    <button id="add">Add Sale</button>
-  </div>
+        <button id="add">Add Sale</button>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Item</th>
+              <th>Colur</th>
+              <th>Unit</th>
+              <th>Quantity Sold</th>
+              <th>Rate</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="saleTableBody">
+            <tr class="no-data">
+              <td colspan="10">No sales added yet</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <button class="submit-btn" id="submitBtn">Submit & Save</button>
+    </main>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Brand</th>
-        <th>Item</th>
-        <th>Colour</th>
-        <th>Unit</th>
-        <th>Quantity Sold</th>
-        <th>Rate</th>
-        <th>Total</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="saleTableBody">
-      <tr class="no-data"><td colspan="10">No sales added yet</td></tr>
-    </tbody>
-  </table>
-
-  <button class="submit-btn" id="submitBtn">Submit & Save</button>
-</main>
-
-<script id="productData" type="application/json">
+    <script id="productData" type="application/json">
   <%- JSON.stringify(products || []) %>
 </script>
 
-<script src="/javascripts/addSale.js"></script>
+    <script src="/javascripts/addSale.js"></script>
 
 </body>
+
 </html>
-
-
-

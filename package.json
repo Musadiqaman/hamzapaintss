@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "start": "node app.js",
-    "dev": "nodemon app.js"
+    "dev": "browser-sync start --proxy 'localhost:3000' --files 'views/**/*.ejs, public/**/*.css, app.js' --no-notify"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
@@ -25,6 +25,7 @@
     "path": "^0.12.7"
   },
   "devDependencies": {
+    "browser-sync": "^3.0.4",
     "nodemon": "^3.1.11"
   }
 }

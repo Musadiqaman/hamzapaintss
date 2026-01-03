@@ -2,19 +2,19 @@
 // Toggle Date Inputs
 const filterSelect = document.getElementById("filter");
 function toggleDateInputs(value) {
-    const from = document.getElementById("from");
-    const to = document.getElementById("to");
-    if (value === "custom") {
-        from.style.display = "inline-block";
-        to.style.display = "inline-block";
-    } else {
-        from.style.display = "none";
-        to.style.display = "none";
-    }
+  const from = document.getElementById("from");
+  const to = document.getElementById("to");
+  if (value === "custom") {
+    from.style.display = "inline-block";
+    to.style.display = "inline-block";
+  } else {
+    from.style.display = "none";
+    to.style.display = "none";
+  }
 }
 
-filterSelect.addEventListener("change", function() {
-    toggleDateInputs(this.value);
+filterSelect.addEventListener("change", function () {
+  toggleDateInputs(this.value);
 });
 
 // Initial load check

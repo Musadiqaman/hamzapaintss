@@ -1,255 +1,296 @@
- *{
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+/* ================= RESET ================= */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
-    ::-webkit-scrollbar {
-      width: 8px;
-    }
+/* ================= SCROLLBAR ================= */
+::-webkit-scrollbar {
+  width: 6px;
+}
 
-    ::-webkit-scrollbar-thumb {
-      background-color: #06A56C;
-    }
+::-webkit-scrollbar-thumb {
+  background: #06A56C;
+}
 
-    ::-webkit-scrollbar-track {
-      background-color: #f1f1f1;
-    }
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
 
-    /* body{
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f4f7fa;
-      margin: 0px auto;
-      max-width: 1200px;
-    } */
-    
-    h1{
-      color: #06a56c;
-      text-align: center;
-      margin-bottom: 10px;
-      font-size: 24px;
-    }
+body {
+  font-family: 'Segoe UI', sans-serif;
+  background: #f4f7fa;
+  overflow-x: hidden;
+}
 
-    .filter-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      flex-wrap: wrap;
-    }
+/* ================= MAIN (SIDEBAR SAFE) ================= */
+main {
+  /* margin-left:250px;              sidebar width */
+  padding: 25px;
+  transition: .3s ease;
+}
 
-    select, input[type="date"], button {
-      padding: 6px 7px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 14px;
-      width: 130px;
-      text-align: center;
-    }
+/* ================= TITLE ================= */
+h1 {
+  color: #06a56c;
+  text-align: center;
+  margin-bottom: 10px;
+  font-size: 21px;
+}
 
-    select:focus{
-      border-color: #06a56c;
-      outline: none;
-      box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
-    }
+/* ================= FILTERS ================= */
+.filter-container {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 10px;
+  max-width: 1200px;
+  margin: 0 auto 18px;
+}
 
+select,
+input[type="date"],
+button {
+  padding: 9px 12px;
+  border-radius: 5px;
+  border: 1px solid #363636bb;
+  font-size: 13px;
+  /* width:100%; */
+  background: #fff;
+  text-align: start;
+  cursor: pointer;
+}
 
+button#apply {
+  background-color: #a6e7d8;
+  color: #008767;
+  border: 2px solid #00b087;
+  cursor: pointer;
+  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
+  font-weight: 600;
+  padding: 8px 10px;
+}
 
-     button#apply {
-     background-color: #a6e7d8;  /* Light teal background color */
-     color: white;                /* White text */
-     border: 2px solid #00B087;   /* Greenish border */
-     padding: 5px;
-     border-radius: 8px;          /* Rounded corners */
-     width: 110px;
-     font-size: 13px; 
-     transition: all 0.3s ease;   /* Smooth transition for background, border, and scale */
-     cursor: pointer;
-     color: #008767;              /* Dark green text color */
-    }
+#apply:hover {
+  background-color: #00b087;
+  color: white;
+  border-color: #006f5f;
+  transform: scale(1.05);
+}
 
-     button#apply:hover{
-      background-color: #00B087;
-      border-color: #006f5f;
-      color: white;
-      transform: scale(1.03);
-    }
+/* ================= STATS ================= */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  max-width: 1200px;
+  margin: 0 auto 18px;
 
-    button#add:focus{
-      outline: none;
-      box-shadow: 0 0 5px rgba(0, 184, 135, 0.6);
-    }
+}
 
+.stat-box {
+  background: #fff;
+  border-radius: 10px;
+  border: #06A56C 2px solid;
+  padding: 2px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .1);
+  text-align: center;
+}
 
-    button#delete{
-    margin-top: 3px;
-    background-color: #FFC5C5;   /* Light red background color */
-    color: #DF0404;               /* Red text color */
-    border: 2px solid #DF0404;    /* Red border */
-    padding: 4px;
-    border-radius: 8px;           /* Rounded corners */
-    width: 60px;
-    font-size: 13px;
-    margin-bottom: 5px;          /* Space between inputs */
-    transition: all 0.3s ease;    /* Smooth transition for background, border, and scale */
-    cursor: pointer;
-    }
+.stat-box h3 {
+  color: #06a56c;
+  font-size: 15px;
+  font-weight: 700;
+  padding-right: 30px;
+  margin-bottom: 1px;
+}
 
+.stat-box p {
+  font-size: 18px;
+  font-weight: 800;
+  margin-top: 0px;
+}
 
-    button#delete:hover {
-    background-color: #FF4D4D;   /* Darker red background on hover */
-    border-color: #D30000;       /* Darker red border on hover */
-    transform: scale(1.05);       /* Slightly scale the button for a popping effect */
-    color: white;
-    }
+.stat-box#negative {
+  color: #ff4d4d;
+  font-weight: 800;
+}
 
-   button#delete:focus {
-   outline: none;               /* Remove default outline */
-   box-shadow: 0 0 5px rgba(255, 77, 77, 0.6);  /* Red glow effect on focus */
-  }
+/* ================= TABLE ================= */
+.table-container {
+  max-width: 1200px;
+  margin: 0 auto 40px auto;
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+}
 
+table {
+  width: 100%;
+  min-width: 900px;
+  /* ensures horizontal scroll on small screens */
+  border-collapse: collapse;
+  table-layout: fixed;
+}
 
-
-
-
-
-button#view{
-    margin-top: 3px;
-    background-color: #a6e7d8;   /* Light red background color */
-    color: white;               /* Red text color */
-    border: 2px solid #00B087;    /* Red border */
-    padding: 4px;
-    border-radius: 8px;           /* Rounded corners */
-    width: 60px;
-    font-size: 13px;
-    margin-bottom: 5px;          /* Space between inputs */
-    transition: all 0.3s ease;    /* Smooth transition for background, border, and scale */
-    cursor: pointer;
-    color: #008767;
-    }
-
-
-    button#view:hover {
-     background-color: #00B087;
-      border-color: #006f5f;
-      color: white;
-      transform: scale(1.03);
-    }
-   
-
-   button#view:focus {
-      outline: none;
-      box-shadow: 0 0 5px rgba(0, 184, 135, 0.6);
-  }
+thead {
+  background: #06a56c;
+  color: white;
+}
 
 
+th {
+  color: #ffffff;
+  padding: 16px 5px;
+  font-size: 13px;
+  text-align: center;
+  word-wrap: break-word;
+}
 
+td {
+  padding: 2px 1px;
+  font-size: 14px;
+  font-weight: 400;
+  text-align: center;
+  border-bottom: 1px solid #13a354;
+  word-wrap: break-word;
+}
 
+tbody tr:hover td {
+  background: #baded0;
+  font-weight: 400;
+}
 
-    .stats{
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 4px;
-      flex-wrap: wrap;
-      margin-bottom: 20px;
-      /* background-color: #888; */
-    }
+.no-data {
+  padding: 12px;
+  color: #888;
+  text-align: center;
+}
 
-    .stat-box {
-      background-color: white;
-      border-radius: 9px;
-      padding: 20px 35px;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      text-align: center;
-      /* min-width: 10px; */
-      transition: transform 0.2s ease-in-out;
-    }
+tbody {
+  display: block;
+  max-height: 280px;
+  overflow-y: auto;
+  width: 100%;
+}
 
-    .stat-box:hover{ 
-     transform: scale(1.05); 
-    }
-
-    .stat-box h3{ 
-     margin: 0; 
-     color: #06a56c; 
-     font-size: 20px; 
-    }
-
-    .stat-box p{ 
-    font-size: 20px; 
-    font-weight: bold; 
-    margin: 5px 0 0; 
-    }
-
-    #refund-sales{
-      font-weight: bold;
-      color: #ff4d4d;
-    }
-
-    table{
-      width: 100%;
-      border-collapse: collapse;
-      background-color: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 3px 8px rgba(0,0,0,0.1);
-      /* margin-bottom: 50px; */
-    }
-
-    td{ 
-      border-bottom: 1px solid #ddd; 
-      padding: 2px 0px; 
-      text-align: center;
-      font-size: 13px;
-      }
-
-     th{
-      border-bottom: 1px solid #ddd; 
-      padding: 12px 0px; 
-      text-align: center;
-      font-size: 13.2px;
-      background-color: #06a56c; 
-      color: white; 
-     }
-
-    tr:hover td{ 
-    background-color: #f1f1f1; 
-    }
-
-    td.profit{
-     font-weight: bold;
-     color: #06a56c;
-    }
-
-    td.loss,#total-loss,.refund-status,.refund-quantity{
-      font-weight: bold;
-      color: #ff4d4d;
-    }
-
-
-
-
-    tbody{
-    max-height: 315px; /* Adjust the height according to your requirement */
-    overflow-y: auto;  /* Enables vertical scrolling */
-    display: block;
-   }
-
-  /* Ensure that table headers don't break */
-  thead, tbody tr {
+thead,
+tbody tr {
   display: table;
   width: 100%;
-  table-layout: fixed; 
+  table-layout: fixed;
+}
+
+/* ================= BUTTON ================= */
+#view {
+  background-color: #a6e7d8;
+  /* Light teal background color */
+  color: white;
+  /* White text */
+  border: 2px solid #00B087;
+  padding: 5px 14px;
+  border-radius: 8px;
+  font-size: 12px;
+  color: #008767;
+  cursor: pointer;
+}
+
+#view:hover {
+  background-color: #00B087;
+  border-color: #006f5f;
+  color: white;
+  transform: scale(1.03);
+}
+
+#delete {
+  background: #FFC5C5;
+  color: #DF0404;
+  border: 2px solid #DF0404;
+  padding: 5px 10px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+#delete:hover {
+  background: #FF4D4D;
+  color: #fff;
+}
+
+/* ================= LARGE LAPTOP ================= */
+@media(max-width:1200px) {
+  .filter-container {
+    grid-template-columns: repeat(5, 1fr);
   }
 
-  
-  .no-data { 
-    text-align: center; 
-    color: #888; 
-    padding: 8px; 
+  table {
+    min-width: 1100px;
+  }
+}
+
+/* ================= TABLET ================= */
+@media(max-width:1024px) {
+  main {
+    margin-left: 250px;
+    padding: 20px;
   }
 
+  .filter-container {
+    grid-template-columns: repeat(3, 1fr);
+  }
 
-  
+  .stats {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px) {
+  main {
+    margin-left: 0 !important;
+    padding: 15px;
+    padding-top: 80px;
+  }
+
+  h1 {
+    font-size: 19px;
+  }
+
+  .filter-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  table {
+    min-width: 1100px;
+  }
+
+  tbody {
+    max-height: 375px;
+  }
+}
+
+/* ================= SMALL MOBILE ================= */
+@media(max-width:480px) {
+  h1 {
+    font-size: 18px;
+  }
+
+  th,
+  td {
+    font-size: 12px;
+    font-weight: 500;
+  }
+
+  .stat-box h3 {
+    font-size: 13px;
+  }
+
+  .stat-box p {
+    font-size: 14.5px;
+  }
+}

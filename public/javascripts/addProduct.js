@@ -23,22 +23,22 @@ const brandItems = {
     "Emulsion", "Primer", "Wall Putty", "Exterior Primer", "Enamel"
   ],
   "Other Paints": [
-    "Oil Tupe","Paints SPRAY","WALL PUTTY","GODKA WALLPUTTY","EMULSION","GODKA EMULSION","ENAMEL","PEARL PASTE 1000G", "PEARL PASTE 500G","PEARL PASTE 100G","MASKAN TAPE 2",
-    "MASKAN TAPE 1","MASKAN TAPE 1/2","MASKAN TAPE 2 SOTTER","MASKAN TAPE 1 SOTTER",
-    "BRUSH EMULSION 6","BRUSH EMULSION 5","BRUSH EMULSION 4","BRUSH TIGER PAINT 4",
-    "BRUSH TIGER PAINT 3","BRUSH TIGER PAINT 2 Double","BRUSH TIGER PAINT 2 Single",
-    "BRUSH TIGER PAINT 1 Double","BRUSH TIGER PAINT 1 Single","MARSHAL BRUSH 3",
-    "COMMANDER BURSH 2","CAPTAN BRUSH 4","CAPTAN BRUSH 3 Double","CAPTAN BRUSH 2 Double",
-    "CAPTAN BRUSH 2 Single","ROBINA QALAM","WHITE QALAM","STENSEL","STENSEL BOADER","CHAPA","BOADE CHAPA","CAPTAN BRUSH 3 SINGLE",
-    "MATTI OIL 1500G","MATTI OIL 1000G","MATTI OIL 900G","MATTI OIL DAMIND",
-    "MATTI OIL 500G","MATTI OIL 250G","MATTI OIL 300G","RAGMAL ADDID","RAGMAL ROLLE","RAGMAL FUFF","RAGMAL KERMALA","COMMANDER ROLLER",
-    "SADA ROLLER","ROLA STAKE","ROLLER 4","ROLLA PUFF 4","ROLLA PUFF ADDID","BALCAK ROLLER","BLACAK ROLLA PUFF 8","NEEL PKT 100G",
-    "NEEL PKT 40G","NEEL","CHAK MATTI KG","PARIS","GLUE 1KG","GLUE 1/2 KG","GLUE DABBI","NOBLE GLUE","ACRYLIC 1 KG",
-    "ACRYLIC 1/2 KG","DIKOO SET","MITTI OIL SMALL","SAMAD BOND DABBI","OIL TUBE ADDID","CAHILLANGER ADDID",
-    "SPRAY MUBAH","SPRAY STEEL","SPRAY GOLDEN","SPRAY ZANG","MAGIC","SCRAPER 8","SCRAPER 4","SCRAPER SAFAYE",
-    "PATRA","TURKEY UMBER","YELLOW UMBER","R/O UMBER","BLACK UMBER","CHOONA","FARMKEA GANKE","MALMAL",
-    "Tinter Tube","Challanger Tube","Samad Bond Tube","Sycle Pump","Sycle","Hickory","20KG H.D Putty",
-    "5KG H.D Putty","5KG Wallcoat","White Cement","Lakdana","Chamky",
+    "Oil Tupe", "Paints SPRAY", "WALL PUTTY", "GODKA WALLPUTTY", "EMULSION", "GODKA EMULSION", "ENAMEL", "PEARL PASTE 1000G", "PEARL PASTE 500G", "PEARL PASTE 100G", "MASKAN TAPE 2",
+    "MASKAN TAPE 1", "MASKAN TAPE 1/2", "MASKAN TAPE 2 SOTTER", "MASKAN TAPE 1 SOTTER",
+    "BRUSH EMULSION 6", "BRUSH EMULSION 5", "BRUSH EMULSION 4", "BRUSH TIGER PAINT 4",
+    "BRUSH TIGER PAINT 3", "BRUSH TIGER PAINT 2 Double", "BRUSH TIGER PAINT 2 Single",
+    "BRUSH TIGER PAINT 1 Double", "BRUSH TIGER PAINT 1 Single", "MARSHAL BRUSH 3",
+    "COMMANDER BURSH 2", "CAPTAN BRUSH 4", "CAPTAN BRUSH 3 Double", "CAPTAN BRUSH 2 Double",
+    "CAPTAN BRUSH 2 Single", "ROBINA QALAM", "WHITE QALAM", "STENSEL", "STENSEL BOADER", "CHAPA", "BOADE CHAPA", "CAPTAN BRUSH 3 SINGLE",
+    "MATTI OIL 1500G", "MATTI OIL 1000G", "MATTI OIL 900G", "MATTI OIL DAMIND",
+    "MATTI OIL 500G", "MATTI OIL 250G", "MATTI OIL 300G", "RAGMAL ADDID", "RAGMAL ROLLE", "RAGMAL FUFF", "RAGMAL KERMALA", "COMMANDER ROLLER",
+    "SADA ROLLER", "ROLA STAKE", "ROLLER 4", "ROLLA PUFF 4", "ROLLA PUFF ADDID", "BALCAK ROLLER", "BLACAK ROLLA PUFF 8", "NEEL PKT 100G",
+    "NEEL PKT 40G", "NEEL", "CHAK MATTI KG", "PARIS", "GLUE 1KG", "GLUE 1/2 KG", "GLUE DABBI", "NOBLE GLUE", "ACRYLIC 1 KG",
+    "ACRYLIC 1/2 KG", "DIKOO SET", "MITTI OIL SMALL", "SAMAD BOND DABBI", "OIL TUBE ADDID", "CAHILLANGER ADDID",
+    "SPRAY MUBAH", "SPRAY STEEL", "SPRAY GOLDEN", "SPRAY ZANG", "MAGIC", "SCRAPER 8", "SCRAPER 4", "SCRAPER SAFAYE",
+    "PATRA", "TURKEY UMBER", "YELLOW UMBER", "R/O UMBER", "BLACK UMBER", "CHOONA", "FARMKEA GANKE", "MALMAL",
+    "Tinter Tube", "Challanger Tube", "Samad Bond Tube", "Sycle Pump", "Sycle", "Hickory", "20KG H.D Putty",
+    "5KG H.D Putty", "5KG Wallcoat", "White Cement", "Lakdana", "Chamky",
   ]
 };
 
@@ -47,9 +47,9 @@ const brandItems = {
 const brandUnits = {
   "Weldon Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"],
   "Sparco Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"],
-  "Value Paints":  ["Gallons", "Quarters", "Drumi", "Dabbi"],
+  "Value Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"],
   "Corona Paints": ["Gallons", "Quarters", "Drumi", "Dabbi", "Ponts"],
-  "Other Paints":  ["Gallons", "Quarters", "Drumi", "Dabbi"]
+  "Other Paints": ["Gallons", "Quarters", "Drumi", "Dabbi"]
 };
 
 // ===================== COLOURS FOR SELECT ITEMS + BRAND ONLY ==============
@@ -119,7 +119,7 @@ const productOptions = {
     { code: "6853", colour: "Green Yellow" },
   ],
   "Weldon Paints-Emulsion": [
-     { code: "0", colour: "White" },
+    { code: "0", colour: "White" },
     { code: "10", colour: "Off White" },
     { code: "43", colour: "Kitten White" },
     { code: "97", colour: "Rose White" },
@@ -182,14 +182,14 @@ const productOptions = {
     { code: "45", colour: "Toasted Almond" },
 
 
-  
+
     { code: "102", colour: "Golf Green (New)" },
     { code: "36", colour: "Spring Leaf" },
     { code: "72", colour: "Jonquil" },
     { code: "90", colour: "Jade" },
   ],
   "Weldon Paints-Enamel": [
-     { code: "241", colour: "Black" },
+    { code: "241", colour: "Black" },
     { code: "0", colour: "White" },
     { code: "222", colour: "Bone White" },
     { code: "272", colour: "Apricot (New)" },
@@ -265,37 +265,37 @@ const productOptions = {
   ],
   "Other Paints-Oil Tupe": [
     { code: "106", colour: "White" },
-    { code: "443", colour: "Blue" }, 
-    { code: "560", colour: "Viridian" },  
-    { code: "227", colour: "Yellow" },  
-    { code: "794", colour: "Lamp Black" },  
-    { code: "313", colour: "Orange Red" },  
-    { code: "453", colour: "Cobalt Blue" }, 
-    { code: "559", colour: "Emerald Green" },   
+    { code: "443", colour: "Blue" },
+    { code: "560", colour: "Viridian" },
+    { code: "227", colour: "Yellow" },
+    { code: "794", colour: "Lamp Black" },
+    { code: "313", colour: "Orange Red" },
+    { code: "453", colour: "Cobalt Blue" },
+    { code: "559", colour: "Emerald Green" },
     { code: "676", colour: "Yellow Ochre" },
-    { code: "302", colour: "Scarlet" },  
-    { code: "688", colour: "Raw Umber" },  
+    { code: "302", colour: "Scarlet" },
+    { code: "688", colour: "Raw Umber" },
     { code: "601", colour: "Raw Siena" },
     { code: "687", colour: "Burnt Umber" },
     { code: "215", colour: "Lemon Yellow" },
     { code: "684", colour: "Burnt Siena" },
-    { code: "336", colour: "Rose" },  
+    { code: "336", colour: "Rose" },
     { code: "402", colour: "Mauve" },
   ],
   "Other Paints-Paints SPRAY": [
     { code: "37", colour: "Onion Green" },
-    { code: "23", colour: "Red" }, 
-    { code: "39", colour: "Black" },  
-    { code: "30", colour: "Pink" },  
-    { code: "21", colour: "Vivdid Blue" },  
-    { code: "22", colour: "Medium Grey" },  
-    { code: "36", colour: "Silver" }, 
-    { code: "35", colour: "Gold" },   
+    { code: "23", colour: "Red" },
+    { code: "39", colour: "Black" },
+    { code: "30", colour: "Pink" },
+    { code: "21", colour: "Vivdid Blue" },
+    { code: "22", colour: "Medium Grey" },
+    { code: "36", colour: "Silver" },
+    { code: "35", colour: "Gold" },
     { code: "318", colour: "Chrome" },
-    { code: "25", colour: "Yellow" },  
-    { code: "15", colour: "Sky Blue" },  
+    { code: "25", colour: "Yellow" },
+    { code: "15", colour: "Sky Blue" },
     { code: "40", colour: "white" },
-    { code: "29", colour: "Brown" },  
+    { code: "29", colour: "Brown" },
   ]
 };
 
@@ -333,7 +333,7 @@ itemNameSelect.addEventListener("change", function () {
   const selectedBrand = brandNameSelect.value;
   const selectedItem = this.value;
   const lookupKey = `${selectedBrand}-${selectedItem}`;
-  
+
   colourCodeSelect.innerHTML = '<option value="">Select Colour</option>';
 
   if (productOptions[lookupKey]) {
@@ -346,11 +346,11 @@ itemNameSelect.addEventListener("change", function () {
     colourCodeSelect.disabled = false;
   } else {
     const el = document.createElement("option");
-    el.value = ""; 
+    el.value = "";
     el.textContent = "No Colour Required";
     colourCodeSelect.appendChild(el);
-    colourCodeSelect.value = ""; 
-    colourCodeSelect.disabled = true; 
+    colourCodeSelect.value = "";
+    colourCodeSelect.disabled = true;
   }
 });
 
@@ -416,7 +416,7 @@ function renderTable() {
 
 function attachDeleteButtons() {
   document.querySelectorAll(".delete-temp").forEach(btn => {
-    btn.onclick = function() {
+    btn.onclick = function () {
       const index = parseInt(this.getAttribute("data-index"));
       tempProducts.splice(index, 1);
       renderTable();
@@ -449,7 +449,7 @@ async function submitData() {
     const data = await res.json();
     if (res.ok && data.success) {
       alert("✅ Saved Successfully!");
-      
+
       // Print logic
       const printData = encodeURIComponent(JSON.stringify(tempProducts));
       window.open(`/products/print?data=${printData}`, "_blank");
@@ -457,7 +457,7 @@ async function submitData() {
       tempProducts = [];
       renderTable();
     } else {
-       throw new Error(data.message || "Failed to save");
+      throw new Error(data.message || "Failed to save");
     }
   } catch (err) { alert("Error: " + err.message); }
 }

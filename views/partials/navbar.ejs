@@ -1,23 +1,36 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <link rel="stylesheet" href="/stylesheets/navbar.css">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hamza Paints | Admin</title>
+
+  <link rel="stylesheet" href="/stylesheets/navbar.css">
 </head>
+
 <body>
 
-  <button class="hamburger" onclick="toggleSidebar()">☰</button>
+  <!-- ================= HAMBURGER (MOBILE) ================= -->
+  <button class="hamburger" id="hamburger">☰</button>
 
-  <div class="sidebar" id="sidebar">
+  <!-- ================= OVERLAY (MOBILE) ================= -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- ================= SIDEBAR ================= -->
+  <aside class="sidebar" id="sidebar">
     <div class="logo">
-      <img src="/images/weldon-paints-logo.png" />
+      <img src="/images/weldon-paints-logo.png" alt="Hamza Paints">
       <h3>Hamza Paints</h3>
     </div>
 
     <ul>
-      <li><a href="/home" class="dropdown">
-        <div class="menu-left">🏠 Home</div>
-      </a></li>
+
+      <li>
+        <a href="/home" class="dropdown">
+          <div class="menu-left">🏠 Home</div>
+        </a>
+      </li>
 
       <div class="menu-group">
         <li class="dropdown">
@@ -38,9 +51,9 @@
         </li>
         <ul class="submenu">
           <li><a href="/sales/add">Add Sale</a></li>
-          <% if(role=="admin"){ %>
-          <li><a href="/sales/all">All Sales</a></li>
-          <% } %>
+          <% if(role==="admin" ){ %>
+            <li><a href="/sales/all">All Sales</a></li>
+            <% } %>
         </ul>
       </div>
 
@@ -55,10 +68,17 @@
         </ul>
       </div>
 
-      <li><a href="/auth/logout" class="logout">🔓 Logout</a></li>
-    </ul>
-  </div>
+      <li>
+        <a href="/auth/logout" class="logout">🔓 Logout</a>
+      </li>
 
-<script src="/javascripts/navbar.js"></script>
+    </ul>
+  </aside>
+
+
+  <!-- ================= JS ================= -->
+  <script src="/javascripts/navbar.js" defer></script>
+
 </body>
+
 </html>

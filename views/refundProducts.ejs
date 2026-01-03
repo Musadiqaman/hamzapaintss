@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -7,30 +8,32 @@
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/refundProducts.css">
 </head>
+
 <body>
 
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
 
-<main>
+    <main>
 
-<div class="content-wrapper">
-<div class="form-wrapper">
-  <h1>Refund Products</h1>
+      <div class="content-wrapper">
+        <div class="form-wrapper">
+          <h1>Refund Products</h1>
 
-  <form id="refundForm" class="form-container">
-    <input type="text" name="stockID" placeholder="Enter Sale StockID" required />
-    <input type="text" name="saleID"  placeholder="Enter Sale SaleID" required />
-    <input type="number" name="productQuantity" placeholder="Enter Quantity of Sale" required />
-    <button type="submit" id="add">Refund Now</button>
-  </form>
+          <form id="refundForm" class="form-container">
+            <input type="text" name="stockID" placeholder="Enter Sale StockID" required />
+            <input type="text" name="saleID" placeholder="Enter Sale SaleID" required />
+            <input type="number" name="productQuantity" placeholder="Enter Quantity of Sale" required />
+            <button type="submit" id="add">Refund Now</button>
+          </form>
 
-  <div id="refundResult" style="margin-top:20px; font-size:16px;"></div>
-</div>
+          <div id="refundResult" style="margin-top:20px; font-size:16px;"></div>
+        </div>
 
-</main>
-<script src="/javascripts/refundProducts.js"></script>
+    </main>
+    <script src="/javascripts/refundProducts.js"></script>
 
-</div>
+    </div>
 </body>
+
 </html>

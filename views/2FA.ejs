@@ -1,37 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Two Factor Authentication</title>
   <link rel="stylesheet" href="/stylesheets/2FA.css">
 </head>
+
 <body>
   <div class="login-wrapper">
     <h1>Two Factor Authentication</h1>
 
-   <form id="loginForm" class="form-container">
-  <div class="otp-container">
-    <input type="text" name="otp1" maxlength="1" required />
-    <input type="text" name="otp2" maxlength="1" required />
-    <input type="text" name="otp3" maxlength="1" required />
-    <input type="text" name="otp4" maxlength="1" required />
-    <input type="text" name="otp5" maxlength="1" required />
-    <input type="text" name="otp6" maxlength="1" required />
-  </div>
+    <form id="loginForm" class="form-container">
+      <div class="otp-container">
+        <input type="text" name="otp1" maxlength="1" required />
+        <input type="text" name="otp2" maxlength="1" required />
+        <input type="text" name="otp3" maxlength="1" required />
+        <input type="text" name="otp4" maxlength="1" required />
+        <input type="text" name="otp5" maxlength="1" required />
+        <input type="text" name="otp6" maxlength="1" required />
+      </div>
 
-  <div class="button-container">
-    <button id="login" type="submit">Submit</button>
-    <button id="logout" type="button">Logout</button>
-  </div>
-</form>
-<p id="message"></p>
+      <div class="button-container">
+        <button id="login" type="submit">Submit</button>
+        <button id="logout" type="button">Logout</button>
+      </div>
+    </form>
+    <p id="message"></p>
 
   </div>
 
   <script src="/javascripts/2FA.js"></script>
   <script>
-   
+
   </script>
 </body>
+
 </html>

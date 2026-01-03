@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Product Entry Bill</title>
@@ -8,21 +9,24 @@
 </head>
 
 <body>
-     <div class="print-area">
-     <!-- <button id="print-bill">print bill</button> -->
-   <div class="shop-header">
+  <div class="print-area">
+    <!-- <button id="print-bill">print bill</button> -->
+    <div class="shop-header">
       <img src="/images/weldon-paints-logo.png" id="logo" />
       <div class="shop-name-en">Hamza Weldon Paint & Hardware Store</div>
       <div class="shop-name-ur">حمزہ ویلڈن پینٹ اینڈ ہارڈویئر سٹور</div>
-      <div class="shop-phones"><span dir="ltr">0319-9303154</span>(حمزہ)<span dir="ltr">0332-9780911</span>(اسماعیل)<span dir="ltr">0335-0502041</span>(مبارک شاہ)</div>
+      <div class="shop-phones"><span dir="ltr">0319-9303154</span>(حمزہ)<span
+          dir="ltr">0332-9780911</span>(اسماعیل)<span dir="ltr">0335-0502041</span>(مبارک شاہ)</div>
       <div class="divider-line">------------------------------</div>
     </div>
-   <!-- <h2> <img src="/images/weldon-paints-logo.png" id="logo"> <br> Hamza paints</h2> -->
-  <p><b>Entry Date:</b> <%= currentDate %></p>
+    <!-- <h2> <img src="/images/weldon-paints-logo.png" id="logo"> <br> Hamza paints</h2> -->
+    <p><b>Entry Date:</b>
+      <%= currentDate %>
+    </p>
     <h3>Product Details:</h3>
-  <table>
-    <thead>
-       <tr>
+    <table>
+      <thead>
+        <tr>
           <th>Stock ID</th>
           <th>Brand Name</th>
           <th>Item</th>
@@ -32,45 +36,60 @@
           <th>Price</th>
           <th>Total</th>
         </tr>
-    </thead>
-    <tbody>
-      <% let totalAmount = 0; %>
-      <% products.forEach(p => { 
-           const total = parseFloat((p.totalProduct * p.rate).toFixed(2));
-           totalAmount += total;
-      %>
-      <tr>
-        <td><%= p.stockID %></td>
-        <td><%= p.brandName %></td>
-        <td><%= p.itemName %></td>
-        <td><%= p.colourName %></td>
-        <td><%= p.qty %></td>
-        <td><%= p.totalProduct %></td>
-        <td>Rs <%= parseFloat(p.rate).toFixed(2) %></td>
-        <td>Rs <%= total.toFixed(2) %></td>
-      </tr>
-      <% }) %>
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+        <% let totalAmount=0; %>
+          <% products.forEach(p=> {
+            const total = parseFloat((p.totalProduct * p.rate).toFixed(2));
+            totalAmount += total;
+            %>
+            <tr>
+              <td>
+                <%= p.stockID %>
+              </td>
+              <td>
+                <%= p.brandName %>
+              </td>
+              <td>
+                <%= p.itemName %>
+              </td>
+              <td>
+                <%= p.colourName %>
+              </td>
+              <td>
+                <%= p.qty %>
+              </td>
+              <td>
+                <%= p.totalProduct %>
+              </td>
+              <td>Rs <%= parseFloat(p.rate).toFixed(2) %>
+              </td>
+              <td>Rs <%= total.toFixed(2) %>
+              </td>
+            </tr>
+            <% }) %>
+      </tbody>
+    </table>
 
-  <div class="footer">
-    <span>Total Items: <%= products.length %></span>
-    <span>Total Amount: Rs <%= totalAmount.toFixed(2) %></span>
-  </div>
-  
+    <div class="footer">
+      <span>Total Items: <%= products.length %></span>
+      <span>Total Amount: Rs <%= totalAmount.toFixed(2) %></span>
+    </div>
+
     <!-- ===== URDU FOOTER ===== -->
     <div class="urdu-footer">
-      پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6  
+      پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6
       کوہاٹ بورڈ ہائی وے چوک
     </div>
 
-     <div class="thank-you-section">THANK YOU</div>
+    <div class="thank-you-section">THANK YOU</div>
     <div class="dev-footer">
       <span>Software Developed by: M.SHOUKAT(0335 8004900)</span><br />
       <span></span>
     </div>
-</div>
+  </div>
 
-<script src="/javascripts/printProducts.js"></script>
+  <script src="/javascripts/printProducts.js"></script>
 </body>
+
 </html>

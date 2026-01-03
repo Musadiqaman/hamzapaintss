@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Add New Agent</title>
   <link rel="stylesheet" href="/stylesheets/addAgent.css">
-   
+
 </head>
+
 <body>
 
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<main>
-<div class="content-wrapper">
-<div class="form-wrapper">
-  <h1>Add New Agent</h1>
-  
-  <form id="agentForm" class="form-container">
-    <input type="text" name="name" placeholder="Enter Agent Name" required />
-    <input type="text" name="phone" placeholder="Enter Agent Phone Number" required />
-    <input type="text" name="cnic" placeholder="Enter Agent CNIC Number" />
-    <button id="add" type="submit">Add Agent</button>
-  </form>
+    <main>
+      <div class="content-wrapper">
+        <div class="form-wrapper">
+          <h1>Add New Agent</h1>
 
-  <!-- Message area -->
-  <p id="message" style="margin-top:20px; font-size:16px; text-align: center;"></p>
-</div>
-</div>  
+          <form id="agentForm" class="form-container">
+            <input type="text" name="name" placeholder="Enter Agent Name" required />
+            <input type="text" name="phone" placeholder="Enter Agent Phone Number" required />
+            <input type="text" name="cnic" placeholder="Enter Agent CNIC Number" />
+            <button id="add" type="submit">Add Agent</button>
+          </form>
 
-</main>
+          <!-- Message area -->
+          <p id="message" style="margin-top:20px; font-size:16px; text-align: center;"></p>
+        </div>
+      </div>
 
-<script src="/javascripts/addAgent.js"></script>
+    </main>
+
+    <script src="/javascripts/addAgent.js"></script>
 
 </body>
-</html>
 
+</html>

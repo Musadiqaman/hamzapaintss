@@ -1,18 +1,350 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
-    <link rel="stylesheet" href="/stylesheets/home.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Advanced Dashboard | Hamza Paints</title>
+  <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
+  <link rel="stylesheet" href="/stylesheets/home.css" />
 </head>
+
 <body>
- <%- include('partials/navbar') %>  
- <main> 
-    <h1>Welcome to dashboard</h1>
+  <%- include('partials/navbar') %>
+    <main class="dashboard">
+      <section class="welcome glass-panel">
+        <div class="welcome-text">
+          <h1>Welcome to Dashboard</h1>
+          <p>Complete overview of your paint store management system</p>
+        </div>
+        <div class="welcome-icon">
+          <i class="fas fa-paint-roller"></i>
+        </div>
+      </section>
+
+      <section class="stats">
+        <div class="stat-card glass">
+          <div class="icon-glow cyan"><i class="fas fa-cubes"></i></div>
+          <h3>Total Products</h3>
+          <p class="val-cyan">
+            <%= stats.totalStock || 0 %>
+          </p>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="icon-glow pink"><i class="fas fa-file-invoice-dollar"></i></div>
+          <h3>Products Value</h3>
+          <p class="val-green">Rs <%= stats.totalValue.toLocaleString() %>
+          </p>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="icon-glow blue"><i class="fas fa-warehouse"></i></div>
+          <h3>Items In Stock</h3>
+          <p class="val-cyan">
+            <%= stats.totalRemaining || 0 %>
+          </p>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="icon-glow green"><i class="fas fa-chart-line"></i></div>
+          <h3>Remaining Stock Value</h3>
+          <p class="val-green">Rs <%= stats.remainingValue.toLocaleString() %>
+          </p>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="icon-glow red"><i class="fas fa-undo"></i></div>
+          <h3>Refunded Value</h3>
+          <p class="val-red">Rs <%= stats.totalRefundedValue.toLocaleString() %>
+          </p>
+        </div>
+
+        <div class="stat-card glass">
+          <div class="icon-glow purple"><i class="fas fa-user-tie"></i></div>
+          <h3>Active Agents</h3>
+          <p class="val-cyan">
+            <%= stats.activeAgents %>
+          </p>
+        </div>
+      </section>
+
+      <section class="actions">
+        <a href="/products/add" class="action-btn neon-blue">
+          <i class="fas fa-plus-circle"></i> Add Product
+        </a>
+        <a href="/products/all" class="action-btn neon-pink">
+          <i class="fas fa-boxes-stacked"></i> All Products
+        </a>
+        <a href="/products/refund" class="action-btn neon-purple">
+          <i class="fas fa-exchange-alt"></i> Refunds
+        </a>
+        <a href="/sales/add" class="action-btn neon-pink">
+          <i class="fas fa-cart-plus"></i> New Sale
+        </a>
+        <a href="/agents/add" class="action-btn neon-blue">
+          <i class="fas fa-user-plus"></i> Add Agent
+        </a>
+        <a href="/agents/all" class="action-btn neon-blue">
+          <i class="fas fa-users-cog"></i> Manage Agents
+        </a>
+      </section>
     </main>
+      <!-- <style> -->
+<!-- /* =========================
+   WRAPPER
+========================= */
+/* .paint-calculator-wrapper{
+  min-height:100vh;
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  padding:40px;
+  background:linear-gradient(135deg,#0f172a,#020617);
+  font-family:'Poppins',sans-serif;
+} */
+
+/* =========================
+   CARD
+========================= */
+/* .paint-calculator{
+  width:480px;
+  background:#111827;
+  color:#e5e7eb;
+  padding:28px 32px;
+  border-radius:16px;
+  box-shadow:0 20px 40px rgba(0,0,0,.5);
+}
+
+.paint-calculator h2{
+  margin-bottom:20px;
+  text-align:center;
+  font-size:24px;
+  font-weight:700;
+} */
+
+/* =========================
+   FORM
+========================= */
+/* .paint-calculator label{
+  display:flex;
+  flex-direction:column;
+  font-size:14px;
+  margin-bottom:14px;
+}
+
+.paint-calculator input{
+  margin-top:6px;
+  padding:10px 12px;
+  border-radius:10px;
+  border:none;
+  outline:none;
+  font-size:15px;
+}
+
+.checkbox{
+  flex-direction:row;
+  align-items:center;
+  gap:10px;
+  margin-top:10px;
+}
+
+.paint-calculator button{
+  margin-top:18px;
+  padding:14px;
+  border:none;
+  border-radius:12px;
+  font-size:16px;
+  font-weight:700;
+  cursor:pointer;
+  background:linear-gradient(135deg,#22d3ee,#3b82f6);
+  color:#020617;
+  transition:.3s;
+}
+
+.paint-calculator button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 10px 20px rgba(59,130,246,.4);
+} */ -->
+
+<!-- /* =========================
+   RESULTS
+========================= */ -->
+<!-- /* .results{
+  margin-top:24px;
+  padding-top:16px;
+  border-top:1px solid rgba(255,255,255,.1);
+  display:none;
+}
+
+.results p{
+  margin:8px 0;
+  font-size:15px;
+} */ -->
+
+<!-- /* =========================
+   MOBILE
+========================= */ -->
+<!-- @media(max-width:768px){
+  .paint-calculator-wrapper{
+    justify-content:center;
+    padding:20px;
+  }
+  .paint-calculator{
+    width:100%;
+  }
+} -->
+<!-- </style> -->
+
+<!-- <div class="paint-calculator-wrapper">
+  <div class="paint-calculator">
+    <h2>Room Paint Calculator</h2>
+
+    <form id="calcForm">
+      <label>
+        Room Length (ft)
+        <input type="number" id="length" required>
+      </label>
+
+      <label>
+        Room Width (ft)
+        <input type="number" id="width" required>
+      </label>
+
+      <label>
+        Room Height (ft)
+        <input type="number" id="height" required>
+      </label>
+
+      <label>
+        Door Area (sq ft)
+        <input type="number" id="doorArea" value="0">
+      </label>
+
+      <label>
+        Window Area (sq ft)
+        <input type="number" id="windowArea" value="0">
+      </label>
+
+      <label class="checkbox">
+        <input type="checkbox" id="ceiling" checked>
+        Include Ceiling
+      </label>
+
+      <button type="submit">Calculate Paint</button>
+    </form>
+
+    <div class="results" id="results">
+      <p>Wall Area: <strong><span id="wallArea"></span> sq ft</strong></p>
+      <p>Ceiling Area: <strong><span id="ceilingArea"></span> sq ft</strong></p>
+      <p>Total Area: <strong><span id="totalArea"></span> sq ft</strong></p>
+      <p>Paint Required: <strong><span id="paintLiters"></span> litres</strong></p>
+      <p>Suggested Buckets (1L): <strong><span id="paintBuckets"></span></strong></p>
+    </div>
+  </div>
+</div> -->
+<!-- <div class="paint-calculator-wrapper">
+  <div class="paint-calculator">
+
+    <h2>کمرہ پینٹ کیلکولیٹر</h2>
+
+    <form id="calcForm">
+
+      <label>
+        کمرے کی لمبائی (فٹ)
+        <input type="number" id="length" required>
+      </label>
+
+      <label>
+        کمرے کی چوڑائی (فٹ)
+        <input type="number" id="width" required>
+      </label>
+
+      <label>
+        کمرے کی اونچائی (فٹ)
+        <input type="number" id="height" required>
+      </label>
+
+      <label>
+        دروازوں کا کل رقبہ (مربع فٹ)
+        <input type="number" id="doorArea" value="0">
+      </label>
+
+      <label>
+        کھڑکیوں کا کل رقبہ (مربع فٹ)
+        <input type="number" id="windowArea" value="0">
+      </label>
+
+      <label class="checkbox">
+        <input type="checkbox" id="ceiling" checked>
+        چھت بھی شامل کریں
+      </label>
+
+      <button type="submit">حساب کریں</button>
+
+    </form>
+
+    <div class="results" id="results" style="display:none;">
+      <p>دیواروں کا رقبہ: <strong><span id="wallArea"></span> مربع فٹ</strong></p>
+      <p>چھت کا رقبہ: <strong><span id="ceilingArea"></span> مربع فٹ</strong></p>
+      <p>کل رقبہ: <strong><span id="totalArea"></span> مربع فٹ</strong></p>
+      <p>درکار پینٹ: <strong><span id="paintLiters"></span> لیٹر</strong></p>
+      <p>تجویز کردہ بالٹیاں (1 لیٹر): <strong><span id="paintBuckets"></span></strong></p>
+    </div>
+
+  </div>
+</div> -->
+<!-- <script>
+document.getElementById('calcForm').addEventListener('submit', function(e){
+  e.preventDefault();
+
+  const length = parseFloat(lengthInput.value);
+  const width  = parseFloat(widthInput.value);
+  const height = parseFloat(heightInput.value);
+  const doorArea = parseFloat(doorAreaInput.value) || 0;
+  const windowArea = parseFloat(windowAreaInput.value) || 0;
+  const includeCeiling = ceiling.checked;
+
+  const perimeter = 2 * (length + width);
+  let wallArea = perimeter * height;
+  wallArea -= (doorArea + windowArea);
+  if(wallArea < 0) wallArea = 0;
+
+  const ceilingArea = includeCeiling ? (length * width) : 0;
+  const totalArea = wallArea + ceilingArea; -->
+
+  <!-- // 1 litre ≈ 100 sq ft -->
+  <!-- const paintLiters = totalArea / 100;
+  const paintBuckets = Math.ceil(paintLiters);
+
+  wallAreaSpan.textContent = wallArea.toFixed(2);
+  ceilingAreaSpan.textContent = ceilingArea.toFixed(2);
+  totalAreaSpan.textContent = totalArea.toFixed(2);
+  paintLitersSpan.textContent = paintLiters.toFixed(2);
+  paintBucketsSpan.textContent = paintBuckets;
+
+  results.style.display = 'block';
+}); -->
+
+<!-- // shortcuts -->
+<!-- const lengthInput = document.getElementById('length');
+const widthInput = document.getElementById('width');
+const heightInput = document.getElementById('height');
+const doorAreaInput = document.getElementById('doorArea');
+const windowAreaInput = document.getElementById('windowArea');
+const ceiling = document.getElementById('ceiling');
+
+const wallAreaSpan = document.getElementById('wallArea');
+const ceilingAreaSpan = document.getElementById('ceilingArea');
+const totalAreaSpan = document.getElementById('totalArea');
+const paintLitersSpan = document.getElementById('paintLiters');
+const paintBucketsSpan = document.getElementById('paintBuckets');
+const results = document.getElementById('results');
+</script> -->
+
+    <script src="/javascripts/home.js"></script>
 </body>
+
 </html>
-
-

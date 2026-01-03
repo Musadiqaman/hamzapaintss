@@ -9,13 +9,18 @@ body {
     font-family: 'Segoe UI', sans-serif; 
     background: #f6f7fb; 
     overflow-x: hidden; 
+    -webkit-font-smoothing: antialiased;
 }
 
 /* Scrollbar styling */
-::-webkit-scrollbar { width: 5px; }
-::-webkit-scrollbar-thumb { background-color: #06A56C; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-thumb { 
+    background-color: #06A56C; 
+    border-radius: 10px;
+}
 ::-webkit-scrollbar-track { background-color: #f1f1f1; }
 
+/* ---------------- HAMBURGER ---------------- */
 .hamburger {
     display: none; 
     position: fixed;
@@ -30,13 +35,17 @@ body {
     border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+    transition: transform 0.2s ease;
+}
+.hamburger:active {
+    transform: scale(0.95);
 }
 
-
+/* ---------------- SIDEBAR ---------------- */
 .sidebar {
     width: 250px;
     height: 100vh;
-    background: #00100c10; /* Desktop par hamesha white rahega */
+    background: #ffffff;
     position: fixed;
     left: 0;
     top: 0;
@@ -44,20 +53,32 @@ body {
     border-right: 1px solid #e9ecef;
     box-shadow: 2px 0 20px rgba(0,0,0,0.05);
     overflow-y: auto;
-    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.35s ease;
     z-index: 5000;
 }
 
-
-.logo { text-align: center; margin-bottom: 30px; }
-.logo img { width: 70px; border-radius: 12px; }
-.logo h3 { margin-top: 10px; font-size: 20px; color: #007a4d; font-weight: 700; }
+/* Logo */
+.logo { 
+    text-align: center; 
+    margin-bottom: 30px; 
+}
+.logo img { 
+    width: 70px; 
+    border-radius: 12px; 
+}
+.logo h3 { 
+    margin-top: 10px; 
+    font-size: 20px; 
+    color: #007a4d; 
+    font-weight: 700; 
+}
 
 ul { list-style: none; }
 
+/* Menu item */
 .dropdown {
     padding: 14px 16px;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 600;
     border-radius: 10px;
     color: #101317;
@@ -65,12 +86,15 @@ ul { list-style: none; }
     align-items: center;
     justify-content: space-between;
     cursor: pointer;
-    transition: 0.3s;
+    transition: background 0.25s ease;
     text-decoration: none;
-    margin-bottom: 5px;
+    margin-bottom: 6px;
 }
-.dropdown:hover { background: #e8e8e8; }
+.dropdown:hover { 
+    background: #eef1f0; 
+}
 
+/* Submenu */
 .submenu {
     max-height: 0;
     overflow: hidden;
@@ -80,10 +104,9 @@ ul { list-style: none; }
     margin-bottom: 10px;
 }
 .submenu.open { 
-    max-height: 300px; 
-    padding: 5px 0 10px 15px; 
+    max-height: 320px; 
+    padding: 6px 0 10px 15px; 
 }
-
 
 .submenu li a {
     padding: 10px;
@@ -91,11 +114,15 @@ ul { list-style: none; }
     font-size: 14px;
     font-weight: 500;
     color: #00462c;
-    /* background-color: #c3ffe9; */
     text-decoration: none;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+.submenu li a:hover {
+    background: #e6fff4;
 }
 
-
+/* Logout */
 .logout { 
     margin-top: 30px; 
     padding: 14px 16px;
@@ -107,56 +134,60 @@ ul { list-style: none; }
     gap: 10px;
 }
 
-/* --- Main Content Area --- */
+/* ---------------- MAIN CONTENT (DESKTOP FIX) ---------------- */
 main { 
     margin-left: 250px; 
     padding: 30px; 
-    transition: all 0.4s ease;
+    transition: margin-left 0.35s ease;
+    width: calc(100% - 250px);
 }
 
-/* --- MOBILE RESPONSIVE (Strict Fixes) --- */
+/* Table container */
+.table-wrapper {
+    width: 100%;
+    overflow-x: auto;
+    background: #ffffff;
+    border-radius: 12px;
+}
+
+/* ---------------- MOBILE RESPONSIVE ---------------- */
 @media screen and (max-width: 768px) {
+
     .hamburger { 
-        display: block; /* Mobile par button dikhao */
+        display: block;
     }
 
-    .submenu li a { margin-bottom: 5px; 
-    border-radius: 5px;
-    border: 1px solid #0000001e;
-    background-color: #afedd5;
-    }
-.submenu li a:hover { background: #03985f; }
     .sidebar { 
-        left: -280px; /* Sidebar ko screen se bahar karo */
-        width: 200px;
+        left: -280px;
+        width: 210px;
     }
 
-    /* Jab click ho to sidebar ka background color change ho jaye */
     .sidebar.mobile-open { 
         left: 0; 
-        background: #62ffca !important; /* Aapka pasandida color */
+        background: #62ffca;
         box-shadow: 10px 0 30px rgba(31, 27, 27, 0.25);
     }
 
-    /* Mobile par links ka background transparent */
-    .sidebar.mobile-open .dropdown, 
-    .sidebar.mobile-open .submenu {
-        background: transparent !important;
-        /* border: 1px solid #0000001e; */
+    .submenu li a { 
+        margin-bottom: 6px; 
+        border-radius: 6px;
+        border: 1px solid #0000001e;
+        background-color: #afedd5;
+    }
+
+    .submenu li a:hover { 
+        background: #03985f; 
+        color: #fff;
     }
 
     main { 
         margin-left: 0 !important; 
-        padding: 15px; 
-        padding-top: 80px; /* Welcome dashboard text ko neeche karne ke liye */
         width: 100%;
+        padding: 15px; 
+        padding-top: 80px;
     }
 
-    .table-wrapper {
-        width: 100%;
-        overflow-x: auto;
-        background: white;
-        border-radius: 12px;
+    table { 
+        min-width: 800px; 
     }
-    table { min-width: 800px; }
 }

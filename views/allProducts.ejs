@@ -1,164 +1,196 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>All Products</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/allProducts.css">
 </head>
+
 <body>
- <%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
- <main>
-  
-<h1>All Products</h1>
+    <main>
 
-<form class="filter-container" method="GET" action="/products/all" id="filterForm">
- <select name="filter" id="filter">
-    <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Dates</option>
-    <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
-    <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
-    <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
-    <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
-  </select>
+      <h1>All Products</h1>
 
-  <!-- Brand Name Filter -->
-  <select name="brand" id="brandFilter">
-    <option value="all" <%= selectedBrand === 'all' ? 'selected' : '' %>>All Brands</option>
-    <option value="Weldon Paints" <%= selectedBrand === 'Weldon Paints' ? 'selected' : '' %>>Weldon Paints</option>
-    <option value="Sparco Paints" <%= selectedBrand === 'Sparco Paints' ? 'selected' : '' %>>Sparco Paints</option>
-    <option value="Value Paints" <%= selectedBrand === 'Value Paints' ? 'selected' : '' %>>Value Paints</option>
-    <option value="Corona Paints" <%= selectedBrand === 'Corona Paints' ? 'selected' : '' %>>Corona Paints</option>
-    <option value="Other Paints" <%= selectedBrand === 'Other Paints' ? 'selected' : '' %>>Other Paints</option>
-  </select>
+      <form class="filter-container" method="GET" action="/products/all" id="filterForm">
+        <select name="filter" id="filter">
+          <option value="all" <%=filter==='all' ? 'selected' : '' %>>All Dates</option>
+          <option value="today" <%=filter==='today' ? 'selected' : '' %>>Today</option>
+          <option value="yesterday" <%=filter==='yesterday' ? 'selected' : '' %>>Yesterday</option>
+          <option value="month" <%=filter==='month' ? 'selected' : '' %>>This Month</option>
+          <option value="lastMonth" <%=filter==='lastMonth' ? 'selected' : '' %>>Last Month</option>
+          <option value="custom" <%=filter==='custom' ? 'selected' : '' %>>Custom Range</option>
+        </select>
 
-  <!-- Item Name Filter -->
-  <select name="itemName" id="itemNameFilter">
-    <option value="all">All Items</option>
-  </select>
+        <!-- Brand Name Filter -->
+        <select name="brand" id="brandFilter">
+          <option value="all" <%=selectedBrand==='all' ? 'selected' : '' %>>All Brands</option>
+          <option value="Weldon Paints" <%=selectedBrand==='Weldon Paints' ? 'selected' : '' %>>Weldon Paints</option>
+          <option value="Sparco Paints" <%=selectedBrand==='Sparco Paints' ? 'selected' : '' %>>Sparco Paints</option>
+          <option value="Value Paints" <%=selectedBrand==='Value Paints' ? 'selected' : '' %>>Value Paints</option>
+          <option value="Corona Paints" <%=selectedBrand==='Corona Paints' ? 'selected' : '' %>>Corona Paints</option>
+          <option value="Other Paints" <%=selectedBrand==='Other Paints' ? 'selected' : '' %>>Other Paints</option>
+        </select>
 
-  <!-- Item Colour Filter -->
-  <select name="colourName" id="colourNameFilter">
-    <option value="all">All Colours</option>
-  </select>
+        <!-- Item Name Filter -->
+        <select name="itemName" id="itemNameFilter">
+          <option value="all">All Items</option>
+        </select>
 
-  <!-- Units Filter (always visible, disabled by default) -->
-  <select name="unit" id="unitFilter">
-    <option value="all">All Units</option>
-  </select>
+        <!-- Item Colour Filter -->
+        <select name="colourName" id="colourNameFilter">
+          <option value="all">All Colors</option>
+        </select>
 
-  <!-- Stock Status -->
-  <select name="stockStatus" id="stockStatusFilter">
-    <option value="all" <%= stockStatus === 'all' ? 'selected' : '' %>>All Stock</option>
-    <option value="in" <%= stockStatus === 'in' ? 'selected' : '' %>>In Stock</option>
-    <option value="out" <%= stockStatus === 'out' ? 'selected' : '' %>>Out of Stock</option>
-  </select>
+        <!-- Units Filter (always visible, disabled by default) -->
+        <select name="unit" id="unitFilter">
+          <option value="all">All Units</option>
+        </select>
 
-  <!-- Refund -->
-  <select name="refund" id="refundFilter">
-    <option value="all" <%= selectedRefund === 'all' ? 'selected' : '' %>>All Status</option>
-    <option value="none" <%= selectedRefund === 'none' ? 'selected' : '' %>>Not Refunded</option>
-    <option value="Partially Refunded" <%= selectedRefund === 'Partially Refunded' ? 'selected' : '' %>>Partially Refunded</option>
-    <option value="Fully Refunded" <%= selectedRefund === 'Fully Refunded' ? 'selected' : '' %>>Fully Refunded</option>
-  </select>
+        <!-- Stock Status -->
+        <select name="stockStatus" id="stockStatusFilter">
+          <option value="all" <%=stockStatus==='all' ? 'selected' : '' %>>All Stock</option>
+          <option value="in" <%=stockStatus==='in' ? 'selected' : '' %>>In Stock</option>
+          <option value="out" <%=stockStatus==='out' ? 'selected' : '' %>>Out of Stock</option>
+        </select>
 
-  <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-  <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-  <button type="submit" id="apply" style="display:none;">Apply Range</button>
-</form>
-<!-- Stats Section -->
-<div class="stats">
-  <div class="stat-box">
-    <h3>Total Products</h3>
-    <p><%= stats.totalStock || 0 %></p>
-  </div>
-  <div class="stat-box">
-    <h3>Products Value</h3>
-    <p>Rs <%= stats.totalValue ? stats.totalValue.toFixed(2) : '0.00' %></p>
-  </div>
-  <div class="stat-box">
-    <h3>Items In Stock</h3>
-    <p><%= stats.totalRemaining || 0 %></p>
-  </div>
-  <div class="stat-box">
-    <h3>Remaining Stock Value</h3>
-    <p><%= stats.remaining ? stats.remaining.toFixed(2) : '0.00' %></p>
-  </div>
-  <div class="stat-box">
-    <h3>Refunded Stock Value</h3>
-    <p id="refund-stock">Rs <%= stats.totalRefundedValue ? stats.totalRefundedValue.toFixed(2) : '0.00' %></p>
-  </div>
-</div>
-<!-- Product Table -->
- <div class="table-container">
-  <table>
-  <thead>
-    <tr>
-      <th>Brand</th>
-      <th>Item</th>
-      <th>Colour</th>
-      <th>Unit</th>
-      <th>Total Product</th>
-      <th>Remaining</th>
-      <th>Rate</th>
-      <th>Total Amount</th>
-      <th>Status</th>
-      <th>Refund (Qty)</th>
-      <th>Date</th>
-      <% if(role=="admin"){ %>
-      <th>Action</th>
-      <% } %>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (products.length === 0) { %>
-      <tr><td colspan="13" class="no-data">No products found for the selected filter.</td></tr>
-    <% } else { %>
-      <% products.forEach(p => { %>
-        <tr>
-          <td><%= p.brandName %></td>
-          <td><%= p.itemName %></td>
-          <td><%= p.colourName %></td>
-          <td><%= p.qty %></td>
-          <td><%= p.totalProduct %></td>
-          <td><%= p.remaining %></td>
-          <td>Rs <%= p.rate %></td>
-          <td>Rs <%= (p.totalProduct * p.rate).toFixed(2) %></td>
-          <td class="refund-status"><%= p.refundStatus %></td>
-          <td class="refund-quantity"><%= p.refundQuantity %></td>
-          <td>
-  <%= new Date(p.createdAt).toLocaleDateString('en-GB', { 
-      day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' 
-  }) %>
-  <br>
-  <small style="color: #007bff; font-weight: bold;">
-    <%= new Date(p.createdAt).toLocaleTimeString('en-GB', { 
-        hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' 
-    }) %>
-  </small>
-</td>
-         <% if(role=="admin"){ %>
-       <td><button type="button" id="delete" class="delete-btn" data-id="<%= p._id %>">Delete</button></td>
+        <!-- Refund -->
+        <select name="refund" id="refundFilter">
+          <option value="all" <%=selectedRefund==='all' ? 'selected' : '' %>>All Status</option>
+          <option value="none" <%=selectedRefund==='none' ? 'selected' : '' %>>Not Refunded</option>
+          <option value="Partially Refunded" <%=selectedRefund==='Partially Refunded' ? 'selected' : '' %>>Partially
+            Refunded</option>
+          <option value="Fully Refunded" <%=selectedRefund==='Fully Refunded' ? 'selected' : '' %>>Fully Refunded
+          </option>
+        </select>
 
-        <% } %>
-          
+        <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+        <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+        <button type="submit" id="apply" style="display:none;">Apply Range</button>
+      </form>
+      <!-- Stats Section -->
+      <div class="stats">
+        <div class="stat-box">
+          <h3><span style="font-size: 17px;">🛒</span>Total Products</h3>
+          <p>
+            <%= stats.totalStock || 0 %>
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3><span style="font-size: 17px;">💰</span>Products Value</h3>
+          <p>Rs <%= stats.totalValue ? stats.totalValue.toFixed(2) : '0.00' %>
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3><span style="font-size: 17px;">🧱</span>Items In Stock</h3>
+          <p>
+            <%= stats.totalRemaining || 0 %>
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3><span style="font-size: 17px;">💹</span>Remaining Stock Value</h3>
+          <p>
+            <%= stats.remaining ? stats.remaining.toFixed(2) : '0.00' %>
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3>↩️Refunded Stock Value</h3>
+          <p id="refund-stock">Rs <%= stats.totalRefundedValue ? stats.totalRefundedValue.toFixed(2) : '0.00' %>
+          </p>
+        </div>
+      </div>
+      <!-- Product Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Item</th>
+              <th>Color</th>
+              <th>Unit</th>
+              <th>Total Product</th>
+              <th>Remaining</th>
+              <th>Rate</th>
+              <th>Total Amount</th>
+              <th>Status</th>
+              <th>Refund (Qty)</th>
+              <th>Date</th>
+              <% if(role=="admin" ){ %>
+                <th>Action</th>
+                <% } %>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (products.length===0) { %>
+              <tr>
+                <td colspan="13" class="no-data">No products found for the selected filter.</td>
+              </tr>
+              <% } else { %>
+                <% products.forEach(p=> { %>
+                  <tr>
+                    <td>
+                      <%= p.brandName %>
+                    </td>
+                    <td>
+                      <%= p.itemName %>
+                    </td>
+                    <td>
+                      <%= p.colourName %>
+                    </td>
+                    <td>
+                      <%= p.qty %>
+                    </td>
+                    <td>
+                      <%= p.totalProduct %>
+                    </td>
+                    <td>
+                      <%= p.remaining %>
+                    </td>
+                    <td>Rs <%= p.rate %>
+                    </td>
+                    <td>Rs <%= (p.totalProduct * p.rate).toFixed(2) %>
+                    </td>
+                    <td class="refund-status">
+                      <%= p.refundStatus %>
+                    </td>
+                    <td class="refund-quantity">
+                      <%= p.refundQuantity %>
+                    </td>
+                    <td>
+                      <%= new Date(p.createdAt).toLocaleDateString('en-GB', { day: '2-digit' , month: 'short' ,
+                        year: 'numeric' , timeZone: 'Asia/Karachi' }) %>
+                        <br>
+                        <small style="color: #007bff; font-weight: bold;">
+                          <%= new Date(p.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit' , minute: '2-digit' ,
+                            hour12: true, timeZone: 'Asia/Karachi' }) %>
+                        </small>
+                    </td>
+                    <% if(role=="admin" ){ %>
+                      <td><button type="button" id="delete" class="delete-btn" data-id="<%= p._id %>">Delete</button>
+                      </td>
 
-        </tr>
-      <% }) %>
-    <% } %>
-  </tbody>
-</table>
-</div>
-</main>
-<script>
-  window.selectedBrand = "<%= selectedBrand || 'all' %>";
-  window.selectedItem = "<%= selectedItem || 'all' %>";
-  window.selectedColour = "<%= selectedColour || 'all' %>";
-  window.selectedUnit = "<%= selectedUnit || 'all' %>";
-</script>
+                      <% } %>
 
-<script src="/javascripts/allProducts.js"></script>
+
+                  </tr>
+                  <% }) %>
+                    <% } %>
+          </tbody>
+        </table>
+      </div>
+    </main>
+    <script>
+      window.selectedBrand = "<%= selectedBrand || 'all' %>";
+      window.selectedItem = "<%= selectedItem || 'all' %>";
+      window.selectedColour = "<%= selectedColour || 'all' %>";
+      window.selectedUnit = "<%= selectedUnit || 'all' %>";
+    </script>
+
+    <script src="/javascripts/allProducts.js"></script>
 
 </body>
+
 </html>

@@ -1,114 +1,144 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>View Agent</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/viewAgent.css">
 </head>
+
 <body>
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<main>
-<h1>View Agent - <span style="color: #2196F3;"><%= agent.name %></span></h1>
+    <main>
+      <a href="/agents/all" id="BackBtn">
+        <span class="backbtn">←</span>
+        All Agents
+      </a>
+
+      <h1>View Agent - <span style="color: #2196F3;">
+          <%= agent.name %>
+        </span></h1>
 
 
 
-<!-- Filter Section -->
-<form class="filter-container" method="GET" action="/agents/view-agent/<%= agent._id %>">
-  <select name="filter" id="filter">
-    <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Dates</option>
-    <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
-    <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
-    <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
-    <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
-  </select>
+      <!-- Filter Section -->
+      <form class="filter-container" method="GET" action="/agents/view-agent/<%= agent._id %>">
+        <select name="filter" id="filter">
+          <option value="all" <%=filter==='all' ? 'selected' : '' %>>All Dates</option>
+          <option value="today" <%=filter==='today' ? 'selected' : '' %>>Today</option>
+          <option value="yesterday" <%=filter==='yesterday' ? 'selected' : '' %>>Yesterday</option>
+          <option value="month" <%=filter==='month' ? 'selected' : '' %>>This Month</option>
+          <option value="lastMonth" <%=filter==='lastMonth' ? 'selected' : '' %>>Last Month</option>
+          <option value="custom" <%=filter==='custom' ? 'selected' : '' %>>Custom Range</option>
+        </select>
 
-  <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-  <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-  <button type="submit" id="apply">Apply</button>
-</form>
+        <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+        <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+        <button type="submit" id="apply">Apply</button>
+      </form>
 
-<!-- Stats Section -->
-<div class="stats">
-  <div class="stat-box">
-    <h3>Total % Commission</h3>
-    <p>Rs <%= stats.totalPercentageAmount.toFixed(2) %></p>
-  </div>
-  <div class="stat-box">
-    <h3>Paid % Commission</h3>
-    <p>Rs <%= stats.totalPercentageAmountGiven.toFixed(2) %></p>
-  </div>
-  <div class="stat-box">
-    <h3>Left % Commission</h3>
-    <p>Rs <%= stats.totalPercentageAmountLeft.toFixed(2) %></p>
-  </div>
-</div>
+      <!-- Stats Section -->
+      <div class="stats">
+        <div class="stat-box">
+          <h3>Total% Commission<span style="font-size: 15px;">💵</span></h3>
+          <p>Rs <%= stats.totalPercentageAmount.toFixed(2) %>
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3>Paid % Commission <span style="font-size: 15px;">✅</h3>
+          <p>Rs <%= stats.totalPercentageAmountGiven.toFixed(2) %>
+          </p>
+        </div>
+        <div class="stat-box">
+          <h3>Left % Commission<span style="font-size: 15px;"> ⏳</span></h3>
+          <p id="negative">Rs <%= stats.totalPercentageAmountLeft.toFixed(2) %>
+          </p>
+        </div>
+      </div>
 
-<!-- Items Table -->
-<table>
-  <thead>
-    <tr>
-      <th>Product Sold</th>
-      <th>Product Amount</th>
-      <th>%</th>
-      <th>% Amount</th>
-      <th>Item Status</th>
-      <th>Paid Amount</th>
-      <th>Left Amount</th>
-      <th>Register Date</th>
-      <th>Action</th>
-    </tr>
-  </thead>
-  <tbody>
-    <% if (agent.items.length === 0) { %>
-      <tr>
-        <td colspan="9" class="no-data">No items found for the selected filter.</td>
-      </tr>
-    <% } else { %>
-      <% agent.items.forEach(i => { %>
-        <tr id="row-<%= i._id %>">
-          <td><%= i.totalProductSold %></td>
-          <td><%= i.totalProductAmount %></td>
-          <td><%= i.percentage %></td>
-          <td><%= i.percentageAmount %></td>
-          <td class="paid-status">
-            <% if (i.paidAmount >= i.percentageAmount) { %>
-              Paid
-            <% } else if (i.paidAmount > 0) { %>
-              Partially
-            <% } else { %>
-              Unpaid
-            <% } %>
-          </td>
-          <td>Rs <%= i.paidAmount %></td>
-          <td>Rs <%= (i.percentageAmount - i.paidAmount).toFixed(2) %></td>
-          <td>
-  <%= new Date(i.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' }) %>
-  <br>
-  <small style="color: #007bff; font-weight: bold;">
-    <%= new Date(i.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' }) %>
-  </small>
-</td>
-          <td class="actions">
-            <button class="pay-btn"  id="pay" data-id="<%= i._id %>" data-total="<%= i.percentageAmount %>" data-paid="<%= i.paidAmount %>">Pay</button>
-            <% if(role=="admin"){ %>
-            <button class="delete-btn" data-id="<%= i._id %>">Delete</button>
-            <% } %>
-            <div class="pay-box" id="paybox-<%= i._id %>" style="display:none; margin-top:5px;">
-              <input type="number" id="payInput-<%= i._id %>" placeholder="Enter Amount" min="1">
-              <button id="submit" class="submit-btn" data-id="<%= i._id %>" data-total="<%= i.percentageAmount %>" data-paid="<%= i.paidAmount %>">Submit</button>
-            </div>
-          </td>
-        </tr>
-      <% }) %>
-    <% } %>
-  </tbody>
-</table>
-</main>
+      <!-- Items Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Product Sold</th>
+              <th>Product Amount</th>
+              <th>%</th>
+              <th>% Amount</th>
+              <th>Item Status</th>
+              <th>Paid Amount</th>
+              <th>Left Amount</th>
+              <th>Register Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (agent.items.length===0) { %>
+              <tr>
+                <td colspan="9" class="no-data">No items found for the selected filter.</td>
+              </tr>
+              <% } else { %>
+                <% agent.items.forEach(i=> { %>
+                  <tr id="row-<%= i._id %>">
+                    <td>
+                      <%= i.totalProductSold %>
+                    </td>
+                    <td>
+                      <%= i.totalProductAmount %>
+                    </td>
+                    <td>
+                      <%= i.percentage %>
+                    </td>
+                    <td>
+                      <%= i.percentageAmount %>
+                    </td>
+                    <td class="paid-status">
+                      <% if (i.paidAmount>= i.percentageAmount) { %>
+                        Paid
+                        <% } else if (i.paidAmount> 0) { %>
+                          Partially
+                          <% } else { %>
+                            Unpaid
+                            <% } %>
+                    </td>
+                    <td>Rs <%= i.paidAmount %>
+                    </td>
+                    <td>Rs <%= (i.percentageAmount - i.paidAmount).toFixed(2) %>
+                    </td>
+                    <td>
+                      <%= new Date(i.createdAt).toLocaleDateString('en-GB', { day: '2-digit' , month: 'short' ,
+                        year: 'numeric' , timeZone: 'Asia/Karachi' }) %>
+                        <br>
+                        <small style="color: #007bff; font-weight: bold;">
+                          <%= new Date(i.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit' , minute: '2-digit' ,
+                            hour12: true, timeZone: 'Asia/Karachi' }) %>
+                        </small>
+                    </td>
+                    <td class="actions">
+                      <button class="pay-btn" id="pay" data-id="<%= i._id %>" data-total="<%= i.percentageAmount %>"
+                        data-paid="<%= i.paidAmount %>">Pay</button>
+                      <% if(role=="admin" ){ %>
+                        <button class="delete-btn" data-id="<%= i._id %>">Delete</button>
+                        <% } %>
+                          <div class="pay-box" id="paybox-<%= i._id %>" style="display:none; margin-top:5px;">
+                            <input class="payinput" type="number" id="payInput-<%= i._id %>" placeholder="Enter Amount"
+                              min="1">
+                            <button id="submit" class="submit-btn" data-id="<%= i._id %>"
+                              data-total="<%= i.percentageAmount %>" data-paid="<%= i.paidAmount %>">Submit</button>
+                          </div>
+                    </td>
+                  </tr>
+                  <% }) %>
+                    <% } %>
+          </tbody>
+        </table>
+      </div>
+    </main>
 
-<!-- External JS -->
-<script src="/javascripts/viewAgent.js"></script>
+    <!-- External JS -->
+    <script src="/javascripts/viewAgent.js"></script>
 </body>
+
 </html>

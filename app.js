@@ -1,13 +1,15 @@
 import express from "express";
 import path from "path";
 import dotenv from "dotenv";
-import connectDB from "./config/db.js"; 
+import connectDB from "./config/db.js";
 import { fileURLToPath } from "url";
 import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import cors from "cors";
 import session from "express-session";
-
+// Models import (Inhe line 10 ke baad add karein)
+import Product from "./models/Product.js";
+import Agent from "./models/Agent.js"; // esko mene line 11 me add kiya hai home page me agent ki details nikalne ke liye
 
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -47,8 +49,8 @@ app.use(
           "https://cdn.jsdelivr.net"
         ],
         "style-src": [
-          "'self'", 
-          "'unsafe-inline'", 
+          "'self'",
+          "'unsafe-inline'",
           "https://fonts.googleapis.com"
         ],
         "img-src": ["'self'", "data:", "https:"],
@@ -71,7 +73,7 @@ const allowedOrigins = process.env.NODE_ENV === "production"
 
 // ===== CORS Middleware =====
 app.use(cors({
-  origin: function(origin, callback) {
+  origin: function (origin, callback) {
     // origin null -> Postman, curl, server-side request
     if (!origin) return callback(null, true);
 
@@ -128,7 +130,7 @@ app.use(session({
   secret: process.env.SESSION_SECRET || "defaultsecret",
   resave: false,
   saveUninitialized: false,
-  cookie: { 
+  cookie: {
     maxAge: 5 * 60 * 1000, // 5 minutes
     httpOnly: true,
     secure: process.env.NODE_ENV === "production"
@@ -145,10 +147,45 @@ app.use("/agents", agentRoutes);
 
 app.get("/", (req, res) => res.redirect("/auth/login"));
 
-app.get("/home", isLoggedIn,allowRoles("admin", "worker"), (req, res) => {
-  const role = req.user.role;
-  res.render("home", { role });
+// app.get("/home", isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
+//   const role = req.user.role;
+//   res.render("home", { role });
+// }); esko mene comment kar diya hai neeche naye code ke liye
+
+
+
+// Is code ko Line 149 se leker line no 156 tak mene past kaya eh  par paste karein (Purane /home route ki jagah)
+app.get("/home", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  try {
+    const role = req.user.role;
+    
+    // Sab data parallel mangwana
+    const [products, agents] = await Promise.all([
+        Product.find({}),
+        Agent.find({}) // Saare agents mangwaye taaki commission plus kar sakein
+    ]);
+
+    const stats = {
+      totalStock: products.reduce((acc, p) => acc + (p.totalProduct || 0), 0),
+      totalValue: products.reduce((acc, p) => acc + (p.totalProduct * p.rate || 0), 0),
+      totalRemaining: products.reduce((acc, p) => acc + (p.remaining || 0), 0),
+      remainingValue: products.reduce((acc, p) => acc + (p.remaining * p.rate || 0), 0),
+      totalRefundedValue: products.reduce((acc, p) => acc + (p.refundQuantity * p.rate || 0), 0),
+      activeAgents: agents.length, // Agents ki ginti
+      // Sab agents ka commission plus (+) karne ka formula
+      totalCommission: agents.reduce((acc, a) => acc + (Number(a.commission) || 0), 0)
+    };
+
+    res.render("home", { role, stats });
+    
+  } catch (err) {
+    console.error("Dashboard Error:", err);
+    res.status(500).send("Stats load karne mein masla aya hai.");
+  }
 });
+// edar tak add kaya he code ko 
+
+
 
 app.get("/navi-bar", isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
   const role = req.user.role;
@@ -156,14 +193,14 @@ app.get("/navi-bar", isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
 });
 
 // =======================================================
-// 🛑 404 Handler
+//  404 Handler
 // =======================================================
 app.use((req, res) => {
   res.status(404).send("❌ Page not found.");
 });
 
 // =======================================================
-// 🛑 ERROR HANDLER
+//  ERROR HANDLER
 // =======================================================
 app.use((err, req, res, next) => {
   console.error("❌ ERROR:", err.stack);

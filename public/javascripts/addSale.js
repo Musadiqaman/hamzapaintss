@@ -11,15 +11,15 @@ agentSelect.addEventListener("change", function () {
 
 // Deep copy of product data to manage stock on front-end
 const initialProducts = JSON.parse(document.getElementById("productData").textContent);
-let products = JSON.parse(JSON.stringify(initialProducts)); 
+let products = JSON.parse(JSON.stringify(initialProducts));
 let tempSales = [];
 
 // FORM ELEMENTS
 const brandSelect = document.getElementById("brandSelect");
 const itemSelect = document.getElementById("itemSelect");
 const unitSelect = document.getElementById("unitSelect");
-const allColoursSelect = document.getElementById("allColours"); 
-const colourSelect = document.getElementById("colourSelect"); 
+const allColoursSelect = document.getElementById("allColours");
+const colourSelect = document.getElementById("colourSelect");
 const quantitySold = document.getElementById("quantitySold");
 const rate = document.getElementById("rate");
 const totalStock = document.getElementById("totalStock");
@@ -29,7 +29,7 @@ const totalStock = document.getElementById("totalStock");
 // ===============================================
 
 brandSelect.addEventListener("change", function () {
-    resetFieldsBelowBrand(); 
+    resetFieldsBelowBrand();
     if (this.value) updateItemDropdown(this.value);
 });
 
@@ -39,7 +39,7 @@ itemSelect.addEventListener("change", function () {
 });
 
 unitSelect.addEventListener("change", function () {
-    resetOptionAndInputs(); 
+    resetOptionAndInputs();
     updateAllColoursDropdown(brandSelect.value, itemSelect.value, this.value);
 });
 
@@ -48,7 +48,7 @@ allColoursSelect.addEventListener("change", function () {
     updateOptionDropdown(brandSelect.value, itemSelect.value, unitSelect.value, this.value);
 });
 
-colourSelect.addEventListener("change", function() {
+colourSelect.addEventListener("change", function () {
     const opt = this.selectedOptions[0];
     if (opt && opt.value) {
         rate.value = opt.dataset.rate || 0;
@@ -73,12 +73,12 @@ function updateUnitColourDropdown(brand, item) {
     const hasUnit = matches.some(p => p.qty && p.qty.trim() !== "" && p.qty.toUpperCase() !== "N/A");
     const hasColour = matches.some(p => p.colourName && p.colourName.trim() !== "" && p.colourName.toUpperCase() !== "N/A");
 
-    resetUnitColourAndInputs(); 
-    
+    resetUnitColourAndInputs();
+
     if (!hasUnit) {
         unitSelect.disabled = true;
         unitSelect.innerHTML = `<option value="">No Unit</option>`;
-        if (hasColour) updateAllColoursDropdown(brand, item, ""); 
+        if (hasColour) updateAllColoursDropdown(brand, item, "");
         else updateOptionDropdown(brand, item, "", "", matches);
         return;
     }
@@ -89,11 +89,11 @@ function updateUnitColourDropdown(brand, item) {
 }
 
 function updateAllColoursDropdown(brand, item, unit) {
-    const filtered = products.filter(p => 
-        p.brandName === brand && p.itemName === item && 
+    const filtered = products.filter(p =>
+        p.brandName === brand && p.itemName === item &&
         (unit ? p.qty === unit : (!p.qty || p.qty.toUpperCase() === "N/A")) && p.remaining > 0
     );
-    
+
     const hasColour = filtered.some(p => p.colourName && p.colourName.trim() !== "" && p.colourName.toUpperCase() !== "N/A");
 
     if (!hasColour) {
@@ -102,17 +102,17 @@ function updateAllColoursDropdown(brand, item, unit) {
         updateOptionDropdown(brand, item, unit, "", filtered);
         return;
     }
-    
+
     const colours = [...new Set(filtered.map(p => p.colourName).filter(c => c && c.toUpperCase() !== "N/A"))];
     allColoursSelect.innerHTML = `<option value="">Select Colour</option>` + colours.map(c => `<option value="${c}">${c}</option>`).join('');
     allColoursSelect.disabled = false;
 }
 
 function updateOptionDropdown(brand, item, unit, colourName, preFiltered = null) {
-    const filtered = preFiltered || products.filter(p => 
-        p.brandName === brand && p.itemName === item && 
-        (unit ? p.qty === unit : (!p.qty || p.qty.toUpperCase() === "N/A")) && 
-        (colourName ? p.colourName === colourName : (!p.colourName || p.colourName.toUpperCase() === "N/A")) && 
+    const filtered = preFiltered || products.filter(p =>
+        p.brandName === brand && p.itemName === item &&
+        (unit ? p.qty === unit : (!p.qty || p.qty.toUpperCase() === "N/A")) &&
+        (colourName ? p.colourName === colourName : (!p.colourName || p.colourName.toUpperCase() === "N/A")) &&
         p.remaining > 0
     );
 
@@ -123,7 +123,7 @@ function updateOptionDropdown(brand, item, unit, colourName, preFiltered = null)
             if (p.colourName && p.colourName.toUpperCase() !== "N/A") detail += ` | ${p.colourName}`;
             return `<option value="${p.stockID}" data-remaining="${p.remaining}" data-rate="${p.rate}">${detail} — Rate: ${p.rate} | Stock: ${p.remaining}</option>`;
         }).join('');
-    
+
     colourSelect.disabled = filtered.length === 0;
 }
 
@@ -131,10 +131,10 @@ function updateOptionDropdown(brand, item, unit, colourName, preFiltered = null)
 // ADD / DELETE / SUBMIT (FRONT-END UPDATES)
 // ===============================================
 
-document.getElementById("add").addEventListener("click", function() {
+document.getElementById("add").addEventListener("click", function () {
     const brand = brandSelect.value;
     const item = itemSelect.value;
-    const option = colourSelect.selectedOptions[0]; 
+    const option = colourSelect.selectedOptions[0];
     const qtyInput = parseInt(quantitySold.value) || 0;
     const rateVal = parseFloat(rate.value) || 0;
 
@@ -150,7 +150,7 @@ document.getElementById("add").addEventListener("click", function() {
     }
 
     // FRONT-END MINUS
-    selectedProduct.remaining -= qtyInput; 
+    selectedProduct.remaining -= qtyInput;
 
     tempSales.push({
         stockID: selectedProduct.stockID,
@@ -173,7 +173,7 @@ function refreshCurrentSelection() {
     const i = itemSelect.value;
     const u = unitSelect.value;
     const c = allColoursSelect.value;
-    
+
     // Sirf niche walay dropdown refresh karein taake selection kharab na ho
     if (u || unitSelect.disabled) {
         if (c || allColoursSelect.disabled) {
@@ -184,7 +184,7 @@ function refreshCurrentSelection() {
     } else {
         updateUnitColourDropdown(b, i);
     }
-    
+
     quantitySold.value = ""; rate.value = ""; totalStock.value = "";
 }
 
@@ -204,14 +204,14 @@ function renderTable() {
     `).join('');
 
     document.querySelectorAll(".delete-sale").forEach(btn => {
-        btn.onclick = function() {
+        btn.onclick = function () {
             const idx = this.dataset.index;
             const sale = tempSales[idx];
-            
+
             // FRONT-END PLUS
             const prod = products.find(p => p.stockID === sale.stockID);
-            if(prod) prod.remaining += sale.quantitySold;
-            
+            if (prod) prod.remaining += sale.quantitySold;
+
             tempSales.splice(idx, 1);
             renderTable();
             refreshCurrentSelection();
@@ -219,7 +219,7 @@ function renderTable() {
     });
 }
 
-document.getElementById("submitBtn").addEventListener("click", async function() {
+document.getElementById("submitBtn").addEventListener("click", async function () {
     if (tempSales.length === 0) return alert("⚠️ Add sales first.");
     const payload = { sales: tempSales, agentID: agentSelect.value || null, percentage: agentPercentage.value || 0 };
     try {

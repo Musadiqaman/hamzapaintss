@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>Sale Entry Bill</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/printSales.css">
 </head>
+
 <body>
   <div class="print-area">
 
@@ -15,21 +17,24 @@
       <img src="/images/weldon-paints-logo.png" id="logo">
 
       <div class="shop-name-en">
-      Hamza Weldon Paint & Hardware Store
+        Hamza Weldon Paint & Hardware Store
       </div>
 
       <div class="shop-name-ur">
         حمزہ ویلڈن پینٹ اینڈ ہارڈویئر سٹور
       </div>
 
-  <div class="shop-phones"><span dir="ltr">0319-9303154</span>(حمزہ)<span dir="ltr">0332-9780911</span>(اسماعیل)<span dir="ltr">0335-0502041</span>(مبارک شاہ)
-</div>
-<br><br>
+      <div class="shop-phones"><span dir="ltr">0319-9303154</span>(حمزہ)<span
+          dir="ltr">0332-9780911</span>(اسماعیل)<span dir="ltr">0335-0502041</span>(مبارک شاہ)
+      </div>
+      <br><br>
       <div class="divider-line">------------------------------------ کسٹمر نام </div>
     </div>
     <!-- ===== SHOP HEADER END ===== -->
 
-    <p><b>Entry date:</b> <%= currentDate %></p>
+    <p><b>Entry date:</b>
+      <%= currentDate %>
+    </p>
 
     <h3>Remarks:</h3>
 
@@ -47,22 +52,36 @@
         </tr>
       </thead>
       <tbody>
-        <% let totalAmount = 0; %>
-        <% sales.forEach(s => { 
-             const total = parseFloat((s.quantitySold * s.rate).toFixed(2));
-             totalAmount += total;
-        %>
-          <tr>
-            <td><%= s.stockID %></td>
-            <td><%= s.saleID %></td>
-            <td><%= s.itemName %></td>
-            <td><%= s.colourName %></td>
-            <td><%= s.qty %></td>
-            <td><%= s.quantitySold %></td>
-            <td>Rs <%= parseFloat(s.rate).toFixed(2) %></td>
-            <td>Rs <%= total.toFixed(2) %></td>
-          </tr>
-        <% }) %>
+        <% let totalAmount=0; %>
+          <% sales.forEach(s=> {
+            const total = parseFloat((s.quantitySold * s.rate).toFixed(2));
+            totalAmount += total;
+            %>
+            <tr>
+              <td>
+                <%= s.stockID %>
+              </td>
+              <td>
+                <%= s.saleID %>
+              </td>
+              <td>
+                <%= s.itemName %>
+              </td>
+              <td>
+                <%= s.colourName %>
+              </td>
+              <td>
+                <%= s.qty %>
+              </td>
+              <td>
+                <%= s.quantitySold %>
+              </td>
+              <td>Rs <%= parseFloat(s.rate).toFixed(2) %>
+              </td>
+              <td>Rs <%= total.toFixed(2) %>
+              </td>
+            </tr>
+            <% }) %>
       </tbody>
     </table>
 
@@ -73,12 +92,12 @@
 
     <!-- ===== URDU FOOTER ===== -->
     <div class="urdu-footer">
-  پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6 کوہاٹ بورڈ ہائی وے چوک 
-     
+      پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6 کوہاٹ بورڈ ہائی وے چوک
+
     </div>
-    
+
     <div class="urdu-warning">
-    .بل کے بغیر واپسی نہیں ہوگی
+      .بل کے بغیر واپسی نہیں ہوگی
     </div>
     <div class="thank-you-section">
       THANK YOU FOR VISITING HAMZA PAINTS
@@ -86,11 +105,12 @@
 
     <div class="dev-footer">
       <span>Software Developed by: M.SHOUKAT (0335 8004900)</span><br>
-     
+
     </div>
 
   </div>
 
-<script src="/javascripts/printSales.js"></script>
+  <script src="/javascripts/printSales.js"></script>
 </body>
+
 </html>

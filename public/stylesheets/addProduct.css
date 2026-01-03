@@ -4,9 +4,17 @@
   box-sizing: border-box;
 }
 
-::-webkit-scrollbar { width: 8px; }
-::-webkit-scrollbar-thumb { background-color: #06A56C; }
-::-webkit-scrollbar-track { background-color: #f1f1f1; }
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #06A56C;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
 
 h1 {
   color: #06a56c;
@@ -19,23 +27,28 @@ h1 {
   display: flex;
   justify-content: center;
   gap: 8px;
-  margin-bottom: 5px;
+  margin-bottom: 3px;
   flex-wrap: wrap;
 }
 
-select, input {
+select,
+input {
   padding: 10px;
   border: 1px solid #ccc;
-  border-radius: 6px;
+  border-radius: 5px;
   width: 130px;
   font-size: 13px;
   margin-bottom: 8px;
   transition: border-color 0.3s ease-in-out;
 }
 
-#rate, .totalproduct { width: 130px; }
+#rate,
+.totalproduct {
+  width: 130px;
+}
 
-select:focus, input:focus {
+select:focus,
+input:focus {
   border-color: #06a56c;
   outline: none;
   box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
@@ -63,14 +76,19 @@ table {
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
 }
 
-th, td {
-  border-bottom: 1px solid #ddd;
+th,
+td {
+  border-bottom: 1px solid #41d79b;
   padding: 5px;
   text-align: center;
   font-size: 15px;
 }
 
-th { background-color: #06a56c; color: white; padding: 13px; }
+th {
+  background-color: #06a56c;
+  color: white;
+  padding: 13px;
+}
 
 tbody {
   max-height: 260px;
@@ -78,7 +96,8 @@ tbody {
   display: block;
 }
 
-thead, tbody tr {
+thead,
+tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
@@ -95,88 +114,18 @@ thead, tbody tr {
   cursor: pointer;
 }
 
-/* --- MOBILE RESPONSIVE (Advanced Fixes for Text & Alignment) --- */
-@media screen and (max-width: 768px) {
-  main {
-    padding: 5px;
-    padding-top: 10px; /* Hamburger space */
-    margin-left: 0 !important;
-  }
-
-  h1 {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-
-  /* Compact Input Gaps */
-  .form-container {
-    gap: 3px; 
-    padding: 5px;
-    justify-content: space-between;
-  }
-
-  select, input {
-    width: calc(50% - 3px) !important; 
-    font-size: 11px; /* Text chota kiya taake fit aaye */
-    padding: 8px 4px;
-    margin-bottom: 5px;
-  }
-
-  button#add {
-    width: 100%;
-    padding: 10px;
-    font-size: 13px;
-    margin-top: 2px;
-  }
-
-  /* Table Container Fix */
-  .table-container {
-    width: 100%;
-    overflow-x: auto; /* Side scroll enable */
-    background: white;
-    border-radius: 8px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  table {
-    display: table; /* Block reset kiya alignment ke liye */
-    min-width: 700px; /* Isse table pichkegi nahi aur align rahegi */
-    table-layout: auto !important; /* PC ka fixed layout override kiya */
-  }
-
-  thead {
-    display: table-header-group; /* Standard header behavior */
-  }
-
-  tbody {
-    display: table-row-group; /* Standard row behavior */
-    max-height: none; /* Mobile par scroll container control karega */
-  }
-
-  tbody tr {
-    display: table-row;
-    width: auto;
-  }
-
-  th, td {
-    padding: 10px 5px;
-    font-size: 10.5px; /* Mazeed chota text mobile alignment ke liye */
-    white-space: nowrap; /* Data ko ek line mein rakhne ke liye */
-    border-bottom: 1px solid #eee;
-  }
-
-  th {
-    padding: 12px 5px;
-  }
-}
 /* Delete Button Styling */
 button#delete {
-  background-color: #ffebee; /* Light red background */
-  color: #d32f2f;            /* Dark red text */
-  border: 1px solid #ef9a9a; /* Soft red border */
+  background-color: #ffebee;
+  /* Light red background */
+  color: #d32f2f;
+  /* Dark red text */
+  border: 1px solid #ef9a9a;
+  /* Soft red border */
   padding: 6px 12px;
   border-radius: 4px;
-  font-size: 11px;           /* Mobile ke hisab se chota text */
+  font-size: 11px;
+  /* Mobile ke hisab se chota text */
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -197,4 +146,97 @@ td button#delete {
   margin: 2px 0;
   width: auto;
   min-width: 60px;
+}
+
+/* --- MOBILE RESPONSIVE (Advanced Fixes for Text & Alignment) --- */
+@media screen and (max-width: 768px) {
+  main {
+    padding: 5px;
+    padding-top: 10px;
+    /* Hamburger space */
+    margin-left: 0 !important;
+  }
+
+  h1 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  /* Compact Input Gaps */
+  .form-container {
+    gap: 3px;
+    padding: 5px;
+    justify-content: space-between;
+  }
+
+  select,
+  input {
+    width: calc(50% - 3px) !important;
+    font-size: 16px;
+    /* Text chota kiya taake fit aaye */
+    padding: 9px 14px;
+    border: 1px solid #717070;
+    margin-bottom: 5px;
+  }
+
+  button#add {
+    width: 100%;
+    padding: 10px;
+    font-size: 13px;
+    margin-top: 2px;
+  }
+
+  /* Table Container Fix */
+  .table-container {
+    width: 100%;
+    overflow-x: auto;
+    /* Side scroll enable */
+    background: white;
+    border-radius: 8px;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    display: table;
+    /* Block reset kiya alignment ke liye */
+    min-width: 700px;
+    /* Isse table pichkegi nahi aur align rahegi */
+    table-layout: auto !important;
+    /* PC ka fixed layout override kiya */
+  }
+
+  thead {
+    display: table-header-group;
+    /* Standard header behavior */
+  }
+
+  tbody {
+    display: table-row-group;
+    /* Standard row behavior */
+    max-height: none;
+    /* Mobile par scroll container control karega */
+  }
+
+  tbody tr {
+    display: table-row;
+    width: auto;
+  }
+
+  th,
+  td {
+    padding: 10px 5px;
+    font-size: 10.5px;
+    /* Mazeed chota text mobile alignment ke liye */
+    white-space: nowrap;
+    /* Data ko ek line mein rakhne ke liye */
+    border-bottom: 1px solid #31c697e2;
+  }
+
+  th {
+    padding: 12px 5px;
+  }
+
+  tbody {
+    max-height: 375px;
+  }
 }

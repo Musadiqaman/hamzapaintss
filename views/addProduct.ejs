@@ -1,72 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8" />
   <title>Add New Product</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/addProduct.css">
 </head>
+
 <body>
-<%- include('partials/navbar') %>
+  <%- include('partials/navbar') %>
 
-<main>
+    <main>
 
-  <h1>Add New Products</h1>
+      <h1>Add New Products</h1>
 
-  <div class="form-container">
-  
-    <select id="brandName">
-      <option value="">Select Brand</option>
-      <option value="Weldon Paints">Weldon Paints</option>
-      <option value="Sparco Paints">Sparco Paints</option>
-      <option value="Value Paints">Value Paints</option>
-      <option value="Corona Paints">Corona Paints</option>
-      <option value="Other Paints">Other Paints</option>
-    </select>
+      <div class="form-container">
 
-    <select id="itemName">
-      <option value="">Select Item</option>
-    </select>
+        <select id="brandName">
+          <option value="">Select Brand</option>
+          <option value="Weldon Paints">Weldon Paints</option>
+          <option value="Sparco Paints">Sparco Paints</option>
+          <option value="Value Paints">Value Paints</option>
+          <option value="Corona Paints">Corona Paints</option>
+          <option value="Other Paints">Other Paints</option>
+        </select>
 
-    <select id="colourCode" disabled>
-      <option value="">Select Colour</option>
-    </select>
+        <select id="itemName">
+          <option value="">Select Item</option>
+        </select>
 
-    <select id="quantitative">
-      <option value="">Select Unit</option>
-    </select>
+        <select id="colourCode" disabled>
+          <option value="">Select Colour</option>
+        </select>
 
-    <input id="totalProduct" type="number" class="totalproduct" placeholder="Total Product" min="1">
-    <input id="rate" type="number" placeholder="Rate" min="1">
+        <select id="quantitative">
+          <option value="">Select Unit</option>
+        </select>
 
-    <!-- removed inline onclick -->
-    <button id="add">Add Product</button>
-  </div>
+        <input id="totalProduct" type="number" class="totalproduct" placeholder="Total Product" min="1">
+        <input id="rate" type="number" placeholder="Rate" min="1">
 
-  <div class="table-container">
-   <table>
-    <thead>
-      <tr>
-        <th>Brand</th>
-        <th>Item</th>
-        <th>Colour</th>
-        <th>Unit</th>
-        <th>Total Product</th>
-        <th>Rate</th>
-        <th>Total</th>
-        <th>Action</th>
-      </tr>
-    </thead>
-    <tbody id="tableBody"></tbody>
-  </table>
-</div>
- 
+        <!-- removed inline onclick -->
+        <button id="add">Add Product</button>
+      </div>
 
-  <!-- removed inline onclick -->
-  <button class="submit-btn">Submit & Save</button>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Brand</th>
+              <th>Item</th>
+              <th>Color</th>
+              <th>Unit</th>
+              <th>Total Product</th>
+              <th>Rate</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <!-- Dynamic rows will be added here -->
+          </tbody>
+        </table>
+      </div>
 
-</main>
 
-<script src="/javascripts/addProduct.js"></script>
+      <!-- removed inline onclick -->
+      <button class="submit-btn">Submit & Save</button>
+
+    </main>
+
+    <script src="/javascripts/addProduct.js"></script>
 </body>
+
 </html>

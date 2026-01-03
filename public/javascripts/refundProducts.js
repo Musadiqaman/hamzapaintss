@@ -2,15 +2,15 @@ const refundForm = document.getElementById("refundForm");
 const refundResult = document.getElementById("refundResult");
 const addButton = document.getElementById("add");
 
-refundForm.addEventListener("submit", async function(e) {
+refundForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
   addButton.disabled = true; // prevent multiple clicks
 
   const formData = new FormData(refundForm);
   const data = {
-     stockID: formData.get("stockID").trim(),
-     saleID: formData.get("saleID").trim(),
+    stockID: formData.get("stockID").trim(),
+    saleID: formData.get("saleID").trim(),
     productQuantity: parseInt(formData.get("productQuantity"))
   };
 
@@ -27,11 +27,11 @@ refundForm.addEventListener("submit", async function(e) {
     // ✅ Show only refund message
     refundResult.innerHTML = `<span style="color:${res.ok ? 'green' : 'red'}">${result}</span>`;
 
-    if(res.ok){
+    if (res.ok) {
       refundForm.reset();
     }
 
-  } catch(err) {
+  } catch (err) {
     console.error(err);
     refundResult.innerHTML = `<span style="color:red">❌ Something went wrong. Try again!</span>`;
   }
