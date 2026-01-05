@@ -70,13 +70,15 @@ router.post("/add-multiple",isLoggedIn,allowRoles("admin", "worker"), async (req
 ================================ */
 // 🟢 3️⃣ All Products Page (GET) — with filters
 
-const PKT_TIMEZONE = "Asia/Karachi"; // 🟢 Standard Timezone
+const PKT_TIMEZONE = "Asia/Karachi"; 
 
+// Regex escape function
 function escapeRegExp(string) {
+    if (!string) return "";
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
-// 🟢 ALL PRODUCTS ROUTE
+// 🟢 ALL PRODUCTS ROUTE (Updated)
 router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     const role = req.user.role;
 
@@ -84,38 +86,51 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
         let { filter, from, to, brand, itemName, colourName, unit, stockStatus, refund } = req.query;
         let query = {};
         let start, end;
+        let dateOperator = '$lte'; // Default operator
 
-        // --- Moment Timezone Logic ---
+        const nowPKT = moment().tz(PKT_TIMEZONE);
+
+        // --- Accurate Date Logic ---
         if (filter === "today") {
-            start = moment.tz(PKT_TIMEZONE).startOf('day').toDate();
-            end = moment.tz(PKT_TIMEZONE).endOf('day').toDate();
+            start = nowPKT.clone().startOf('day').toDate();
+            end = nowPKT.clone().endOf('day').toDate();
         } else if (filter === "yesterday") {
-            start = moment.tz(PKT_TIMEZONE).subtract(1, 'days').startOf('day').toDate();
-            end = moment.tz(PKT_TIMEZONE).subtract(1, 'days').endOf('day').toDate();
+            const yesterday = nowPKT.clone().subtract(1, 'days');
+            start = yesterday.startOf('day').toDate();
+            end = yesterday.endOf('day').toDate();
         } else if (filter === "month") {
-            start = moment.tz(PKT_TIMEZONE).startOf('month').toDate();
-            end = moment.tz(PKT_TIMEZONE).endOf('day').toDate();
+            start = nowPKT.clone().startOf('month').toDate();
+            end = nowPKT.clone().endOf('day').toDate();
         } else if (filter === "lastMonth") {
-            start = moment.tz(PKT_TIMEZONE).subtract(1, 'months').startOf('month').toDate();
-            end = moment.tz(PKT_TIMEZONE).subtract(1, 'months').endOf('month').toDate();
-        } else if (filter === "custom" && (from || to)) {
-            const fromDate = from ? moment.tz(from, PKT_TIMEZONE).startOf('day') : null;
-            const toDate = to ? moment.tz(to, PKT_TIMEZONE).endOf('day') : (fromDate ? fromDate.clone().endOf('day') : null);
-            if (fromDate) start = fromDate.toDate();
-            if (toDate) end = toDate.toDate();
+            const lastMonth = nowPKT.clone().subtract(1, 'months');
+            start = lastMonth.startOf('month').toDate();
+            end = lastMonth.endOf('month').toDate();
+        } else if (filter === "custom" && from && to) {
+            // 🛑 CUSTOM DATE FIX: Less Than ($lt) logic for accuracy
+            dateOperator = '$lt';
+            const f = moment.tz(from, 'YYYY-MM-DD', PKT_TIMEZONE);
+            let t = moment.tz(to, 'YYYY-MM-DD', PKT_TIMEZONE);
+
+            // Agle din ka start (00:00:00)
+            t.add(1, 'days').startOf('day');
+
+            if (f.isValid() && t.isValid()) {
+                start = f.startOf('day').toDate();
+                end = t.toDate();
+            }
         }
 
         if (start && end) {
-            query.createdAt = { $gte: start, $lte: end };
+            query.createdAt = { $gte: start, [dateOperator]: end };
         }
 
-        // --- Brand filter mapping ---
+        // --- Brand filter ---
         if (brand && brand !== "all") {
             if (brand === "Weldon Paints") query.brandName = /^Weldon Paints$/i;
             else if (brand === "Sparco Paints") query.brandName = /^Sparco Paints$/i;
             else if (brand === "Value Paints") query.brandName = /^Value Paints$/i;
             else if (brand === "Corona Paints") query.brandName = /^Corona Paints$/i;
-            else if (brand === "Other Paints") query.brandName = /Other Paints|Other/i;
+            else query.brandName = /Other Paints|Other/i;
         }
 
         // --- Item filter ---
@@ -124,21 +139,18 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             if (itemName === "Other") {
                 query.itemName = { $nin: knownNames };
             } else {
-                query.itemName = new RegExp(`^${itemName}$`, "i");
+                query.itemName = new RegExp(`^${escapeRegExp(itemName)}$`, "i");
             }
         }
 
-      // --- Colour filter ---
-   if (colourName && colourName !== "all") {
-    // Apne global function ko call karein
-    const escaped = escapeRegExp(colourName); 
-    query.colourName = new RegExp(`^${escaped}$`, "i");
-  }
-     
+        // --- Colour filter (Escaped for accuracy) ---
+        if (colourName && colourName !== "all") {
+            query.colourName = new RegExp(`^${escapeRegExp(colourName)}$`, "i");
+        }
 
         // --- Unit filter ---
         if (unit && unit !== "all") {
-            query.qty = new RegExp(unit, "i");
+            query.qty = new RegExp(escapeRegExp(unit), "i");
         }
 
         // --- Stock status ---
@@ -149,22 +161,34 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
         // --- Refund status ---
         if (refund && refund !== "all") query.refundStatus = refund;
 
-        // --- Fetch & Sort ---
-        const filteredProducts = await Product.find(query).sort({ createdAt: -1 });
+        // --- Fetch with Lean (Fast Speed) ---
+        const filteredProducts = await Product.find(query).sort({ createdAt: -1 }).lean();
 
-        // --- Stats Calculation ---
+        // --- Accurate Stats Calculation ---
         let totalStock = 0, totalRemaining = 0, totalValue = 0, remainingValue = 0, totalRefundedValue = 0;
+        
         filteredProducts.forEach(p => {
-            totalStock += p.totalProduct || 0;
-            totalValue += (p.totalProduct || 0) * (p.rate || 0);
-            totalRemaining += Math.min(p.remaining || 0, p.totalProduct || 0);
-            totalRefundedValue += Math.min(p.refundQuantity || 0, p.totalProduct || 0) * (p.rate || 0);
-            remainingValue += (p.remaining || 0) * (p.rate || 0);
+            const rate = parseFloat(p.rate || 0);
+            const totalProd = parseFloat(p.totalProduct || 0);
+            const remaining = parseFloat(p.remaining || 0);
+            const refundQty = parseFloat(p.refundQuantity || 0);
+
+            totalStock += totalProd;
+            totalValue += (totalProd * rate);
+            totalRemaining += Math.min(remaining, totalProd);
+            totalRefundedValue += (Math.min(refundQty, totalProd) * rate);
+            remainingValue += (remaining * rate);
         });
 
         const responseData = {
             products: filteredProducts,
-            stats: { totalStock, totalRemaining, totalValue, remaining: remainingValue, totalRefundedValue },
+            stats: { 
+                totalStock, 
+                totalRemaining, 
+                totalValue: parseFloat(totalValue.toFixed(2)), 
+                remaining: parseFloat(remainingValue.toFixed(2)), 
+                totalRefundedValue: parseFloat(totalRefundedValue.toFixed(2)) 
+            },
             filter, from, to,
             selectedBrand: brand || "all",
             selectedItem: itemName || "all",
@@ -175,7 +199,7 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             role
         };
 
-        // --- AJAX Check (For Single Page Update) ---
+        // AJAX Support
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, ...responseData });
         }
@@ -186,7 +210,6 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
         res.status(500).send("Error loading products page");
     }
 });
-
 
 
 

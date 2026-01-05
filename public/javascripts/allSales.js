@@ -313,11 +313,12 @@ const filterForm = document.getElementById('filterForm') || document.querySelect
 
 // ===================== AJAX UPDATE FUNCTION =========================
 
+// ===================== UPDATED AJAX UPDATE FUNCTION =========================
+
 async function updateTable() {
     const formData = new URLSearchParams(new FormData(filterForm)).toString();
     const tbody = document.querySelector('tbody');
     
-    // Loading State
     tbody.style.opacity = '0.5';
 
     try {
@@ -327,7 +328,6 @@ async function updateTable() {
         const data = await res.json();
 
         if (data.success) {
-            // 1. Update Stats Boxes (Revenue, Profit, Loss, etc.)
             const statsPs = document.querySelectorAll('.stat-box p');
             if (statsPs.length >= 5) {
                 statsPs[0].innerText = data.stats.totalSold;
@@ -337,48 +337,48 @@ async function updateTable() {
                 statsPs[4].innerText = `Rs ${data.stats.totalRefunded}`;
             }
 
-            // 2. Build Table Content
             let html = '';
             if (data.sales.length === 0) {
                 html = `<tr><td colspan="15" class="no-data">No sales records found.</td></tr>`;
             } else {
                 data.sales.forEach(s => {
-    const dateObj = new Date(s.createdAt);
-    const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-    const timeStr = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
-    
-    // 🟢 Fix: Profit calculation aur decimal handling
-    const netQty = s.quantitySold - (s.refundQuantity || 0);
-    const purchaseRate = s.purchaseRate || 0;
-    const profitVal = ((s.rate - purchaseRate) * netQty).toFixed(2);
-    
-    // 🟢 Fix: Refund Status (backend check karein agar ye 'refundStatus' hai)
-    const status = s.refundStatus || 'none'; 
-    const refundQty = s.refundQuantity || 0;
+                    // 🔴 FIX: Browser ki local conversion rokhne ke liye 'Asia/Karachi' specify karein
+                    const dateObj = new Date(s.createdAt);
+                    const dateStr = dateObj.toLocaleDateString('en-GB', { 
+                        day: '2-digit', month: 'short', year: 'numeric', 
+                        timeZone: 'Asia/Karachi' 
+                    });
+                    const timeStr = dateObj.toLocaleTimeString('en-GB', { 
+                        hour: '2-digit', minute: '2-digit', hour12: true, 
+                        timeZone: 'Asia/Karachi' 
+                    });
+                    
+                    const netQty = (s.quantitySold || 0) - (s.refundQuantity || 0);
+                    const purchaseRate = s.purchaseRate || 0;
+                    const profitVal = ((s.rate - purchaseRate) * netQty).toFixed(2);
+                    
+                    const status = s.refundStatus || 'none'; 
+                    const refundQty = s.refundQuantity || 0;
 
-    html += `
-    <tr>
-        <td>${s.brandName}</td>
-        <td>${s.itemName}</td>
-        <td>${s.colourName}</td>
-        <td>${s.qty}</td>
-        <td>${s.quantitySold}</td>
-        <td>Rs ${s.rate}</td>
-        <td>Rs ${(s.quantitySold * s.rate).toFixed(2)}</td>
-        <td class="${profitVal < 0 ? 'loss' : 'profit'}">Rs ${Math.abs(profitVal)}</td>
-        <td class="refund-status">${status}</td>
-        <td class="refund-quantity">${refundQty}</td>
-        <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
-        ${data.role === "admin" ? `<td><button type="button" class="delete-sale delete-btn" id="delete" data-id="${s._id}">Delete</button></td>` : ''}
-    </tr>`;
-});
+                    html += `
+                    <tr>
+                        <td>${s.brandName}</td>
+                        <td>${s.itemName}</td>
+                        <td>${s.colourName}</td>
+                        <td>${s.qty}</td>
+                        <td>${s.quantitySold}</td>
+                        <td>Rs ${s.rate}</td>
+                        <td>Rs ${(s.quantitySold * s.rate).toFixed(2)}</td>
+                        <td class="${profitVal < 0 ? 'loss' : 'profit'}">Rs ${Math.abs(profitVal)}</td>
+                        <td class="refund-status">${status}</td>
+                        <td class="refund-quantity">${refundQty}</td>
+                        <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
+                        ${data.role === "admin" ? `<td><button type="button" id="delete" class="delete-sale delete-btn" data-id="${s._id}">Delete</button></td>` : ''}
+                    </tr>`;
+                });
             }
             tbody.innerHTML = html;
-            
-            // 3. Update Browser URL
             window.history.pushState({}, '', `/sales/all?${formData}`);
-            
-            // Re-attach delete listeners
             attachDeleteListeners();
         }
     } catch (err) {

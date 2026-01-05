@@ -123,8 +123,11 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
    ✅ Includes Total Stats
 ================================ */
 // PKT Time Zone Identifier
+// PKT Time Zone Identifier
+// PKT Time Zone Identifier
 const PKT_TIMEZONE = 'Asia/Karachi';
 
+// Regex escape function jo aapne manga tha
 function escapeRegExp(string) {
     return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
@@ -135,11 +138,11 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
         let { filter, from, to, brand, itemName, colourName, unit, refund } = req.query;
         let query = {};
         let start, end;
-        let dateOperator = '$lte';
+        let dateOperator = '$lte'; 
 
         const nowPKT = moment().tz(PKT_TIMEZONE);
         
-        // --- Date Filter Logic ---
+        // 🟢 1. YE HAI AAPKI ORIGINAL DATE LOGIC (No Changes)
         if (filter === "today" || filter === "yesterday" || filter === "month" || filter === "lastMonth") {
             if (filter === "today") {
                 start = nowPKT.clone().startOf('day').toDate();
@@ -157,13 +160,16 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
                 end = lastMonthPKT.endOf('month').toDate();
             }
         } else if (filter === "custom" && from && to) {
-            dateOperator = '$lt';
+            dateOperator = '$lt'; 
             const f = moment.tz(from, 'YYYY-MM-DD', PKT_TIMEZONE);
             let t = moment.tz(to, 'YYYY-MM-DD', PKT_TIMEZONE);
+            
+            // Exact original step: 1 day add karna
             t.add(1, 'days').startOf('day'); 
+            
             if (f.isValid() && t.isValid()) {
                 start = f.startOf('day').toDate();
-                end = t.toDate();
+                end = t.toDate(); 
             }
         }
         
@@ -171,35 +177,35 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             query.createdAt = { $gte: start, [dateOperator]: end };
         }
 
-        // --- Brand & Item Filters ---
+        // 🟢 2. FILTERS (With escapeRegExp for accuracy)
         if (brand && brand !== "all") {
             if (brand === "Weldon Paints") query.brandName = /weldon/i;
             else if (brand === "Sparco Paints") query.brandName = /sparco/i;
             else if (brand === "Value Paints") query.brandName = /value/i;
             else if (brand === "Corona Paints") query.brandName = /Corona/i;
-            else query.brandName = /Other Paints|Other/i;
+            else if (brand === "Other Paints") query.brandName = /Other Paints|Other/i;
         }
 
         if (itemName && itemName !== "all") {
             const knownNames = ["Weather Shield", "Emulsion", "Enamel"];
             if (itemName === "Other") query.itemName = { $nin: knownNames };
-            else query.itemName = new RegExp(`^${itemName}$`, "i");
+            else query.itemName = new RegExp(`^${escapeRegExp(itemName)}$`, "i");
         }
 
         if (colourName && colourName !== "all") {
             query.colourName = new RegExp(`^${escapeRegExp(colourName)}$`, "i");
         }
 
-        if (unit && unit !== "all") query.qty = new RegExp(unit, "i");
+        if (unit && unit !== "all") {
+            query.qty = new RegExp(escapeRegExp(unit), "i");
+        }
+
         if (refund && refund !== "all") query.refundStatus = refund;
 
-        // --- OPTIMIZATION STARTS HERE ---
-        
-        // 1. Fetch Sales with .lean() for speed
+        // 🟢 3. SPEED FIX: Product mapping (Loop ke andar findOne khatam)
         const filteredSales = await Sale.find(query).sort({ createdAt: -1 }).lean();
-
-        // 2. Fetch all products in ONE go and create a Map (No more loop queries!)
         const allProducts = await Product.find({}, 'stockID rate').lean();
+        
         const productMap = {};
         allProducts.forEach(p => {
             productMap[p.stockID] = parseFloat(p.rate || 0);
@@ -208,36 +214,34 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
         let totalSold = 0, totalRevenue = 0, totalProfit = 0, totalLoss = 0, totalRefunded = 0;
         const enrichedSales = [];
 
-        // 3. Fast processing using the Map
         for (const s of filteredSales) {
             const purchaseRate = productMap[s.stockID] || 0;
-            let netSoldQty = Math.max(0, s.quantitySold - (s.refundQuantity || 0));
+            let netSoldQty = Math.max(0, (s.quantitySold || 0) - (s.refundQuantity || 0));
 
             totalSold += netSoldQty;
-            totalRevenue += netSoldQty * s.rate;
-            totalRefunded += (s.refundQuantity || 0) * (s.rate || 0);
+            
+            // 🟢 4. DECIMAL FIX: Har step par precision maintain
+            totalRevenue += (netSoldQty * (s.rate || 0));
+            totalRefunded += ((s.refundQuantity || 0) * (s.rate || 0));
 
-            const saleProfit = (s.rate - purchaseRate) * netSoldQty;
+            const saleProfit = ((s.rate || 0) - purchaseRate) * netSoldQty;
             if (saleProfit > 0) totalProfit += saleProfit;
             else totalLoss += Math.abs(saleProfit);
 
-            // Adding purchaseRate to sale object for frontend
             enrichedSales.push({ ...s, purchaseRate });
         }
 
+        // Response bhejte waqt numbers ko clean karna
         const responseData = {
             sales: enrichedSales,
             stats: { 
                 totalSold, 
-                totalRevenue, 
-                totalProfit, 
-                totalLoss, 
-                totalRefunded 
+                totalRevenue: parseFloat(totalRevenue.toFixed(2)), 
+                totalProfit: parseFloat(totalProfit.toFixed(2)), 
+                totalLoss: parseFloat(totalLoss.toFixed(2)), 
+                totalRefunded: parseFloat(totalRefunded.toFixed(2)) 
             },
-            role, 
-            filter, 
-            from, 
-            to,
+            role, filter, from, to,
             selectedBrand: brand || "all",
             selectedItem: itemName || "all",
             selectedColour: colourName || "all",
@@ -245,24 +249,14 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             selectedRefund: refund || "all"
         };
 
-        // --- AJAX Response ---
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
-            const ajaxStats = {
-                totalSold: totalSold,
-                totalRevenue: totalRevenue.toFixed(2),
-                totalProfit: totalProfit.toFixed(2),
-                totalLoss: totalLoss.toFixed(2),
-                totalRefunded: totalRefunded.toFixed(2)
-            };
-            return res.json({ success: true, ...responseData, stats: ajaxStats });
+            return res.json({ success: true, ...responseData });
         }
-
-        // --- Regular Page Render ---
         res.render("allSales", responseData);
 
     } catch (err) {
-        console.error("❌ Error loading All Sales:", err);
-        res.status(500).send("Error loading sales page");
+        console.error("❌ Error:", err);
+        res.status(500).send("Server Error");
     }
 });
 

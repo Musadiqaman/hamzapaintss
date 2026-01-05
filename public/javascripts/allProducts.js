@@ -335,13 +335,15 @@ async function updateTable() {
         const data = await res.json();
 
         if (data.success) {
-            // 1. Update Stats Boxes
+            // 1. Update Stats Boxes (Safe decimal handling)
             const statsPs = document.querySelectorAll('.stat-box p');
-            statsPs[0].innerText = data.stats.totalStock || 0;
-            statsPs[1].innerText = `Rs ${data.stats.totalValue.toFixed(2)}`;
-            statsPs[2].innerText = data.stats.totalRemaining || 0;
-            statsPs[3].innerText = `Rs ${data.stats.remaining.toFixed(2)}`;
-            statsPs[4].innerText = `Rs ${data.stats.totalRefundedValue.toFixed(2)}`;
+            if (statsPs.length >= 5) {
+                statsPs[0].innerText = data.stats.totalStock || 0;
+                statsPs[1].innerText = `Rs ${Number(data.stats.totalValue || 0).toFixed(2)}`;
+                statsPs[2].innerText = data.stats.totalRemaining || 0;
+                statsPs[3].innerText = `Rs ${Number(data.stats.remaining || 0).toFixed(2)}`;
+                statsPs[4].innerText = `Rs ${Number(data.stats.totalRefundedValue || 0).toFixed(2)}`;
+            }
 
             // 2. Build Table Content
             let html = '';
@@ -349,9 +351,16 @@ async function updateTable() {
                 html = `<tr><td colspan="13" class="no-data">No products found for the selected filter.</td></tr>`;
             } else {
                 data.products.forEach(p => {
+                    // 🟢 FIX: strictly Pakistan timezone mein date dikhayein
                     const dateObj = new Date(p.createdAt);
-                    const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
-                    const timeStr = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true });
+                    const dateStr = dateObj.toLocaleDateString('en-GB', { 
+                        day: '2-digit', month: 'short', year: 'numeric',
+                        timeZone: 'Asia/Karachi' 
+                    });
+                    const timeStr = dateObj.toLocaleTimeString('en-GB', { 
+                        hour: '2-digit', minute: '2-digit', hour12: true,
+                        timeZone: 'Asia/Karachi' 
+                    });
 
                     html += `
                     <tr>
@@ -362,16 +371,16 @@ async function updateTable() {
                         <td>${p.totalProduct}</td>
                         <td>${p.remaining}</td>
                         <td>Rs ${p.rate}</td>
-                        <td>Rs ${(p.totalProduct * p.rate).toFixed(2)}</td>
-                        <td class="refund-status">${p.refundStatus}</td>
-                        <td class="refund-quantity">${p.refundQuantity}</td>
+                        <td>Rs ${(Number(p.totalProduct || 0) * Number(p.rate || 0)).toFixed(2)}</td>
+                        <td class="refund-status">${p.refundStatus || 'none'}</td>
+                        <td class="refund-quantity">${p.refundQuantity || 0}</td>
                         <td>
                             ${dateStr}<br>
                             <small style="color: #007bff; font-weight: bold;">${timeStr}</small>
                         </td>
                         ${data.role === "admin" ? `
                         <td>
-                            <button type="button" id="delete" class="delete-btn" data-id="${p._id}">
+                            <button type="button" id="delete" class="delete-btn delete-sale" data-id="${p._id}">
                                 Delete
                             </button>
                         </td>` : ''}
@@ -383,8 +392,12 @@ async function updateTable() {
             // 3. Update URL browser history
             window.history.pushState({}, '', `/products/all?${formData}`);
             
-            // Re-attach delete button events
-            attachDeleteEvents();
+            // Re-attach delete events
+            if (typeof attachDeleteEvents === "function") {
+                attachDeleteEvents();
+            } else if (typeof attachDeleteListeners === "function") {
+                attachDeleteListeners();
+            }
         }
     } catch (err) {
         console.error("AJAX Error:", err);
@@ -392,7 +405,6 @@ async function updateTable() {
         tbody.style.opacity = '1';
     }
 }
-
 // ===================== HELPER FUNCTIONS =========================
 
 function populateItemFilter(brand) {

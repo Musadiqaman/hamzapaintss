@@ -55,6 +55,7 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
 
 
 
+
 const PKT_TIMEZONE = "Asia/Karachi";
 
 router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
@@ -62,11 +63,10 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
     try {
         let { filter, from, to } = req.query;
         let query = {};
-        
-        // PKT ke mutabiq 'Today' ka start aur end nikalna
         const nowPKT = moment.tz(PKT_TIMEZONE);
         let start, end;
 
+        // Date Logic
         if (filter === "today") {
             start = nowPKT.clone().startOf('day').toDate();
             end = nowPKT.clone().endOf('day').toDate();
@@ -86,31 +86,41 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
 
         if (start && end) {
             query.createdAt = { $gte: start, $lte: end };
-            console.log(`Agent Query (UTC): ${start.toISOString()} to ${end.toISOString()}`);
         }
 
-        const agents = await Agent.find(query).populate("items").sort({ createdAt: -1 });
+        // Fetching Agents with Populated Items
+        const agents = await Agent.find(query).populate("items").sort({ createdAt: -1 }).lean();
 
-        // Stats Calculation
-        let totalPercentageAmount = 0, totalPercentageAmountGiven = 0, totalPercentageAmountLeft = 0;
+        // Stats Calculation (Strictly Numbers)
+        let totalPercentageAmount = 0, totalPercentageAmountGiven = 0;
         agents.forEach(agent => {
-            agent.items.forEach(item => {
+            (agent.items || []).forEach(item => {
                 totalPercentageAmount += Number(item.percentageAmount || 0);
                 totalPercentageAmountGiven += Number(item.paidAmount || 0);
-                totalPercentageAmountLeft += (Number(item.percentageAmount || 0) - Number(item.paidAmount || 0));
             });
         });
 
-        res.render("allAgents", {
-            role, agents, filter, from, to,
-            stats: { totalAgents: agents.length, totalPercentageAmount, totalPercentageAmountGiven, totalPercentageAmountLeft }
-        });
+        const stats = {
+            totalAgents: agents.length,
+            totalPercentageAmount: totalPercentageAmount,
+            totalPercentageAmountGiven: totalPercentageAmountGiven,
+            totalPercentageAmountLeft: (totalPercentageAmount - totalPercentageAmountGiven)
+        };
+
+        const responseData = { role, agents, filter, from, to, stats };
+
+        // 🟢 Check for AJAX/SPA Request
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({ success: true, ...responseData });
+        }
+
+        // Regular Page Load
+        res.render("allAgents", responseData);
     } catch (err) {
         console.error("❌ Error:", err);
         res.status(500).send("Server Error");
     }
 });
-
 
 
 
@@ -134,91 +144,66 @@ router.delete("/delete-agent/:id",isLoggedIn,allowRoles("admin"), async (req, re
 
 
 router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
-  const role = req.user.role;
+    const role = req.user.role;
+    try {
+        let { filter, from, to } = req.query;
+        let query = {};
+        const nowPKT = moment.tz(PKT_TIMEZONE);
+        let start, end;
 
-  try {
-    let { filter, from, to } = req.query;
-    let query = {};
-    
-    // Pakistan Timezone ke mutabiq current time
-    const nowPKT = moment.tz(PKT_TIMEZONE);
-    let start, end;
+        if (filter === "today") {
+            start = nowPKT.clone().startOf('day').toDate();
+            end = nowPKT.clone().endOf('day').toDate();
+        } else if (filter === "yesterday") {
+            const yesterday = nowPKT.clone().subtract(1, 'days');
+            start = yesterday.clone().startOf('day').toDate();
+            end = yesterday.clone().endOf('day').toDate();
+        } else if (filter === "month") {
+            start = nowPKT.clone().startOf('month').toDate();
+            end = nowPKT.clone().endOf('day').toDate();
+        } else if (filter === "lastMonth") {
+            const lastMonth = nowPKT.clone().subtract(1, 'months');
+            start = lastMonth.clone().startOf('month').toDate();
+            end = lastMonth.clone().endOf('month').toDate();
+        } else if (filter === "custom" && from) {
+            start = moment.tz(from, PKT_TIMEZONE).startOf('day').toDate();
+            end = to ? moment.tz(to, PKT_TIMEZONE).endOf('day').toDate() : moment.tz(from, PKT_TIMEZONE).endOf('day').toDate();
+        }
 
-    // --------------------------
-    // DATE FILTERS (Corrected for Atlas/UTC)
-    // --------------------------
-    if (filter === "today") {
-      start = nowPKT.clone().startOf('day').toDate();
-      end = nowPKT.clone().endOf('day').toDate();
-    } else if (filter === "yesterday") {
-      const yesterday = nowPKT.clone().subtract(1, 'days');
-      start = yesterday.clone().startOf('day').toDate();
-      end = yesterday.clone().endOf('day').toDate();
-    } else if (filter === "month") {
-      start = nowPKT.clone().startOf('month').toDate();
-      end = nowPKT.clone().endOf('day').toDate();
-    } else if (filter === "lastMonth") {
-      const lastMonth = nowPKT.clone().subtract(1, 'months');
-      start = lastMonth.clone().startOf('month').toDate();
-      end = lastMonth.clone().endOf('month').toDate();
-    } else if (filter === "custom" && from && to) {
-      start = moment.tz(from, PKT_TIMEZONE).startOf('day').toDate();
-      end = moment.tz(to, PKT_TIMEZONE).endOf('day').toDate();
+        if (start && end) query.createdAt = { $gte: start, $lte: end };
+
+        const agent = await Agent.findById(req.params.id).populate({
+            path: "items",
+            match: query,
+            options: { sort: { createdAt: -1 } }
+        }).lean();
+
+        if (!agent) return res.status(404).send("Agent not found");
+
+        let totalPercentageAmount = 0, totalPercentageAmountGiven = 0;
+        (agent.items || []).forEach(item => {
+            totalPercentageAmount += Number(item.percentageAmount || 0);
+            totalPercentageAmountGiven += Number(item.paidAmount || 0);
+        });
+
+        const stats = {
+            totalPercentageAmount,
+            totalPercentageAmountGiven,
+            totalPercentageAmountLeft: totalPercentageAmount - totalPercentageAmountGiven
+        };
+
+        const responseData = { role, agent, stats, filter, from, to };
+
+        // 🟢 AJAX Request Handle
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({ success: true, ...responseData });
+        }
+
+        res.render("viewAgent", responseData);
+    } catch (err) {
+        console.error(err);
+        res.status(500).send("Error loading agent page");
     }
-
-    if (start && end) {
-      query.createdAt = { $gte: start, $lte: end };
-    }
-
-    // --------------------------
-    // FETCH AGENT + ITEMS
-    // --------------------------
-    const agent = await Agent.findById(req.params.id).populate({
-      path: "items",
-      match: query,
-      options: { sort: { createdAt: -1 } }
-    });
-
-    if (!agent) {
-      return res.status(404).send("Agent not found");
-    }
-
-    // Safe access to items (for stats calculation only)
-    const items = agent.items || [];
-
-    // --------------------------
-    // GLOBAL STATS
-    // --------------------------
-    let totalPercentageAmount = 0;
-    let totalPercentageAmountGiven = 0;
-    let totalPercentageAmountLeft = 0;
-
-    items.forEach(item => {
-      totalPercentageAmount += Number(item.percentageAmount || 0);
-      totalPercentageAmountGiven += Number(item.paidAmount || 0);
-      totalPercentageAmountLeft += Number(item.percentageAmount || 0) - Number(item.paidAmount || 0);
-    });
-
-    // --------------------------
-    // SEND TO EJS
-    // --------------------------
-    res.render("viewAgent", {
-      role,
-      agent,
-      stats: {
-        totalPercentageAmount,
-        totalPercentageAmountGiven,
-        totalPercentageAmountLeft
-      },
-      filter,
-      from,
-      to
-    });
-
-  } catch (err) {
-    console.error("❌ Error in /view-agent route:", err);
-    res.status(500).send("Error loading agent page");
-  }
 });
 
 
