@@ -3,164 +3,146 @@
 
 <head>
   <meta charset="UTF-8" />
-  <title>All Sales</title>
+  <title>All Sales | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/allSales.css">
+
 </head>
 
 <body>
   <%- include('partials/navbar') %>
 
-    <main>
+  <main>
+    <h1>All Sales</h1>
 
-      <h1>All Sales</h1>
+    <form class="filter-container" id="filterForm" method="GET" action="/sales/all">
+      <select name="filter" id="filter">
+        <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Times</option>
+        <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
+        <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+        <option value="month" <%= (filter === 'month' || !filter) ? 'selected' : '' %>>This Month</option>
+        <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+        <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+      </select>
 
-      <form class="filter-container" method="GET" action="/sales/all">
-        <select name="filter" id="filter" data-value="<%= filter || 'all' %>">
-          <option value="all">All Dates</option>
-          <option value="today">Today</option>
-          <option value="yesterday">Yesterday</option>
-          <option value="month">This Month</option>
-          <option value="lastMonth">Last Month</option>
-          <option value="custom">Custom Range</option>
-        </select>
+      <select name="brand" id="brandFilter" data-value="<%= selectedBrand || 'all' %>">
+        <option value="all">All Brands</option>
+        <option value="Weldon Paints">Weldon Paints</option>
+        <option value="Sparco Paints">Sparco Paints</option>
+        <option value="Value Paints">Value Paints</option>
+        <option value="Corona Paints">Corona Paints</option>
+        <option value="Other Paints">Other Paints</option>
+      </select>
 
-        <select name="brand" id="brandFilter" data-value="<%= selectedBrand || 'all' %>">
-          <option value="all">All Brands</option>
-          <option value="Weldon Paints">Weldon Paints</option>
-          <option value="Sparco Paints">Sparco Paints</option>
-          <option value="Value Paints">Value Paints</option>
-          <option value="Corona Paints">Corona Paints</option>
-          <option value="Other Paints">Other Paints</option>
-        </select>
+      <select name="itemName" id="itemNameFilter" data-value="<%= selectedItem || 'all' %>">
+        <option value="all">All Items</option>
+      </select>
 
-        <select name="itemName" id="itemNameFilter" data-value="<%= selectedItem || 'all' %>">
-          <option value="all">All Items</option>
-        </select>
+      <select name="colourName" id="colourNameFilter" data-value="<%= selectedColour || 'all' %>">
+        <option value="all">All Colours</option>
+      </select>
 
-        <select name="colourName" id="colourNameFilter" data-value="<%= selectedColour || 'all' %>">
-          <option value="all">All Colours</option>
-        </select>
+      <select name="unit" id="unitFilter" data-value="<%= selectedUnit || 'all' %>">
+        <option value="all">All Units</option>
+      </select>
 
-        <select name="unit" id="unitFilter" data-value="<%= selectedUnit || 'all' %>">
-          <option value="all">All Units</option>
-        </select>
+      <select name="refund" id="refundFilter" data-value="<%= selectedRefund || 'all' %>">
+        <option value="all">All Status</option>
+        <option value="none">Not Refunded</option>
+        <option value="Partially Refunded">Partially Refunded</option>
+        <option value="Fully Refunded">Fully Refunded</option>
+      </select>
 
-        <select name="refund" id="refundFilter" data-value="<%= selectedRefund || 'all' %>">
-          <option value="all">All Status</option>
-          <option value="none">Not Refunded</option>
-          <option value="Partially Refunded">Partially Refunded</option>
-          <option value="Fully Refunded">Fully Refunded</option>
-        </select>
+      <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+      <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+      <button type="submit" id="apply" style="display:none;">Apply Range</button>
+    </form>
 
-        <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-        <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-        <button type="submit" id="apply">Apply Range</button>
-      </form>
+    <div class="stats">
+      <div class="stat-box">
+        <h3>🛍️ Total Sold</h3>
+        <p><%= stats.totalSold || 0 %></p>
+      </div>
+      <div class="stat-box">
+        <h3>📈 Total Sales</h3>
+        <p>Rs <%= stats.totalRevenue ? stats.totalRevenue.toFixed(2) : '0.00' %></p>
+      </div>
+      <div class="stat-box">
+        <h3>💰 Total Profit</h3>
+        <p id="total-profit">Rs <%= stats.totalProfit ? stats.totalProfit.toFixed(2) : '0.00' %></p>
+      </div>
+      <div class="stat-box">
+        <h3>📉 Total Loss</h3>
+        <p id="total-loss">Rs <%= stats.totalLoss ? stats.totalLoss.toFixed(2) : '0.00' %></p>
+      </div>
+      <div class="stat-box">
+        <h3>↩️ Refund Sales</h3>
+        <p id="refund-sales">Rs <%= stats.totalRefunded ? stats.totalRefunded.toFixed(2) : '0.00' %></p>
+      </div>
+    </div>
 
-      <!-- Stats Display -->
-      <div class="stats">
-        <div class="stat-box">
-          <h3><span style="font-size: 17px;">🛍️</span>Total Sold</h3>
-          <p>
-            <%= stats.totalSold || 0 %>
-          </p>
-        </div>
-        <div class="stat-box">
-          <h3><span style="font-size: 17px;">📈</span>Total Sales</h3>
-          <p>Rs <%= stats.totalRevenue ? stats.totalRevenue.toFixed(2) : '0.00' %>
-          </p>
-        </div>
-        <div class="stat-box">
-          <h3><span style="font-size: 20px;">💰</span>Total Profit</h3>
-          <p>Rs <%= stats.totalProfit ? stats.totalProfit.toFixed(2) : '0.00' %>
-          </p>
-        </div>
-        <div class="stat-box">
-          <h3><span style="font-size: 17px;">📉</span>Total Loss</h3>
-          <p id="total-loss">Rs <%= stats.totalLoss ? stats.totalLoss.toFixed(2) : '0.00' %>
-          </p>
-        </div>
-        <div class="stat-box">
-          <h3><span style="font-size: 17px;">↩️</span>Refund Sales</h3>
-          <p id="refund-sales">Rs <%= stats.totalRefunded ? stats.totalRefunded.toFixed(2) : '0.00' %>
-          </p>
-        </div>
+    <div class="table-container" id="tableContainer">
+      <div id="table-loader">
+        <div class="spinner"></div>
+        <p style="margin-top:10px; color:#06A56C; font-weight: bold;">Updating...</p>
       </div>
 
-      <!-- Sales Table -->
-      <div class="table-container">
-        <table>
-          <thead>
+      <table>
+        <thead>
+          <tr>
+            <th>Brand</th>
+            <th>Item</th>
+            <th>Color</th>
+            <th>Unit</th>
+            <th>Qty Sold</th>
+            <th>Rate</th>
+            <th>Total Amount</th>
+            <th>Profit/Loss</th>
+            <th>Status</th>
+            <th>Refund (Qty)</th>
+            <th>Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (sales.length === 0) { %>
             <tr>
-              <th>Brand</th>
-              <th>Item</th>
-              <th>Colur</th>
-              <th>Unit</th>
-              <th>Quantity Sold</th>
-              <th>Rate</th>
-              <th>Total Amount</th>
-              <th>Profit/Loss</th>
-              <th>Status</th>
-              <th>Refund (Qty)</th>
-              <th>Date</th>
-              <th>Action</th>
+              <td colspan="12" class="no-data">No sales found for the selected filter.</td>
             </tr>
-          </thead>
-          <tbody>
-            <% if (sales.length===0) { %>
+          <% } else { %>
+            <% sales.forEach(s => { %>
               <tr>
-                <td colspan="14" class="no-data">No sales found for the selected filter.</td>
+                <td><%= s.brandName %></td>
+                <td><%= s.itemName %></td>
+                <td><%= s.colourName %></td>
+                <td><%= s.qty %></td>
+                <td><%= s.quantitySold %></td>
+                <td>Rs <%= s.rate.toFixed(2) %></td>
+                <td>Rs <%= (s.quantitySold * s.rate).toFixed(2) %></td>
+                <td class="<%= s.profit < 0 ? 'loss' : 'profit' %>">
+                  Rs <%= Math.abs(s.profit).toFixed(2) %>
+                </td>
+                <td class="refund-status"><%= s.refundStatus %></td>
+                <td class="refund-quantity"><%= s.refundQuantity %></td>
+                <td>
+                  <%= new Date(s.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' }) %>
+                  <br>
+                  <small style="color: #007bff; font-weight: bold;">
+                    <%= new Date(s.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' }) %>
+                  </small>
+                </td>
+                <td>
+                  <button class="delete-sale delete-btn" data-id="<%= s._id %>" id="delete" >Delete</button>
+                </td>
               </tr>
-              <% } else { %>
-                <% sales.forEach(s=> { %>
-                  <tr>
-                    <td>
-                      <%= s.brandName %>
-                    </td>
-                    <td>
-                      <%= s.itemName %>
-                    </td>
-                    <td>
-                      <%= s.colourName %>
-                    </td>
-                    <td>
-                      <%= s.qty %>
-                    </td>
-                    <td>
-                      <%= s.quantitySold %>
-                    </td>
-                    <td>Rs <%= parseFloat(s.rate.toFixed(2)) %>
-                    </td>
-                    <td>Rs <%= parseFloat((s.quantitySold * s.rate).toFixed(2)) %>
-                    </td>
-                    <td class="<%= s.profit < 0 ? 'loss' : 'profit' %>">
-                      Rs <%= parseFloat(s.profit.toFixed(2)) %>
-                    </td>
-                    <td class="refund-status">
-                      <%= s.refundStatus %>
-                    </td>
-                    <td class="refund-quantity">
-                      <%= s.refundQuantity %>
-                    </td>
-                    <td>
-                      <%= new Date(s.createdAt).toLocaleDateString('en-GB', { day: '2-digit' , month: 'short' ,
-                        year: 'numeric' , timeZone: 'Asia/Karachi' }) %>
-                        <br>
-                        <small style="color: #007bff; font-weight: bold;">
-                          <%= new Date(s.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit' , minute: '2-digit' ,
-                            hour12: true, timeZone: 'Asia/Karachi' }) %>
-                        </small>
-                    </td>
-                    <td><button class="delete-sale" id="delete" data-id="<%= s._id %>">Delete</button></td>
-                  </tr>
-                  <% }) %>
-                    <% } %>
-          </tbody>
-        </table>
-      </div>
-      <script src="/javascripts/allSales.js"></script>
-    </main>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <script src="/javascripts/allSales.js"></script>
+  </main>
 </body>
 
 </html>

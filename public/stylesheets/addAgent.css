@@ -196,3 +196,29 @@
      padding: 8px;
    }
  }
+
+
+ /* Spinner Animation */
+.spinner {
+  width: 18px;
+  height: 18px;
+  border: 2px solid #ffffff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: rotation 1s linear infinite;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+@keyframes rotation {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Button loading state */
+.submit-btn:disabled {
+  background-color: #047a50; /* Thora dark rang jab loading ho */
+  cursor: not-allowed;
+  opacity: 0.8;
+}

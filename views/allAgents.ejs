@@ -1,103 +1,100 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
-  <title>All Agents</title>
+  <title>All Agents | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/allAgents.css">
+
 </head>
 
 <body>
   <%- include('partials/navbar') %>
 
-<%- include('partials/navbar') %>
+  <main>
+    <h1>All Agents</h1>
 
-<main>
-  <h1>All Agents</h1>
+  <form class="filter-container" id="filterForm">
+  <select name="filter" id="filter">
+    <option value="all" <%= filter === 'all' || !filter ? 'selected' : '' %>>All Times</option>
+    <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
+    <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+    <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
+    <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+  </select>
 
-  <form class="filter-container" id="filterForm" onsubmit="return false;">
-    <select name="filter" id="filter">
-      <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Dates</option>
-      <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
-      <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
-      <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
-      <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-      <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
-    </select>
+  <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+  <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+  
+  <button type="button" id="apply">Apply Filter</button>
+</form>
 
-    <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-    <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-    
-    <button type="button" id="apply">Apply</button>
-  </form>
-
-  <div class="stats">
-    <div class="stat-box">
-      <h3>🕴️ Total Agents</h3>
-      <p><%= stats.totalAgents %></p>
+    <div class="stats">
+      <div class="stat-box">
+        <h3>🕴️ Total Agents</h3>
+        <p><%= stats.totalAgents %></p>
+      </div>
+      <div class="stat-box">
+        <h3>Total % Commission 💵</h3>
+        <p>Rs <%= Number(stats.totalPercentageAmount || 0).toFixed(2) %></p>
+      </div>
+      <div class="stat-box">
+        <h3>Paid % Commission ✅</h3>
+        <p>Rs <%= Number(stats.totalPercentageAmountGiven || 0).toFixed(2) %></p>
+      </div>
+      <div class="stat-box" id="negative">
+        <h3>Left % Commission ⏳</h3>
+        <p>Rs <%= Number(stats.totalPercentageAmountLeft || 0).toFixed(2) %></p>
+      </div>
     </div>
-    <div class="stat-box">
-      <h3>Total % Commission 💵</h3>
-      <p>Rs <%= Number(stats.totalPercentageAmount || 0).toFixed(2) %></p>
-    </div>
-    <div class="stat-box">
-      <h3>Paid % Commission ✅</h3>
-      <p>Rs <%= Number(stats.totalPercentageAmountGiven || 0).toFixed(2) %></p>
-    </div>
-    <div class="stat-box" id="negative">
-      <h3>Left % Commission ⏳</h3>
-      <p>Rs <%= Number(stats.totalPercentageAmountLeft || 0).toFixed(2) %></p>
-    </div>
-  </div>
 
-  <div class="table-container">
-    <table>
-      <thead>
-        <tr>
-          <th>Agent Name</th>
-          <th>Agent Phone</th>
-          <th>Agent CNIC</th>
-          <th>Register Date</th>
-          <th>Action</th>
-        </tr>
-      </thead>
-      <tbody>
-        <% if (agents.length === 0) { %>
-          <tr><td colspan="5" class="no-data">No agents found.</td></tr>
-        <% } else { %>
-          <% agents.forEach(a => { %>
-            <tr>
-              <td><%= a.name %></td>
-              <td><%= a.phone %></td>
-              <td><%= a.cnic %></td>
-              <td>
-                <%= new Date(a.createdAt).toLocaleDateString('en-GB', { 
-                    day:'2-digit', month:'short', year:'numeric', timeZone: 'Asia/Karachi' 
-                }) %>
-                <br>
-                <small style="color: #007bff; font-weight: bold;">
-                  <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { 
-                      hour:'2-digit', minute:'2-digit', hour12:true, timeZone: 'Asia/Karachi' 
-                  }) %>
-                </small>
-              </td>
-              <td class="action-buttons">
-                <button id="view"><a href="/agents/view-agent/<%= a._id %>" style="text-decoration:none; color:inherit;">View</a></button>
-                <% if(role == "admin") { %>
-                  <button class="delete-btn" id="delete"  data-id="<%= a._id %>  ">Delete</button>
-                <% } %>
-              </td>
-            </tr>
-          <% }) %>
-        <% } %>
-      </tbody>
-    </table>
-  </div>
-</main>
+    <div class="table-container" id="tableContainer">
+      <div id="table-loader">
+        <div class="spinner"></div>
+        <p style="margin-top:10px; color:#06A56C; font-weight: bold;">Updating...</p>
+      </div>
 
-    <!-- External JS -->
-    <script src="/javascripts/allAgents.js"></script>
+      <table>
+        <thead>
+          <tr>
+            <th>Agent Name</th>
+            <th>Agent Phone</th>
+            <th>Agent CNIC</th>
+            <th>Register Date</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% if (agents.length === 0) { %>
+            <tr><td colspan="5" class="no-data">No agents found.</td></tr>
+          <% } else { %>
+            <% agents.forEach(a => { %>
+              <tr>
+               <td><%= a.name  %></td>
+               <td><%= a.phone %></td>
+               <td><%= a.cnic %></td>
+                <td>
+                  <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone: 'Asia/Karachi' }) %>
+                  <br>
+                  <small style="color: #007bff; font-weight: bold;">
+                    <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone: 'Asia/Karachi' }) %>
+                  </small>
+                </td>
+                <td class="action-buttons">
+                  <button id="view"><a href="/agents/view-agent/<%= a._id %>" style="text-decoration:none; color:inherit;">View</a></button>
+                  <% if(role == "admin") { %>
+                    <button class="delete-btn" data-id="<%= a._id %>" id="delete" >Delete</button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="/javascripts/allAgents.js"></script>
 </body>
-
 </html>

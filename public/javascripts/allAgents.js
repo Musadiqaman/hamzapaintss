@@ -1,36 +1,28 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- 1. Elements Selection ---
     const filterForm = document.getElementById("filterForm");
     const filterSelect = document.getElementById("filter");
     const fromInput = document.getElementById("from");
     const toInput = document.getElementById("to");
     const applyBtn = document.getElementById("apply");
     const tbody = document.querySelector('tbody');
+    const tableContainer = document.getElementById('tableContainer');
+    const loader = document.getElementById('table-loader');
 
-    /**
-     * 2. TOGGLE DATE INPUTS
-     * Sirf inputs dikhayega jab 'custom' select ho.
-     */
+    // 1. Sirf Inputs ko show/hide karne ke liye (Data load nahi karega)
     function toggleDateInputs(value) {
-        if (value === "custom") {
-            if (fromInput) fromInput.style.display = "inline-block";
-            if (toInput) toInput.style.display = "inline-block";
-        } else {
-            if (fromInput) fromInput.style.display = "none";
-            if (toInput) toInput.style.display = "none";
-        }
+        const isCustom = value === "custom";
+        if (fromInput) fromInput.style.display = isCustom ? "inline-block" : "none";
+        if (toInput) toInput.style.display = isCustom ? "inline-block" : "none";
     }
 
-    /**
-     * 3. CORE FILTER FUNCTION (SPA STYLE)
-     * Backend se data layega aur table/stats ko update karega.
-     */
+    // 2. Data load karne wala function
     const runFilter = async () => {
-        // Form data pick karna
         const formData = new URLSearchParams(new FormData(filterForm)).toString();
         
-        // Table loading state
-        tbody.style.opacity = '0.5';
+        // Loader Show
+        if (loader) loader.style.display = 'flex';
+        if (tableContainer) tableContainer.classList.add('loading-active');
+        tbody.style.opacity = '0.3';
 
         try {
             const res = await fetch(`/agents/all?${formData}`, {
@@ -42,72 +34,51 @@ document.addEventListener("DOMContentLoaded", () => {
             const data = await res.json();
 
             if (data.success) {
-                // --- A. Stats Update (With Number Formatting) ---
+                // Update Stats
                 const statsPs = document.querySelectorAll('.stat-box p');
                 if (statsPs.length >= 4) {
                     statsPs[0].innerText = data.stats.totalAgents;
-                    statsPs[1].innerText = `Rs ${Number(data.stats.totalPercentageAmount || 0).toFixed(2)}`;
-                    statsPs[2].innerText = `Rs ${Number(data.stats.totalPercentageAmountGiven || 0).toFixed(2)}`;
-                    statsPs[3].innerText = `Rs ${Number(data.stats.totalPercentageAmountLeft || 0).toFixed(2)}`;
+                    statsPs[1].innerText = `Rs ${data.stats.totalPercentageAmount.toFixed(2)}`;
+                    statsPs[2].innerText = `Rs ${data.stats.totalPercentageAmountGiven.toFixed(2)}`;
+                    statsPs[3].innerText = `Rs ${data.stats.totalPercentageAmountLeft.toFixed(2)}`;
                 }
 
-                // --- B. Table Rebuild (With Strict PKT Timezone) ---
+                // Build Table
                 let html = '';
                 if (!data.agents || data.agents.length === 0) {
                     html = `<tr><td colspan="5" class="no-data" style="text-align:center; padding:20px;">No records found.</td></tr>`;
                 } else {
                     data.agents.forEach(a => {
                         const dateObj = new Date(a.createdAt);
-                        
-                        // 🟢 PKT Timezone Fix: Taake date shift na ho
-                        const dateStr = dateObj.toLocaleDateString('en-GB', { 
-                            day: '2-digit', month: 'short', year: 'numeric', 
-                            timeZone: 'Asia/Karachi' 
-                        });
-                        const timeStr = dateObj.toLocaleTimeString('en-GB', { 
-                            hour: '2-digit', minute: '2-digit', hour12: true, 
-                            timeZone: 'Asia/Karachi' 
-                        });
+                        const dateStr = dateObj.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' });
+                        const timeStr = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' });
 
                         html += `
                         <tr>
-                            <td>${a.name || 'N/A'}</td>
-                            <td>${a.phone || 'N/A'}</td>
-                            <td>${a.cnic || 'N/A'}</td>
-                            <td>
-                                ${dateStr}<br>
-                                <small style="color: #007bff; font-weight: bold;">${timeStr}</small>
-                            </td>
+                            <td>${a.name }</td>
+                            <td>${a.phone }</td>
+                            <td>${a.cnic }</td>
+                            <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
                             <td class="action-buttons">
-                                <button id="view">
-                                    <a href="/agents/view-agent/${a._id}" style="text-decoration: none; color: inherit;">View</a>
-                                </button>
-                                ${data.role === "admin" ? `
-                                <button type="button" id="delete" class="delete-btn" data-id="${a._id}">Delete</button>
-                                ` : ''}
+                                <button id="view"><a href="/agents/view-agent/${a._id}" style="text-decoration: none; color: inherit;">View</a></button>
+                                ${data.role === "admin" ? `<button type="button" class="delete-btn" data-id="${a._id}" id="delete" >Delete</button>` : ''}
                             </td>
                         </tr>`;
                     });
                 }
-
                 tbody.innerHTML = html;
-
-                // Browser URL update (bina reload ke)
-                window.history.pushState({}, '', `/agents/all?${formData}`);
-
-                // Re-attach delete listeners to new buttons
                 attachDeleteListeners();
             }
         } catch (err) {
             console.error("Fetch Error:", err);
         } finally {
+            // Loader Hide
+            if (loader) loader.style.display = 'none';
+            if (tableContainer) tableContainer.classList.remove('loading-active');
             tbody.style.opacity = '1';
         }
     };
 
-    /**
-     * 4. DELETE LOGIC
-     */
     function attachDeleteListeners() {
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.onclick = async (e) => {
@@ -117,20 +88,19 @@ document.addEventListener("DOMContentLoaded", () => {
                     try {
                         const res = await fetch(`/agents/delete-agent/${id}`, { method: 'DELETE' });
                         const data = await res.json();
-                        if (data.success) {
-                            runFilter(); // Table refresh bina reload ke
-                        }
-                    } catch (err) {
-                        console.error("Delete failed:", err);
-                    }
+                        if (data.success){ 
+                            alert(data.message);
+                            runFilter();
+                        } // Delete ke baad refresh
+                    } catch (err) { console.error("Delete failed:", err); }
                 }
             };
         });
     }
 
-    // --- 5. Event Listeners ---
+    // --- EVENT LISTENERS ---
 
-    // Apply Button click
+    // 🟢 AB SIRF APPLY BUTTON PAR DATA LOAD HOGA
     if (applyBtn) {
         applyBtn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -138,24 +108,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Dropdown change
+    // Dropdown change karne par sirf inputs togggle honge, data load NAHI hoga
     if (filterSelect) {
         filterSelect.addEventListener("change", () => {
             toggleDateInputs(filterSelect.value);
         });
-        // Run initial check
-        toggleDateInputs(filterSelect.value);
+        toggleDateInputs(filterSelect.value); // Initial check
     }
 
-    // Enter key support in form
-    if (filterForm) {
-        filterForm.onsubmit = (e) => {
-            e.preventDefault();
-            runFilter();
-            return false;
-        };
-    }
-
-    // Initial attachment
     attachDeleteListeners();
 });

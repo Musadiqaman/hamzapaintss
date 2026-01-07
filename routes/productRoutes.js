@@ -32,31 +32,34 @@ router.get("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => 
    -> Adds multiple products at once
 ================================ */
 // 🔹 Add multiple products at once
-router.post("/add-multiple",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
+router.post("/add-multiple", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
   try {
     const { products } = req.body;
 
-    if (!products || products.length === 0) {
+    if (!products || !Array.isArray(products) || products.length === 0) {
       return res.status(400).json({ success: false, message: "No products provided." });
     }
 
-    // Validate and prepare data
+    // 1. Data Prepare (Wahi logic jo aapne di thi)
     const formatted = products.map((p) => ({
-      brandName:p.brandName,
+      brandName: p.brandName,
       itemName: p.itemName,
       colourName: p.colourName,
       qty: p.qty,
       totalProduct: p.totalProduct,
-      remaining: p.totalProduct, // starting remaining = total
+      remaining: p.totalProduct, 
       rate: p.rate,
-      stockID: p.stockID  // Pass the stockID here
+      stockID: p.stockID
     }));
 
-    // Save all to database
-    await Product.insertMany(formatted);
+    // 2. High Speed Insert
+    // ordered: false ka matlab hai agar ek product mein error aaye 
+    // to baaqi rukenge nahi, wo save hote jayenge. Ye insertMany ko mazeed fast kar deta hai.
+    await Product.insertMany(formatted, { ordered: false });
 
-    res.json({ success: true, message: "Products added successfully!" });
+    res.json({ success: true, message: `${products.length} Products added successfully!` });
   } catch (err) {
+    // Agar duplicate stockID ka error aaye tab bhi ye catch mein jayega
     console.error("❌ Failed to save products:", err);
     res.status(500).json({ success: false, message: "Server error: " + err.message });
   }
@@ -84,6 +87,12 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
 
     try {
         let { filter, from, to, brand, itemName, colourName, unit, stockStatus, refund } = req.query;
+
+        // 🟢 UPDATE: Agar pehli baar page khulay to default "month" set ho
+        if (!filter) {
+            filter = "month";
+        }
+
         let query = {};
         let start, end;
         let dateOperator = '$lte'; // Default operator
@@ -99,6 +108,7 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             start = yesterday.startOf('day').toDate();
             end = yesterday.endOf('day').toDate();
         } else if (filter === "month") {
+            // 🟢 Default logic for "This Month"
             start = nowPKT.clone().startOf('month').toDate();
             end = nowPKT.clone().endOf('day').toDate();
         } else if (filter === "lastMonth") {
@@ -106,12 +116,9 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             start = lastMonth.startOf('month').toDate();
             end = lastMonth.endOf('month').toDate();
         } else if (filter === "custom" && from && to) {
-            // 🛑 CUSTOM DATE FIX: Less Than ($lt) logic for accuracy
             dateOperator = '$lt';
             const f = moment.tz(from, 'YYYY-MM-DD', PKT_TIMEZONE);
             let t = moment.tz(to, 'YYYY-MM-DD', PKT_TIMEZONE);
-
-            // Agle din ka start (00:00:00)
             t.add(1, 'days').startOf('day');
 
             if (f.isValid() && t.isValid()) {
@@ -120,6 +127,7 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             }
         }
 
+        // Date filter application
         if (start && end) {
             query.createdAt = { $gte: start, [dateOperator]: end };
         }
@@ -143,7 +151,7 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             }
         }
 
-        // --- Colour filter (Escaped for accuracy) ---
+        // --- Colour filter ---
         if (colourName && colourName !== "all") {
             query.colourName = new RegExp(`^${escapeRegExp(colourName)}$`, "i");
         }
@@ -199,12 +207,13 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             role
         };
 
-        // AJAX Support
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        // AJAX Support (XMLHttpRequest)
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
             return res.json({ success: true, ...responseData });
         }
 
         res.render("allProducts", responseData);
+
     } catch (err) {
         console.error("❌ Error loading All Products:", err);
         res.status(500).send("Error loading products page");

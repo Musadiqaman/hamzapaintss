@@ -1,186 +1,170 @@
 document.addEventListener("DOMContentLoaded", () => {
-    // --- 1. Elements Selection ---
-    const filterForm = document.getElementById("filterForm");
     const filterSelect = document.getElementById("filter");
     const fromInput = document.getElementById("from");
     const toInput = document.getElementById("to");
     const applyBtn = document.getElementById("apply");
-    const tbody = document.querySelector('tbody');
+    const tbody = document.getElementById("agentTableBody");
+    const tableLoader = document.getElementById("tableLoader");
 
-    /**
-     * 2. TOGGLE DATE INPUTS
-     */
-    function toggleDateInputs(value) {
-        if (value === "custom") {
-            if (fromInput) fromInput.style.display = "inline-block";
-            if (toInput) toInput.style.display = "inline-block";
-        } else {
-            if (fromInput) fromInput.style.display = "none";
-            if (toInput) toInput.style.display = "none";
-        }
+    // 🟢 URL CLEANING & ID STORAGE LOGIC
+    // Agar URL mein ID hai (e.g. /view-agent/123), to usay save kar lo
+    const pathParts = window.location.pathname.split('/');
+    const idInUrl = pathParts[pathParts.length - 1];
+
+    // Agar ID valid length ki hai to localStorage mein save karein aur URL saaf karein
+    if (idInUrl && idInUrl.length > 15) { 
+        localStorage.setItem('activeAgentId', idInUrl);
+        // Browser bar mein link clean kar do: localhost:3000/agents/view
+        window.history.replaceState(null, "", "/agents/view");
     }
 
-    /**
-     * 3. REFRESH DATA (SPA Filter)
-     * Ye function table aur stats ko update karta hai bina reload ke.
-     */
-    const refreshData = async () => {
-        const formData = new URLSearchParams(new FormData(filterForm)).toString();
-        tbody.style.opacity = '0.4';
+    const toggleDates = () => {
+        const isCustom = filterSelect.value === "custom";
+        fromInput.style.display = isCustom ? "inline-block" : "none";
+        toInput.style.display = isCustom ? "inline-block" : "none";
+    };
+
+    const fetchData = async () => {
+        // Hamesha localStorage se ID uthao kyunki URL ab clean ho chuka hai
+        const agentId = localStorage.getItem('activeAgentId');
+        if (!agentId) return alert("Agent ID not found. Please go back and try again.");
+
+        const filterVal = filterSelect.value;
+        let paramsObj = { filter: filterVal };
+        if (filterVal === "custom") {
+            paramsObj.from = fromInput.value;
+            paramsObj.to = toInput.value;
+        }
+
+        const params = new URLSearchParams(paramsObj).toString();
+
+        // Loader dikhao
+        tableLoader.style.display = "flex";
+        tbody.style.opacity = "0.3";
 
         try {
-            const res = await fetch(`${window.location.pathname}?${formData}`, {
+            // Request hamesha asal ID wale route par jayegi
+            const response = await fetch(`/agents/view-agent/${agentId}?${params}`, {
                 headers: { 
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+                    'X-Requested-With': 'XMLHttpRequest', 
+                    'Accept': 'application/json' 
                 }
             });
-            const data = await res.json();
+            const data = await response.json();
 
             if (data.success) {
-                // --- A. Update Stats ---
-                const statsPs = document.querySelectorAll('.stat-box p');
-                statsPs[0].innerText = `Rs ${Number(data.stats.totalPercentageAmount).toFixed(2)}`;
-                statsPs[1].innerText = `Rs ${Number(data.stats.totalPercentageAmountGiven).toFixed(2)}`;
-                statsPs[2].innerText = `Rs ${Number(data.stats.totalPercentageAmountLeft).toFixed(2)}`;
+                // 1. Stats Update
+                document.getElementById("stat-total").innerText = `Rs ${Number(data.stats.totalPercentageAmount).toFixed(2)}`;
+                document.getElementById("stat-paid").innerText = `Rs ${Number(data.stats.totalPercentageAmountGiven).toFixed(2)}`;
+                document.getElementById("stat-left").innerText = `Rs ${Number(data.stats.totalPercentageAmountLeft).toFixed(2)}`;
 
-                // --- B. Update Table ---
+                // 2. Table Update
                 let html = '';
                 if (!data.agent.items || data.agent.items.length === 0) {
-                    html = `<tr><td colspan="9" class="no-data" style="text-align:center; padding:20px;">No items found for the selected filter.</td></tr>`;
+                    html = `<tr><td colspan="9" class="no-data" style="text-align:center; padding:20px;">No records found.</td></tr>`;
                 } else {
                     data.agent.items.forEach(i => {
                         const dateObj = new Date(i.createdAt);
-                        const dateStr = dateObj.toLocaleDateString('en-GB', { 
-                            day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' 
-                        });
-                        const timeStr = dateObj.toLocaleTimeString('en-GB', { 
-                            hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' 
-                        });
-
                         const status = i.paidAmount >= i.percentageAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid');
                         const leftAmt = (Number(i.percentageAmount) - Number(i.paidAmount)).toFixed(2);
-
+                        
                         html += `
                         <tr id="row-${i._id}">
                             <td>${i.totalProductSold}</td>
                             <td>${i.totalProductAmount}</td>
                             <td>${i.percentage}%</td>
                             <td>${i.percentageAmount}</td>
-                            <td class="paid-status">${status}</td>
+                            <td class="paid-status"><span  class="status-tag">${status}</span></td>
                             <td>Rs ${i.paidAmount}</td>
                             <td>Rs ${leftAmt}</td>
-                            <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
+                            <td>${dateObj.toLocaleDateString('en-GB')}<br>
+                            <small style="color: #007bff; font-weight: bold;">${dateObj.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', hour12:true})}</small></td>
                             <td class="actions">
-                                <button class="pay-btn" data-id="${i._id}" id="pay">Pay</button>
-                                ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}">Delete</button>` : ''}
-                                <div class="pay-box" id="paybox-${i._id}" style="display:none; margin-top:5px;">
-                                    <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Enter Amount" min="1">
-                                    <button class="submit-btn" data-id="${i._id}" data-total="${i.percentageAmount}" data-paid="${i.paidAmount}" id="submit">Submit</button>
+                                <button class="pay-btn" data-id="${i._id}" id="pay" >Pay</button>
+                                ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete" >Delete</button>` : ''}
+                                <div class="pay-box" id="paybox-${i._id}" style="display:none;">
+                                    <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Pay" style="width:70px" min="1" max="1000000">
+                                    <button class="submit-pay-btn" data-id="${i._id}" id="submit" >Submit</button>
                                 </div>
                             </td>
                         </tr>`;
                     });
                 }
                 tbody.innerHTML = html;
-                
-                window.history.pushState({}, '', `${window.location.pathname}?${formData}`);
-                attachEventListeners();
+                rebindButtons();
             }
-        } catch (err) {
-            console.error("Filter Error:", err);
-        } finally {
-            tbody.style.opacity = '1';
+        } catch (err) { 
+            console.error("Error:", err); 
+            alert("Data can't be loaded.");
+        } 
+        finally { 
+            tableLoader.style.display = "none"; 
+            tbody.style.opacity = "1"; 
         }
     };
 
-    /**
-     * 4. ATTACH EVENT LISTENERS (Pay, Submit, Delete)
-     */
-    function attachEventListeners() {
-        // Toggle Pay Box
+    function rebindButtons() {
         document.querySelectorAll(".pay-btn").forEach(btn => {
             btn.onclick = () => {
-                const id = btn.dataset.id;
-                const box = document.getElementById(`paybox-${id}`);
+                const box = document.getElementById(`paybox-${btn.dataset.id}`);
                 box.style.display = box.style.display === "none" ? "block" : "none";
             };
         });
 
-        // Submit Payment (No Reload + Success Message)
-        document.querySelectorAll(".submit-btn").forEach(btn => {
-            btn.onclick = async () => {
-                const id = btn.dataset.id;
-                const total = Number(btn.dataset.total);
-                const paid = Number(btn.dataset.paid);
-                const input = document.getElementById(`payInput-${id}`);
-                const addAmount = Number(input.value);
+        document.querySelectorAll(".submit-pay-btn").forEach(btn => {
+        btn.onclick = async () => {
+        const id = btn.dataset.id;
+        const inputEl = document.getElementById(`payInput-${id}`);
+        const amt = inputEl.value;
 
-                if (!addAmount || addAmount <= 0) {
-                    alert("Please enter a valid amount!");
-                    return;
-                }
-                if (paid + addAmount > total) {
-                    alert("❌ Amount exceeds the limit!");
-                    return;
-                }
+        if (!amt || amt <= 0) return alert("❌ Please enter a valid amount");
 
-                try {
-                    const res = await fetch(`/agents/pay-item/${id}`, {
-                        method: "POST",
-                        headers: { "Content-Type": "application/json" },
-                        body: JSON.stringify({ amount: addAmount })
-                    });
-                    const data = await res.json();
-                    if (data.success) {
-                        // 🟢 Success Message with Amount
-                        alert(`✅ Payment Added Successfully!\nAmount Cut: Rs ${addAmount.toFixed(2)}`);
-                        refreshData(); 
-                    } else {
-                        alert("Payment Failed!");
-                    }
-                } catch (err) { 
-                    console.error(err);
-                    alert("Error processing payment.");
-                }
-            };
-        });
+        btn.disabled = true;
+        btn.innerText = "...";
 
-        // Delete Item (No Reload + Success Message)
+        try {
+            const res = await fetch(`/agents/pay-item/${id}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ amount: parseFloat(amt) })
+            });
+
+            const result = await res.json(); 
+
+            if (result.success) {
+                // ✅ Professional Success Message
+                alert(`✅ Payment Success!\n---------------------------\nAmount: Rs ${Number(amt).toLocaleString()}`); 
+                
+                fetchData(); 
+            } else {
+                // ❌ Backend Error Message (e.g., Over payment)
+                alert(`⚠️ Error: ${result.message || "Payment Failed"}`); 
+                btn.disabled = false;
+                btn.innerText = "Submit"; 
+            }
+        } catch (e) {
+            console.error(e);
+            alert("🌐 Network Error: Check your connection.");
+            btn.disabled = false;
+            btn.innerText = "Submit";
+        }
+    };
+});
+
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.onclick = async () => {
-                if (!confirm("Are you sure you want to delete this item?")) return;
+                if(!confirm("Are you sure?")) return;
                 try {
                     const res = await fetch(`/agents/delete-item/${btn.dataset.id}`, { method: "DELETE" });
-                    const data = await res.json();
-                    if (data.success) {
-                        // 🟢 Delete success message
-                        alert("🗑️ Item deleted successfully!");
-                        refreshData();
-                    } else {
-                        alert("Failed to delete item.");
-                    }
-                } catch (err) { 
-                    console.error(err);
-                    alert("Error deleting item.");
-                }
+                    if(res.ok) fetchData();
+                } catch (e) { alert("Delete failed"); }
             };
         });
     }
 
-    // --- 5. Initial Event Bindings ---
-    if (applyBtn) {
-        applyBtn.addEventListener("click", (e) => {
-            e.preventDefault();
-            refreshData();
-        });
-    }
-
-    if (filterSelect) {
-        filterSelect.addEventListener("change", () => toggleDateInputs(filterSelect.value));
-        toggleDateInputs(filterSelect.value);
-    }
-
-    // Pehli dafa listeners lagana
-    attachEventListeners();
+    applyBtn.addEventListener("click", fetchData);
+    filterSelect.addEventListener("change", toggleDates);
+    toggleDates();
+    rebindButtons();
 });
+

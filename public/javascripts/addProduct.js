@@ -372,13 +372,15 @@ function addProduct() {
     return;
   }
 
-  // Agar value "N/A" hai ya khali hai, toh bilkul khali string rakho
   if (!colourName || colourName.toUpperCase() === "N/A") {
     colourName = "";
   }
 
+  // Random number add kiya taake stockID kabhi duplicate na ho
+  const stockID = `${(itemName || "PRO").slice(0, 3).toUpperCase()}-${Date.now().toString().slice(-5)}${Math.floor(Math.random() * 10)}`;
+
   tempProducts.push({
-    stockID: generateStockID(itemName),
+    stockID,
     brandName, itemName, colourName, qty, totalProduct, rate,
     total: totalProduct * rate
   });
@@ -387,30 +389,32 @@ function addProduct() {
   clearFields();
 }
 
-// --- Render Table ---
+// --- Render Table (Faster Version) ---
 function renderTable() {
   const tbody = document.getElementById("tableBody");
-  tbody.innerHTML = "";
-
+  
   if (tempProducts.length === 0) {
     tbody.innerHTML = `<tr><td colspan="9" class="no-data">No products added yet</td></tr>`;
     return;
   }
 
+  // String builder approach (Fast Performance)
+  let tableHTML = "";
   tempProducts.forEach((p, i) => {
-    tbody.innerHTML += `
+    tableHTML += `
       <tr>
         <td>${p.brandName}</td>
         <td>${p.itemName}</td>
-        <td>${p.colourName}</td> 
-        <td>${p.qty}</td>
+        <td>${p.colourName }</td> 
+        <td>${p.qty }</td>
         <td>${p.totalProduct}</td>
         <td>Rs ${p.rate.toFixed(2)}</td>
         <td>Rs ${p.total.toFixed(2)}</td>
-        <td><button class="delete-temp" id="delete" data-index="${i}">Delete</button></td>
+        <td><button type="button" class="delete-temp delete-btn" data-index="${i}" id="delete" >Delete</button></td>
       </tr>`;
   });
 
+  tbody.innerHTML = tableHTML; // Ek hi baar mein DOM update
   attachDeleteButtons();
 }
 
@@ -440,13 +444,24 @@ async function submitData() {
     alert("⚠️ Please add at least one product!");
     return;
   }
+
+  // 1. Button aur Loading setup
+  const submitBtn = document.querySelector(".submit-btn");
+  const originalText = submitBtn.innerHTML; // "Submit & Save" mehfooz kar liya
+  
+  // 2. Button ko disable karein aur loader dikhayein
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = `<span class="spinner"></span> Saving Products...`;
+
   try {
     const res = await fetch("/products/add-multiple", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ products: tempProducts }),
     });
+    
     const data = await res.json();
+    
     if (res.ok && data.success) {
       alert("✅ Saved Successfully!");
 
@@ -459,7 +474,13 @@ async function submitData() {
     } else {
       throw new Error(data.message || "Failed to save");
     }
-  } catch (err) { alert("Error: " + err.message); }
+  } catch (err) { 
+    alert("Error: " + err.message); 
+  } finally {
+    // 3. Kaam khatam hone par button wapas asli halat mein (Loader hat jayega)
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = originalText;
+  }
 }
 
 document.getElementById("add").addEventListener("click", addProduct);

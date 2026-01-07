@@ -39,43 +39,49 @@ router.get("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => 
    ✅ No FIFO logic, directly decrease stock
 ================================ */
 // Add Sale (POST) - with FIFO logic removed but ensuring proper profit/loss calculation
-router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
+router.post("/add", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
   try {
-    const { sales, agentID, percentage } = req.body; // frontend se pura tempSales array bhejna
+    const { sales, agentID, percentage } = req.body;
 
     if (!sales || !Array.isArray(sales) || sales.length === 0) {
       return res.status(400).json({ success: false, message: "No sales provided." });
     }
 
+    // 1. Ek hi baar mein saaray products fetch kar lein jo sales mein hain
+    const stockIDs = sales.map(s => s.stockID);
+    const products = await Product.find({ stockID: { $in: stockIDs } });
+    
+    // Map banayein taake loop mein foran product mil jaye (Database hit kiye baghair)
+    const productMap = new Map(products.map(p => [p.stockID, p]));
+
     let totalQuantityForAgent = 0;
     let totalAmountForAgent = 0;
+    const salesToCreate = [];
+    const productUpdates = [];
 
-    // loop through all sales and create Sale documents
+    // 2. Loop sirf calculation ke liye (No Awaits here)
     for (const s of sales) {
       const { brandName, itemName, colourName, qty, quantitySold, rate, stockID, saleID } = s;
+      const product = productMap.get(stockID);
 
-      const product = await Product.findOne({ stockID });
-      if (!product) return res.status(404).json({ success: false, message: `Product not found: ${itemName}` });
+      if (!product) throw new Error(`Product not found: ${itemName}`);
+      if (quantitySold > product.remaining) throw new Error(`Only ${product.remaining} left for ${itemName}!`);
 
-      if (quantitySold > product.remaining)
-        return res.status(400).json({ success: false, message: `Only ${product.remaining} left for ${itemName}!` });
+      // Calculations
+      const profit = Math.round(((rate - (product.rate || 0)) * quantitySold + Number.EPSILON) * 100) / 100;
+      
+      // Data tayyar karein
+      salesToCreate.push({
+        brandName, itemName, colourName, qty, quantitySold, rate, stockID, saleID,
+        profit, refundQuantity: 0, refundStatus: "none"
+      });
 
-      const profit = Math.round(((rate - (product.rate || 0)) * quantitySold + Number.EPSILON) * 100)/100;
-      product.remaining -= quantitySold;
-      await product.save();
-
-      await Sale.create({
-        brandName,
-        itemName,
-        colourName,
-        qty,
-        quantitySold,
-        rate,
-        stockID,
-        saleID,
-        profit,
-        refundQuantity: 0,
-        refundStatus: "none"
+      // Product update ki query tayyar karein
+      productUpdates.push({
+        updateOne: {
+          filter: { _id: product._id },
+          update: { $inc: { remaining: -quantitySold } } // $inc fast hota hai
+        }
       });
 
       if (agentID && percentage > 0) {
@@ -84,7 +90,14 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
       }
     }
 
-    // ✅ Agent Item creation once
+    // 3. Sab kuch ek saath execute karein (Bulk Operations)
+    // Ek hi time par: Sales create hongi aur Products update honge
+    await Promise.all([
+      Sale.insertMany(salesToCreate), // Saari sales ek saath
+      Product.bulkWrite(productUpdates) // Saaray products ka stock ek saath update
+    ]);
+
+    // 4. Agent logic (agar hai)
     if (agentID && percentage > 0) {
       const agent = await Agent.findOne({ agentID });
       if (agent) {
@@ -104,11 +117,11 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
       }
     }
 
-    res.json({ success: true, message: `All sales completed successfully.` });
+    res.json({ success: true, message: `All ${sales.length} sales completed instantly!` });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Server error: " + err.message });
+    console.error("❌ Add Sale Error:", err);
+    res.status(400).json({ success: false, message: err.message });
   }
 });
 
@@ -135,14 +148,16 @@ function escapeRegExp(string) {
 router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
     const role = req.user.role;
     try {
-        let { filter, from, to, brand, itemName, colourName, unit, refund } = req.query;
+        // 🟢 DEFAULT FILTER: Agar koi filter na ho to 'month' auto-select hoga
+        let { filter = 'month', from, to, brand, itemName, colourName, unit, refund } = req.query;
+        
         let query = {};
         let start, end;
         let dateOperator = '$lte'; 
 
         const nowPKT = moment().tz(PKT_TIMEZONE);
         
-        // 🟢 1. YE HAI AAPKI ORIGINAL DATE LOGIC (No Changes)
+        // 🟢 Date Logic with Default 'month' behavior
         if (filter === "today" || filter === "yesterday" || filter === "month" || filter === "lastMonth") {
             if (filter === "today") {
                 start = nowPKT.clone().startOf('day').toDate();
@@ -152,6 +167,7 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
                 start = yesterdayPKT.startOf('day').toDate();
                 end = yesterdayPKT.endOf('day').toDate();
             } else if (filter === "month") {
+                // This Month logic
                 start = nowPKT.clone().startOf('month').toDate();
                 end = nowPKT.clone().endOf('day').toDate(); 
             } else if (filter === "lastMonth") {
@@ -164,7 +180,6 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             const f = moment.tz(from, 'YYYY-MM-DD', PKT_TIMEZONE);
             let t = moment.tz(to, 'YYYY-MM-DD', PKT_TIMEZONE);
             
-            // Exact original step: 1 day add karna
             t.add(1, 'days').startOf('day'); 
             
             if (f.isValid() && t.isValid()) {
@@ -173,11 +188,12 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             }
         }
         
+        // Apply date query if start/end exists
         if (start && end) {
             query.createdAt = { $gte: start, [dateOperator]: end };
         }
 
-        // 🟢 2. FILTERS (With escapeRegExp for accuracy)
+        // 🟢 Brand Filters
         if (brand && brand !== "all") {
             if (brand === "Weldon Paints") query.brandName = /weldon/i;
             else if (brand === "Sparco Paints") query.brandName = /sparco/i;
@@ -186,23 +202,27 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             else if (brand === "Other Paints") query.brandName = /Other Paints|Other/i;
         }
 
+        // 🟢 Item Name Filter
         if (itemName && itemName !== "all") {
             const knownNames = ["Weather Shield", "Emulsion", "Enamel"];
             if (itemName === "Other") query.itemName = { $nin: knownNames };
             else query.itemName = new RegExp(`^${escapeRegExp(itemName)}$`, "i");
         }
 
+        // 🟢 Colour Filter
         if (colourName && colourName !== "all") {
             query.colourName = new RegExp(`^${escapeRegExp(colourName)}$`, "i");
         }
 
+        // 🟢 Unit/Qty Filter
         if (unit && unit !== "all") {
             query.qty = new RegExp(escapeRegExp(unit), "i");
         }
 
+        // 🟢 Refund Filter
         if (refund && refund !== "all") query.refundStatus = refund;
 
-        // 🟢 3. SPEED FIX: Product mapping (Loop ke andar findOne khatam)
+        // 🟢 Data Fetching (Optimized)
         const filteredSales = await Sale.find(query).sort({ createdAt: -1 }).lean();
         const allProducts = await Product.find({}, 'stockID rate').lean();
         
@@ -219,8 +239,6 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             let netSoldQty = Math.max(0, (s.quantitySold || 0) - (s.refundQuantity || 0));
 
             totalSold += netSoldQty;
-            
-            // 🟢 4. DECIMAL FIX: Har step par precision maintain
             totalRevenue += (netSoldQty * (s.rate || 0));
             totalRefunded += ((s.refundQuantity || 0) * (s.rate || 0));
 
@@ -228,10 +246,11 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             if (saleProfit > 0) totalProfit += saleProfit;
             else totalLoss += Math.abs(saleProfit);
 
-            enrichedSales.push({ ...s, purchaseRate });
+            // Row level profit calculation for frontend display
+            const rowProfit = parseFloat(saleProfit.toFixed(2));
+            enrichedSales.push({ ...s, purchaseRate, profit: rowProfit });
         }
 
-        // Response bhejte waqt numbers ko clean karna
         const responseData = {
             sales: enrichedSales,
             stats: { 
@@ -241,7 +260,10 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
                 totalLoss: parseFloat(totalLoss.toFixed(2)), 
                 totalRefunded: parseFloat(totalRefunded.toFixed(2)) 
             },
-            role, filter, from, to,
+            role, 
+            filter, 
+            from, 
+            to,
             selectedBrand: brand || "all",
             selectedItem: itemName || "all",
             selectedColour: colourName || "all",
@@ -249,16 +271,19 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
             selectedRefund: refund || "all"
         };
 
+        // 🟢 Handle AJAX and Regular Request
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, ...responseData });
         }
         res.render("allSales", responseData);
 
     } catch (err) {
-        console.error("❌ Error:", err);
+        console.error("❌ Sales Route Error:", err);
         res.status(500).send("Server Error");
     }
 });
+
+
 
 
 

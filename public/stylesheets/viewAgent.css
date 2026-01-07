@@ -26,15 +26,15 @@ body {
 
 /* ================= MAIN (SIDEBAR SAFE) ================= */
 main {
-  /* margin-left:250px;              sidebar width */
   padding: 25px;
   transition: .3s ease;
 }
-  
-#BackBtn{
+
+/* ================= BACK BUTTON (ALL AGENTS) ================= */
+#BackBtn {
   position: fixed;
-  top: 9px;
-  left: 280px;              /* sidebar ke baad */
+  top: 15px;
+  left: 280px; /* Sidebar ke baad */
   z-index: 999;
   display: flex;
   align-items: center;
@@ -45,36 +45,23 @@ main {
   font-size: 14px;
   font-weight: 600;
   color: #0f5132;
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(25,135,84,0.25);
-  box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+  border: 1px solid rgba(25, 135, 84, 0.25);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
 }
 
-
- #BackBtn .backbtn{
+#BackBtn .backbtn {
   width: 34px;
   height: 34px;
   border-radius: 10px;
-  background: linear-gradient(135deg,#198754,#20c997);
+  background: linear-gradient(135deg, #198754, #20c997);
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-size: 18px;
 }
-
-    
-@media (max-width: 768px) {
-  #BackBtn{
-    top: 230px;
-        right: -19px; 
- 
-  }
-
- 
-}
-
 
 /* ================= TITLE ================= */
 h1 {
@@ -91,36 +78,48 @@ h1 {
   gap: 10px;
   max-width: 1200px;
   margin: 0 auto 18px;
-
 }
 
-select,
 input[type="date"],
 button {
   padding: 9px 12px;
   border-radius: 5px;
   border: 1px solid #363636bb;
   font-size: 13px;
-  /* width:100%; */
   background: #fff;
   text-align: start;
-    cursor: pointer;
+  cursor: pointer;
+}
+
+select {
+  padding: 9px 12px;
+  border-radius: 5px;
+  border: 1px solid #363636bb;
+  font-size: 13px;
+  width: 100%;
+  background: #fff;
+  text-align: start;
+  cursor: pointer;
+}
+
+select:focus {
+  border-color: #06a56c;
+  outline: none;
+  box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
 }
 
 button#apply {
   background-color: #a6e7d8;
   color: #008767;
   border: 2px solid #00b087;
-  cursor: pointer;
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
   font-weight: 600;
   padding: 8px 10px;
+  transition: 0.3s ease;
 }
 
 #apply:hover {
   background-color: #00b087;
   color: white;
-  border-color: #006f5f;
   transform: scale(1.05);
 }
 
@@ -131,7 +130,6 @@ button#apply {
   gap: 4px;
   max-width: 1200px;
   margin: 0 auto 18px;
-
 }
 
 .stat-box {
@@ -147,20 +145,99 @@ button#apply {
   color: #06a56c;
   font-size: 15px;
   font-weight: 700;
-  padding-right: 30px;
   margin-bottom: 1px;
 }
 
 .stat-box p {
   font-size: 18px;
   font-weight: 800;
-  margin-top: 0px;
 }
 
+.stat-box#negative {
+  color: #ff4d4d;
+}
+
+/* ================= TABLE & LOADER ================= */
+.table-container {
+  max-width: 1200px;
+  margin: 0 auto 20px auto; /* Space fix */
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+  position: relative;
+  min-height: 100px;
+}
+
+#tableLoader {
+  display: none; /* JS se control karein */
+  position: absolute;
+  top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  z-index: 100;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+}
+
+.spinner {
+  width: 35px;
+  height: 35px;
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #06A56C;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+table {
+  width: 100%;
+  min-width: 900px;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+thead {
+  background: #06a56c;
+  color: white;
+}
+
+th {
+  color: #ffffff;
+  padding: 16px 5px;
+  font-size: 13px;
+  text-align: center;
+}
+
+td {
+  padding: 10px 5px;
+  font-size: 14px;
+  text-align: center;
+  border-bottom: 1px solid #13a354;
+}
+
+tbody {
+  display: block;
+  max-height: 300px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+thead, tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* ================= BUTTONS ================= */
  button#add:focus {
    outline: none;
    box-shadow: 0 0 5px rgba(0, 184, 135, 0.6);
  }
+
+
+
 
 
  .delete-btn {
@@ -184,6 +261,7 @@ button#apply {
  }
 
 
+
  .delete-btn:hover {
    background-color: #FF4D4D;
    /* Darker red background on hover */
@@ -194,12 +272,14 @@ button#apply {
    color: white;
  }
 
+
  .delete-btn:focus {
    outline: none;
    /* Remove default outline */
    box-shadow: 0 0 5px rgba(255, 77, 77, 0.6);
-   /* Red glow effect on focus */
+   /* Red glow effect on focus*/
  }
+
 
  button#pay {
    margin-top: 3px;
@@ -231,10 +311,11 @@ button#apply {
  }
 
 
- button#pay:focus {
+ button#pay:focus,.payinput {
    outline: none;
    box-shadow: 0 0 5px rgba(0, 184, 135, 0.6);
  }
+
 
 .payinput{
   width: 95px;
@@ -243,6 +324,9 @@ button#apply {
   border-radius: 5px;
   border: 1px solid #363636bb;
 }
+
+
+
 
  /* Submit Button */
  button#submit {
@@ -262,6 +346,7 @@ button#apply {
    cursor: pointer;
  }
 
+
  button#submit:hover {
    background-color: #FFC200;
    /* Slightly darker yellow */
@@ -271,171 +356,63 @@ button#apply {
    transform: scale(1.03);
  }
 
+
  button#submit:focus {
    outline: none;
    box-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
  }
+
 .stat-box#negative {
   color: #ff4d4d;
   font-weight: 800;
 }
 
-/* ================= TABLE ================= */
-.table-container {
-  max-width: 1200px;
-  margin: 0 auto 40px auto;
-  overflow-x: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: white;
+.status-tag{
+  color: #ff4d4d;
+  font-weight: 800;
 }
-table {
-  width: 100%;
-  min-width: 900px;
+
+
+/* ================= MOBILE FIXES ================= */
+
+@media (max-width: 1024px) {
+  main { margin-left: 250px; }
+  #BackBtn { left: 260px; }
+}
+
+@media (max-width: 768px) {
+  main { margin-left: 0 !important; padding-top: 80px; }
   
-  /* ensures horizontal scroll on small screens */
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-thead {
-  background: #06a56c;
-  color: white;
-}
-
- th {
-   color: #ffffff;
-  padding: 16px 5px;
-  font-size: 13px;
-  text-align: center;
-  word-wrap: break-word;
- }
-
- td {
-   padding: 2px 1px;
-  font-size: 14px;
-  font-weight: 400;
-  text-align: center;
-  border-bottom: 1px solid #13a354;
-  word-wrap: break-word;
- }
- tbody tr:hover td {
-   background-color: #f1f1f1;
- }
-
-.no-data {
-  padding: 12px;
-  color: #888;
-  text-align: center;
-}
-
- tbody {
-    display: block;
-  max-height: 280px;
-  overflow-y: auto;
-  width: 100%;
- }
-
- /* Ensure that table headers don't break */
- thead,
- tbody tr {
-   display: table;
-   width: 100%;
-   table-layout: fixed;
- }
-
- td.profit {
-   font-weight: bold;
-   color: #06a56c;
- }
-
- #negative {
-   font-weight: bold;
-   color: #ff4d4d;
- }
-
- .no-data {
-  padding: 12px;
-  color: #888;
-  text-align: center;
- }
-
- .paid-status {
-   font-weight: bold;
-   color: #ff4d4d;
- }
- /* ================= END TABLE ================= */
-/* ================= LARGE LAPTOP ================= */
-@media(max-width:1200px) {
-  .filter-container {
-    grid-template-columns: repeat(5, 1fr);
+  /* Back Button (All Agents) Mobile Fix */
+  #BackBtn {
+    position: absolute;
+    top: 20px;
+    right: 15px;
+    left: auto; /* Left se hata kar right pe set kiya */
+    width: fit-content;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
   }
 
-  table {
-    min-width: 1100px;
-  }
-}
-
-/* ================= TABLET ================= */
-@media(max-width:1024px) {
-  main {
-    margin-left: 250px;
-    padding: 20px;
-  }
-
-  .filter-container {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .stats {
-    grid-template-columns: repeat(3, 1fr);
-  }
-}
-
-/* ================= MOBILE ================= */
-@media(max-width:768px) {
-  main {
-    margin-left: 0 !important;
-    padding: 15px;
-    padding-top: 80px;
-  }
-
-  h1 {
-    font-size: 19px;
-  }
-
-  .filter-container {
+  .filter-container, .stats {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  table {
-    min-width: 1100px;
-  }
-  tbody {
-    max-height: 375px;
-  } 
+  table { min-width: 700px; }
 }
 
-/* ================= SMALL MOBILE ================= */
-@media(max-width:480px) {
-  h1 {
-    font-size: 18px;
-  }
-
-  th,
-  td {
+@media (max-width: 480px) {
+  h1 { font-size: 18px; }
+  th, td { font-size: 12px; }
+  .stat-box p { font-size: 14px; }
+  
+  /* All Agents button mobile par chota kiya */
+  #BackBtn {
+    padding: 6px 10px;
     font-size: 12px;
-    font-weight: 500;
   }
-
-  .stat-box h3 {
-    font-size: 13px;
-  }
-
-  .stat-box p {
-    font-size: 14.5px;
+  #BackBtn .backbtn {
+    width: 28px;
+    height: 28px;
+    font-size: 14px;
   }
 }

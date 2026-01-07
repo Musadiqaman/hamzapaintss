@@ -300,7 +300,7 @@ const productOptions = {
 };
 
 
-// DOM Variables
+
 // DOM Variables
 const brandFilter = document.getElementById('brandFilter');
 const itemFilter = document.getElementById('itemNameFilter');
@@ -324,9 +324,13 @@ const selectedUnit = window.selectedUnit || 'all';
 async function updateTable() {
     const formData = new URLSearchParams(new FormData(filterForm)).toString();
     const tbody = document.querySelector('tbody');
+    const tableContainer = document.getElementById('tableContainer');
+    const loader = document.getElementById('table-loader');
     
-    // Loading State
-    tbody.style.opacity = '0.5';
+    // 🟢 1. Loading Start: Loader dikhao aur blur apply karo
+    if (loader) loader.style.display = 'flex';
+    if (tableContainer) tableContainer.classList.add('loading-active');
+    tbody.style.opacity = '0.3'; // Table ko halka fade kar dein
 
     try {
         const res = await fetch(`/products/all?${formData}`, {
@@ -335,7 +339,7 @@ async function updateTable() {
         const data = await res.json();
 
         if (data.success) {
-            // 1. Update Stats Boxes (Safe decimal handling)
+            // 🟢 2. Update Stats Boxes
             const statsPs = document.querySelectorAll('.stat-box p');
             if (statsPs.length >= 5) {
                 statsPs[0].innerText = data.stats.totalStock || 0;
@@ -345,13 +349,12 @@ async function updateTable() {
                 statsPs[4].innerText = `Rs ${Number(data.stats.totalRefundedValue || 0).toFixed(2)}`;
             }
 
-            // 2. Build Table Content
+            // 🟢 3. Build Table Content
             let html = '';
             if (data.products.length === 0) {
-                html = `<tr><td colspan="13" class="no-data">No products found for the selected filter.</td></tr>`;
+                html = `<tr><td colspan="13" class="no-data">No products found.</td></tr>`;
             } else {
                 data.products.forEach(p => {
-                    // 🟢 FIX: strictly Pakistan timezone mein date dikhayein
                     const dateObj = new Date(p.createdAt);
                     const dateStr = dateObj.toLocaleDateString('en-GB', { 
                         day: '2-digit', month: 'short', year: 'numeric',
@@ -374,34 +377,24 @@ async function updateTable() {
                         <td>Rs ${(Number(p.totalProduct || 0) * Number(p.rate || 0)).toFixed(2)}</td>
                         <td class="refund-status">${p.refundStatus || 'none'}</td>
                         <td class="refund-quantity">${p.refundQuantity || 0}</td>
-                        <td>
-                            ${dateStr}<br>
-                            <small style="color: #007bff; font-weight: bold;">${timeStr}</small>
-                        </td>
-                        ${data.role === "admin" ? `
-                        <td>
-                            <button type="button" id="delete" class="delete-btn delete-sale" data-id="${p._id}">
-                                Delete
-                            </button>
-                        </td>` : ''}
+                        <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
+                        ${data.role === "admin" ? `<td><button type="button" class="delete-btn" data-id="${p._id}" id="delete" >Delete</button></td>` : ''}
                     </tr>`;
                 });
             }
             tbody.innerHTML = html;
             
-            // 3. Update URL browser history
-            window.history.pushState({}, '', `/products/all?${formData}`);
+            // 🟢 URL update line removed for clean URL
             
-            // Re-attach delete events
-            if (typeof attachDeleteEvents === "function") {
-                attachDeleteEvents();
-            } else if (typeof attachDeleteListeners === "function") {
-                attachDeleteListeners();
-            }
+            if (typeof attachDeleteEvents === "function") attachDeleteEvents();
+            else if (typeof attachDeleteListeners === "function") attachDeleteListeners();
         }
     } catch (err) {
-        console.error("AJAX Error:", err);
+        console.error("❌ AJAX Error:", err);
     } finally {
+        // 🟢 4. Loading End: Loader chhupao aur blur khatam karo
+        if (loader) loader.style.display = 'none';
+        if (tableContainer) tableContainer.classList.remove('loading-active');
         tbody.style.opacity = '1';
     }
 }
@@ -492,38 +485,67 @@ function attachDeleteEvents() {
 
 // =================== EVENT LISTENERS ========================
 
+// ... (brandItems, brandUnits, productOptions definitions ko waise hi rehne dein)
+
+// =================== EVENT LISTENERS (REPLACED & SYNCED) ========================
+
+// Jab Brand badle
 brandFilter.addEventListener('change', function () {
     populateItemFilter(this.value);
     populateUnitFilter(this.value);
     itemFilter.value = 'all';
-    populateColourFilter(this.value, 'all');
-    updateTable();
+    colourFilter.innerHTML = '<option value="all">All Colours</option>';
+    colourFilter.disabled = true;
+    updateTable(); // Brand badalne par foran update
 });
 
+// Jab Item badle
 itemFilter.addEventListener('change', function () {
     populateColourFilter(brandFilter.value, this.value);
-    updateTable();
+    updateTable(); // Item badalne par foran update
 });
 
-[unitFilter, colourFilter, filterSelect, stockStatusFilter, refundFilter].forEach(f => {
+// Baqi filters (Unit, Colour, Stock, Refund)
+[unitFilter, colourFilter, stockStatusFilter, refundFilter].forEach(f => {
     if (f) {
-        f.addEventListener('change', () => {
-            if (f === filterSelect) toggleDateInputs(f.value);
-            updateTable();
-        });
+        f.addEventListener('change', updateTable);
     }
 });
 
-filterForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    updateTable();
+// Date Filter Logic (Sahi tareeka)
+filterSelect.addEventListener('change', function() {
+    toggleDateInputs(this.value);
+    // Agar "Custom" hai to update nahi karna, user Apply dabaye ga
+    // Agar Custom ke ilawa kuch hai (Today, All Time) to foran update
+    if (this.value !== 'custom') {
+        updateTable();
+    }
 });
 
-// Initialize
+// Apply Button Logic (Sirf Custom ke liye)
+const applyBtn = document.getElementById('apply');
+if (applyBtn) {
+    applyBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        updateTable(); // Ab loader chalega Custom select karne ke baad button dabane par
+    });
+}
+
+// =================== INITIALIZE (UPDATED) ========================
+
 window.addEventListener('DOMContentLoaded', () => {
+    // Dropdowns populate karein
     populateItemFilter(selectedBrand);
     populateUnitFilter(selectedBrand);
     populateColourFilter(selectedBrand, selectedItem);
+    
+    // Date inputs show/hide karein
     toggleDateInputs(filterSelect.value);
+
+    // 🟢 LOADER FIX: Pehli baar updateTable() ko call NA KAREIN 
+    // Taake page load par loader na aaye, sirf filter badalne par aaye.
+    // updateTable(); <--- Isay comment rehne dein
+    
     attachDeleteEvents();
 });
+

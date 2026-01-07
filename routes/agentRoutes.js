@@ -61,12 +61,12 @@ const PKT_TIMEZONE = "Asia/Karachi";
 router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     const role = req.user.role;
     try {
-        let { filter, from, to } = req.query;
+        let { filter = 'all', from, to } = req.query; // Default 'all' hi rakha hai
         let query = {};
         const nowPKT = moment.tz(PKT_TIMEZONE);
         let start, end;
 
-        // Date Logic
+        // Date Logic (Keep as is)
         if (filter === "today") {
             start = nowPKT.clone().startOf('day').toDate();
             end = nowPKT.clone().endOf('day').toDate();
@@ -91,7 +91,7 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
         // Fetching Agents with Populated Items
         const agents = await Agent.find(query).populate("items").sort({ createdAt: -1 }).lean();
 
-        // Stats Calculation (Strictly Numbers)
+        // Stats Calculation
         let totalPercentageAmount = 0, totalPercentageAmountGiven = 0;
         agents.forEach(agent => {
             (agent.items || []).forEach(item => {
@@ -109,12 +109,11 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
 
         const responseData = { role, agents, filter, from, to, stats };
 
-        // 🟢 Check for AJAX/SPA Request
+        // 🟢 AJAX Request Handling
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, ...responseData });
         }
 
-        // Regular Page Load
         res.render("allAgents", responseData);
     } catch (err) {
         console.error("❌ Error:", err);
@@ -151,6 +150,7 @@ router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (
         const nowPKT = moment.tz(PKT_TIMEZONE);
         let start, end;
 
+        // Default "all" handle karne ke liye
         if (filter === "today") {
             start = nowPKT.clone().startOf('day').toDate();
             end = nowPKT.clone().endOf('day').toDate();
@@ -192,9 +192,9 @@ router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (
             totalPercentageAmountLeft: totalPercentageAmount - totalPercentageAmountGiven
         };
 
-        const responseData = { role, agent, stats, filter, from, to };
+        const responseData = { role, agent, stats, filter: filter || 'all', from, to };
 
-        // 🟢 AJAX Request Handle
+        // 🟢 AJAX Request Handle (Ye page ko refresh hone se bachayega)
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, ...responseData });
         }

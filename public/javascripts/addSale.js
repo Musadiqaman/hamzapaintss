@@ -116,7 +116,7 @@ function updateOptionDropdown(brand, item, unit, colourName, preFiltered = null)
         p.remaining > 0
     );
 
-    colourSelect.innerHTML = `<option value="">Select Stock Option</option>` +
+    colourSelect.innerHTML = `<option value="">Select Stock</option>` +
         filtered.map(p => {
             let detail = p.itemName;
             if (p.qty && p.qty.toUpperCase() !== "N/A") detail += ` | ${p.qty}`;
@@ -219,21 +219,54 @@ function renderTable() {
     });
 }
 
+// Isay dhoondhein aur replace kar dein
+// ===============================================
+// UPDATED SUBMIT LOGIC (Sirf Loader Add Kiya Hai)
+// ===============================================
 document.getElementById("submitBtn").addEventListener("click", async function () {
     if (tempSales.length === 0) return alert("⚠️ Add sales first.");
-    const payload = { sales: tempSales, agentID: agentSelect.value || null, percentage: agentPercentage.value || 0 };
+
+    const submitBtn = document.getElementById("submitBtn");
+    const originalText = submitBtn.innerHTML;
+
+    // 1. Loader Start & Disable Button (Taake double entry na ho)
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `<span class="spinner"></span> Saving Sales...`;
+
+    // Agent logic (Agent ID aur Percentage pick karna)
+    const payload = { 
+        sales: tempSales, 
+        agentID: agentSelect.value || null, 
+        percentage: parseFloat(agentPercentage.value) || 0 
+    };
+
     try {
         const res = await fetch("/sales/add", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload),
         });
-        if (res.ok) {
+
+        const data = await res.json(); // Backend se success/message lena
+
+        if (data.success) {
             alert("✅ Sales Saved Successfully!");
+            // Print window kholna
             window.open(`/sales/print?data=${encodeURIComponent(JSON.stringify(tempSales))}`, "_blank");
-            location.reload();
+            location.reload(); // Page refresh taake stock naya ho jaye
+        } else {
+            // Agar backend koi error bhejta hai (e.g. Stock khatam ho gaya)
+            alert("❌ Failed: " + (data.message || "Unknown error"));
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
         }
-    } catch (err) { alert("❌ Server Error!"); }
+    } catch (err) { 
+        // Agar internet chala jaye ya server down ho
+        alert("❌ Server Connection Error!"); 
+        console.error(err);
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalText;
+    }
 });
 
 // ===============================================

@@ -20,26 +20,25 @@ body {
 }
 ::-webkit-scrollbar-track { background-color: #f1f1f1; }
 
-/* ---------------- HAMBURGER ---------------- */
+/* ---------------- HAMBURGER (FIXED) ---------------- */
 .hamburger {
     display: none; 
     position: fixed;
     top: 15px;
     left: 15px;
-    z-index: 9999;
+    /* Loader (9999) se upar rakha hai taake click block na ho */
+    z-index: 10005; 
     background: #048b59;
     color: white;
     border: none;
-    padding: 10px 14px;
+    padding: 12px 16px; 
     font-size: 22px;
     border-radius: 8px;
     cursor: pointer;
     box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-    /* transition: transform 0.2s ease; */
+    -webkit-tap-highlight-color: transparent; /* Mobile blue tint fix */
+    outline: none;
 }
-/* .hamburger:active {
-    transform: scale(0.95);
-} */
 
 /* ---------------- SIDEBAR ---------------- */
 .sidebar {
@@ -53,8 +52,24 @@ body {
     border-right: 1px solid #e9ecef;
     box-shadow: 2px 0 20px rgba(0,0,0,0.05);
     overflow-y: auto;
-    transition: all 0.35s ease;
-    z-index: 5000;
+    transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10000; /* Sidebar Layer */
+}
+
+/* ---------------- OVERLAY ---------------- */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.4);
+    z-index: 9998; /* Sidebar se niche, content se upar */
+    display: none;
+    backdrop-filter: blur(2px);
+}
+#overlay.show {
+    display: block;
 }
 
 /* Logo */
@@ -92,21 +107,21 @@ ul { list-style: none; }
     border-bottom: #0000001e 3px solid;
 }
 .dropdown:hover { 
-    background: #4ab391; 
+    background: #d4f5e9; 
 }
 
 /* Submenu */
 .submenu {
     max-height: 0;
     overflow: hidden;
-    transition: max-height 0.3s ease;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     background: #f9fafb;
     border-radius: 10px;
-    margin-bottom: 10px;
 }
 .submenu.open { 
-    max-height: 320px; 
+    max-height: 500px; /* Thora barha diya taake data na kute */
     padding: 6px 0 10px 15px; 
+    margin-bottom: 10px;
 }
 
 .submenu li a {
@@ -117,12 +132,13 @@ ul { list-style: none; }
     color: #00462c;
     text-decoration: none;
     border-radius: 6px;
-    /* transition: background 0.2s ease; */
-    border: #11101030 2px solid;
-    margin-bottom: 2px;
+    border: #11101015 1px solid;
+    margin-bottom: 4px;
+    transition: 0.2s;
 }
 .submenu li a:hover {
     background: #65b491;
+    color: white;
 }
 
 /* Logout */
@@ -137,60 +153,69 @@ ul { list-style: none; }
     gap: 10px;
 }
 
-/* ---------------- MAIN CONTENT (DESKTOP FIX) ---------------- */
+/* ---------------- MAIN CONTENT ---------------- */
 main { 
-    margin-left: 250px; 
+    margin-left: 230px; 
     padding: 30px; 
-    /* transition: margin-left 0.35s ease; */
-    /* width: calc(100% - 250px); */
+    transition: 0.35s;
 }
 
-/* Table container */
-.table-wrapper {
+/* ---------------- GLOBAL LOADER (Z-INDEX FIX) ---------------- */
+#global-page-loader {
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-    /* overflow-x: auto; */
-    background: #ffffff;
-    border-radius: 12px;
+    height: 100%;
+    background: rgba(255, 255, 255, 0.95);
+    display: none; /* JS control karegi */
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 10002; /* Hamburger se niche magar content se upar */
+}
+
+.loader-spinner {
+    width: 50px;
+    height: 50px;
+    border: 5px solid #f3f3f3;
+    border-top: 5px solid #098D69; 
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
 }
 
 /* ---------------- MOBILE RESPONSIVE ---------------- */
 @media screen and (max-width: 768px) {
 
     .hamburger { 
-        display: block;
+        display: block; /* Mobile par icon show hoga */
     }
 
     .sidebar { 
-        left: -260px;
-        width: 210px;
+        left: -260px; /* Shuru mein chhupa hoga */
+        width: 240px;
     }
 
     .sidebar.mobile-open { 
         left: 0; 
-        background: #57fdc8;
-        box-shadow: 10px 0 30px rgba(113, 230, 171, 0.25);
+        background: #ffffff;
+        box-shadow: 10px 0 30px rgba(0,0,0,0.1);
     }
 
     .submenu li a { 
-        margin-bottom: 6px; 
-        border-radius: 6px;
-        border: 1px solid #0000001e;
-        background-color: #afedd5;
-    }
-
-    .submenu li a:hover { 
-        background: #03985f; 
-        color: #fff;
+        background-color: #f0fdf9;
     }
 
     main { 
         margin-left: 0 !important; 
         width: 100%;
         padding: 15px; 
-        padding-top: 80px;
-    }
-
-    table { 
-        min-width: 800px; 
+        padding-top: 80px; /* Hamburger ki jagah chhordi */
     }
 }
+

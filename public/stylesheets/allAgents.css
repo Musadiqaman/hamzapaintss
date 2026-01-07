@@ -26,7 +26,6 @@ body {
 
 /* ================= MAIN (SIDEBAR SAFE) ================= */
 main {
-  /* margin-left:250px;              sidebar width */
   padding: 25px;
   transition: .3s ease;
 }
@@ -55,11 +54,16 @@ button {
   border-radius: 5px;
   border: 1px solid #363636bb;
   font-size: 13px;
-  /* width:100%; */
   background: #fff;
   text-align: start;
   cursor: pointer;
 }
+
+select:focus{
+      border-color: #06a56c;
+      outline: none;
+      box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
+    }
 
 button#apply {
   background-color: #a6e7d8;
@@ -85,7 +89,6 @@ button#apply {
   gap: 4px;
   max-width: 1200px;
   margin: 0 auto 18px;
-
 }
 
 .stat-box {
@@ -101,35 +104,63 @@ button#apply {
   color: #06a56c;
   font-size: 15px;
   font-weight: 700;
-  padding-right: 30px;
   margin-bottom: 1px;
 }
 
 .stat-box p {
   font-size: 18px;
   font-weight: 800;
-  margin-top: 0px;
 }
 
 .stat-box#negative {
   color: #ff4d4d;
-  font-weight: 800;
 }
 
-/* ================= TABLE ================= */
+/* ================= TABLE CONTAINER & LOADER ================= */
 .table-container {
   max-width: 1200px;
-  margin: 0 auto 40px auto;
+  margin: 0 auto; /* Niche ka gap khatam */
   overflow-x: auto;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background: white;
+  position: relative; /* Loader center karne ke liye */
+  min-height: 100px; /* Space kam kar diya */
 }
 
+/* Loader Fix: Default hide aur center alignment */
+#table-loader {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.8);
+  display: none; /* Default hidden, JS se flex karein */
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  z-index: 10;
+}
+
+.spinner {
+  width: 30px;
+  height: 30px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #06A56C;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* ================= TABLE STYLE ================= */
 table {
   width: 100%;
   min-width: 900px;
-  /* ensures horizontal scroll on small screens */
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -139,13 +170,11 @@ thead {
   color: white;
 }
 
-
 th {
   color: #ffffff;
   padding: 16px 5px;
   font-size: 13px;
   text-align: center;
-  word-wrap: break-word;
 }
 
 td {
@@ -154,45 +183,29 @@ td {
   font-weight: 400;
   text-align: center;
   border-bottom: 1px solid #13a354;
-  word-wrap: break-word;
-}
-
-tbody tr:hover td {
-  background: #baded0;
-  font-weight: 400;
-}
-
-.no-data {
-  padding: 12px;
-  color: #888;
-  text-align: center;
 }
 
 tbody {
   display: block;
-  max-height: 280px;
+  max-height: 280px; /* Space control karne ke liye */
   overflow-y: auto;
   width: 100%;
 }
 
-thead,
-tbody tr {
+thead, tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
 }
 
-/* ================= BUTTON ================= */
+/* ================= PURANA BUTTON STYLE ================= */
 #view {
   background-color: #a6e7d8;
-  /* Light teal background color */
-  color: white;
-  /* White text */
+  color: #008767;
   border: 2px solid #00B087;
   padding: 5px 14px;
   border-radius: 8px;
   font-size: 12px;
-  color: #008767;
   cursor: pointer;
 }
 
@@ -218,79 +231,21 @@ tbody tr {
   color: #fff;
 }
 
-/* ================= LARGE LAPTOP ================= */
-@media(max-width:1200px) {
-  .filter-container {
-    grid-template-columns: repeat(5, 1fr);
-  }
-
-  table {
-    min-width: 1100px;
-  }
-}
-
-/* ================= TABLET ================= */
+/* ================= MOBILE / RESPONSIVE ================= */
 @media(max-width:1024px) {
-  main {
-    margin-left: 250px;
-    padding: 20px;
-  }
-
-  .filter-container {
-    grid-template-columns: repeat(3, 1fr);
-  }
-
-  .stats {
-    grid-template-columns: repeat(3, 1fr);
-  }
+  .filter-container, .stats { grid-template-columns: repeat(3, 1fr); }
 }
 
-/* ================= MOBILE ================= */
 @media(max-width:768px) {
-  main {
-    margin-left: 0 !important;
-    padding: 15px;
-    padding-top: 80px;
-  }
-
-  h1 {
-    font-size: 19px;
-  }
-
-  .filter-container {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  table {
-    min-width: 1100px;
-  }
-
-  tbody {
-    max-height: 375px;
-  }
+  main { padding-top: 20px; }
+  .filter-container, .stats { grid-template-columns: repeat(2, 1fr); }
+  
+  /* Mobile space fix: 1100px se kam kiya taake gap na dikhe */
+  table { min-width: 700px; } 
 }
 
-/* ================= SMALL MOBILE ================= */
 @media(max-width:480px) {
-  h1 {
-    font-size: 18px;
-  }
-
-  th,
-  td {
-    font-size: 12px;
-    font-weight: 500;
-  }
-
-  .stat-box h3 {
-    font-size: 13px;
-  }
-
-  .stat-box p {
-    font-size: 14.5px;
-  }
+  th, td { font-size: 12px; padding: 8px 2px; }
+  .stat-box p { font-size: 14.5px; }
+  .table-container { margin-bottom: 20px; }
 }

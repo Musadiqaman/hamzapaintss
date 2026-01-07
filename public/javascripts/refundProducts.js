@@ -5,7 +5,10 @@ const addButton = document.getElementById("add");
 refundForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  addButton.disabled = true; // prevent multiple clicks
+  // 1. Loader Setup
+  const originalText = addButton.innerHTML; // "Refund Now" ko save kiya
+  addButton.disabled = true; // Multiple clicks block kiye
+  addButton.innerHTML = `<span class="spinner"></span> Processing...`; // Spinner dikhaya
 
   const formData = new FormData(refundForm);
   const data = {
@@ -24,7 +27,7 @@ refundForm.addEventListener("submit", async function (e) {
 
     const result = await res.text();
 
-    // ✅ Show only refund message
+    // ✅ Show refund message
     refundResult.innerHTML = `<span style="color:${res.ok ? 'green' : 'red'}">${result}</span>`;
 
     if (res.ok) {
@@ -34,7 +37,9 @@ refundForm.addEventListener("submit", async function (e) {
   } catch (err) {
     console.error(err);
     refundResult.innerHTML = `<span style="color:red">❌ Something went wrong. Try again!</span>`;
+  } finally {
+    // 2. Reset Button (Finally block hamesha chalta hai chahe success ho ya error)
+    addButton.disabled = false;
+    addButton.innerHTML = originalText;
   }
-
-  addButton.disabled = false;
 });

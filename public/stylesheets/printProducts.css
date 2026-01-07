@@ -15,11 +15,24 @@ body {
   padding: 0;
 }
 
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #06A56C;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
 .print-area {
   width: 76mm; /* Thermal printer width */
   margin: 0;
   padding: 0;
 }
+
 
 /* ===== SHOP HEADER ===== */
 .shop-header {
