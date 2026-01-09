@@ -308,42 +308,23 @@ router.delete("/delete-sale/:id",isLoggedIn,allowRoles("admin"), async (req, res
 
 
 
-router.get('/print',isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
-  let sales = [];
-
-  if (req.query.data) {
-    // ✅ Data sent from frontend (tempSales)
-    try {
-      sales = JSON.parse(decodeURIComponent(req.query.data));
-    } catch (err) {
-      console.error("Error parsing print data:", err);
-    }
+router.get('/print', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  let currentDate;
+  if (process.env.NODE_ENV === 'production') {
+    currentDate = new Date().toLocaleString('en-US', { 
+      timeZone: 'Asia/Karachi',
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
   } else {
-    // 🗄️ Fallback: load from DB if no query data found
-    sales = await Sale.find().sort({ createdAt: -1 }).lean();
+    currentDate = new Date().toLocaleString('en-US', { 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    });
   }
 
-  let currentDate;
-if (process.env.NODE_ENV === 'production') {
-  // deployed server, force PKT
-  currentDate = new Date().toLocaleString('en-US', { 
-    timeZone: 'Asia/Karachi',
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  });
-} else {
-  // localhost, just use local time
-  currentDate = new Date().toLocaleString('en-US', { 
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  });
-}
-
-
-
-  res.render('printSales', { sales, currentDate });
-  // console.log("Received print data:", req.query.data);
-
+  // ✅ Sirf page render karein, data LocalStorage se ayega
+  res.render('printSales', { currentDate });
 });
 
 

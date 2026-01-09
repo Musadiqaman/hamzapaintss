@@ -6,17 +6,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const tbody = document.getElementById("agentTableBody");
     const tableLoader = document.getElementById("tableLoader");
 
-    // 🟢 URL CLEANING & ID STORAGE LOGIC
-    // Agar URL mein ID hai (e.g. /view-agent/123), to usay save kar lo
+    // ✅ URL se Agent ID nikalna (Address bar se)
     const pathParts = window.location.pathname.split('/');
-    const idInUrl = pathParts[pathParts.length - 1];
-
-    // Agar ID valid length ki hai to localStorage mein save karein aur URL saaf karein
-    if (idInUrl && idInUrl.length > 15) { 
-        localStorage.setItem('activeAgentId', idInUrl);
-        // Browser bar mein link clean kar do: localhost:3000/agents/view
-        window.history.replaceState(null, "", "/agents/view");
-    }
+    const agentId = pathParts[pathParts.length - 1];
 
     const toggleDates = () => {
         const isCustom = filterSelect.value === "custom";
@@ -25,9 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
     };
 
     const fetchData = async () => {
-        // Hamesha localStorage se ID uthao kyunki URL ab clean ho chuka hai
-        const agentId = localStorage.getItem('activeAgentId');
-        if (!agentId) return alert("Agent ID not found. Please go back and try again.");
+        // ID check karein
+        if (!agentId || agentId.length < 15) {
+            return alert("Agent ID not found in URL. Please go back to agents list.");
+        }
 
         const filterVal = filterSelect.value;
         let paramsObj = { filter: filterVal };
@@ -38,12 +31,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const params = new URLSearchParams(paramsObj).toString();
 
-        // Loader dikhao
+        // UI updates before fetch
         tableLoader.style.display = "flex";
         tbody.style.opacity = "0.3";
 
         try {
-            // Request hamesha asal ID wale route par jayegi
             const response = await fetch(`/agents/view-agent/${agentId}?${params}`, {
                 headers: { 
                     'X-Requested-With': 'XMLHttpRequest', 
@@ -74,17 +66,17 @@ document.addEventListener("DOMContentLoaded", () => {
                             <td>${i.totalProductAmount}</td>
                             <td>${i.percentage}%</td>
                             <td>${i.percentageAmount}</td>
-                            <td class="paid-status"><span  class="status-tag">${status}</span></td>
+                            <td class="paid-status"><span class="status-tag">${status}</span></td>
                             <td>Rs ${i.paidAmount}</td>
                             <td>Rs ${leftAmt}</td>
                             <td>${dateObj.toLocaleDateString('en-GB')}<br>
                             <small style="color: #007bff; font-weight: bold;">${dateObj.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', hour12:true})}</small></td>
                             <td class="actions">
-                                <button class="pay-btn" data-id="${i._id}" id="pay" >Pay</button>
-                                ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete" >Delete</button>` : ''}
-                                <div class="pay-box" id="paybox-${i._id}" style="display:none;">
-                                    <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Pay" style="width:70px" min="1" max="1000000">
-                                    <button class="submit-pay-btn" data-id="${i._id}" id="submit" >Submit</button>
+                                <button class="pay-btn" data-id="${i._id}" id="pay">Pay</button>
+                                ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete">Delete</button>` : ''}
+                                <div class="pay-box" id="paybox-${i._id}" style="display:none; margin-top:5px;">
+                                    <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Amount" style="width:70px">
+                                    <button class="submit-pay-btn" data-id="${i._id}" id="submit">Ok</button>
                                 </div>
                             </td>
                         </tr>`;
@@ -96,14 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
         } catch (err) { 
             console.error("Error:", err); 
             alert("Data can't be loaded.");
-        } 
-        finally { 
+        } finally { 
             tableLoader.style.display = "none"; 
             tbody.style.opacity = "1"; 
         }
     };
 
     function rebindButtons() {
+        // Pay button toggle
         document.querySelectorAll(".pay-btn").forEach(btn => {
             btn.onclick = () => {
                 const box = document.getElementById(`paybox-${btn.dataset.id}`);
@@ -111,49 +103,46 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         });
 
+        // Submit Payment logic
         document.querySelectorAll(".submit-pay-btn").forEach(btn => {
-        btn.onclick = async () => {
-        const id = btn.dataset.id;
-        const inputEl = document.getElementById(`payInput-${id}`);
-        const amt = inputEl.value;
+            btn.onclick = async () => {
+                const id = btn.dataset.id;
+                const inputEl = document.getElementById(`payInput-${id}`);
+                const amt = inputEl.value;
 
-        if (!amt || amt <= 0) return alert("❌ Please enter a valid amount");
+                if (!amt || amt <= 0) return alert("❌ Enter valid amount");
 
-        btn.disabled = true;
-        btn.innerText = "...";
+                btn.disabled = true;
+                btn.innerText = "...";
 
-        try {
-            const res = await fetch(`/agents/pay-item/${id}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ amount: parseFloat(amt) })
-            });
+                try {
+                    const res = await fetch(`/agents/pay-item/${id}`, {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ amount: parseFloat(amt) })
+                    });
+                    const result = await res.json(); 
 
-            const result = await res.json(); 
+                    if (result.success) {
+                        alert(`✅ Payment Success: Rs ${amt}`); 
+                        fetchData(); 
+                    } else {
+                        alert(`⚠️ Error: ${result.message}`); 
+                        btn.disabled = false;
+                        btn.innerText = "Ok"; 
+                    }
+                } catch (e) {
+                    alert("🌐 Network Error");
+                    btn.disabled = false;
+                    btn.innerText = "Ok";
+                }
+            };
+        });
 
-            if (result.success) {
-                // ✅ Professional Success Message
-                alert(`✅ Payment Success!\n---------------------------\nAmount: Rs ${Number(amt).toLocaleString()}`); 
-                
-                fetchData(); 
-            } else {
-                // ❌ Backend Error Message (e.g., Over payment)
-                alert(`⚠️ Error: ${result.message || "Payment Failed"}`); 
-                btn.disabled = false;
-                btn.innerText = "Submit"; 
-            }
-        } catch (e) {
-            console.error(e);
-            alert("🌐 Network Error: Check your connection.");
-            btn.disabled = false;
-            btn.innerText = "Submit";
-        }
-    };
-});
-
+        // Delete logic
         document.querySelectorAll(".delete-btn").forEach(btn => {
             btn.onclick = async () => {
-                if(!confirm("Are you sure?")) return;
+                if(!confirm("Are you sure you want to delete this record?")) return;
                 try {
                     const res = await fetch(`/agents/delete-item/${btn.dataset.id}`, { method: "DELETE" });
                     if(res.ok) fetchData();
@@ -162,9 +151,13 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // Event Listeners
     applyBtn.addEventListener("click", fetchData);
     filterSelect.addEventListener("change", toggleDates);
+    
+    // Initializing
     toggleDates();
-    rebindButtons();
+    fetchData(); // Page load par data auto-load karne ke liye
 });
+
 

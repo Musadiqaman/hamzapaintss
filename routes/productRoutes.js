@@ -315,33 +315,26 @@ router.post('/refund',isLoggedIn,allowRoles("admin", "worker"), async (req, res)
 
 
 
-
-router.get('/print',isLoggedIn,allowRoles("admin", "worker"), (req, res) => {
-  let products = [];
-  if (req.query.data) {
-    try {
-      products = JSON.parse(decodeURIComponent(req.query.data));
-    } catch (err) {
-      console.error("Error parsing print data:", err);
-    }
+router.get('/print', isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
+  let currentDate;
+  
+  // Timezone Logic (Same as before)
+  if (process.env.NODE_ENV === 'production') {
+    currentDate = new Date().toLocaleString('en-US', { 
+      timeZone: 'Asia/Karachi',
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit' 
+    });
+  } else {
+    currentDate = new Date().toLocaleString('en-US', { 
+      weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit' 
+    });
   }
- let currentDate;
-if (process.env.NODE_ENV === 'production') {
-  // deployed server, force PKT
-  currentDate = new Date().toLocaleString('en-US', { 
-    timeZone: 'Asia/Karachi',
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  });
-} else {
-  // localhost, just use local time
-  currentDate = new Date().toLocaleString('en-US', { 
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', second: '2-digit'
-  });
-}
 
-  res.render('printProducts', { products, currentDate });
+  // ✅ AB DATA NAHI BHEJNA: products array ko nikal diya
+  // Kyunke data ab browser ki memory (LocalStorage) se aayega
+  res.render('printProducts', { currentDate }); 
 });
 
 

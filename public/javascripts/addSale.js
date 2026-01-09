@@ -250,11 +250,16 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
         const data = await res.json(); // Backend se success/message lena
 
         if (data.success) {
-            alert("✅ Sales Saved Successfully!");
-            // Print window kholna
-            window.open(`/sales/print?data=${encodeURIComponent(JSON.stringify(tempSales))}`, "_blank");
-            location.reload(); // Page refresh taake stock naya ho jaye
-        } else {
+          alert("✅ Sales Saved Successfully!");
+
+         // ✅ STEP 1: Data ko LocalStorage mein save karein
+          localStorage.setItem("lastAddedSales", JSON.stringify(tempSales));
+
+         // ✅ STEP 2: Khali URL open karein
+         window.open(`/sales/print`, "_blank");
+
+         location.reload(); 
+} else {
             // Agar backend koi error bhejta hai (e.g. Stock khatam ho gaya)
             alert("❌ Failed: " + (data.message || "Unknown error"));
             submitBtn.disabled = false;

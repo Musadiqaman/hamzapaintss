@@ -41,23 +41,7 @@ document.querySelectorAll(".menu-group").forEach(group => {
     }
 });
 
-/* GLOBAL LOADER LOGIC */
-window.addEventListener('load', () => {
-    if (globalLoader) globalLoader.style.display = 'none';
-});
 
-document.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href');
-        if (href && !href.startsWith('#') && link.target !== '_blank' && link.href.startsWith(window.location.origin)) {
-            if (globalLoader) globalLoader.style.display = 'flex';
-        }
-    });
-});
-
-window.addEventListener('pageshow', (event) => {
-    if (globalLoader) globalLoader.style.display = 'none';
-});
 
 
 

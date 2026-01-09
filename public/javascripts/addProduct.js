@@ -438,18 +438,17 @@ function clearFields() {
   document.getElementById("rate").value = "";
 }
 
-// --- Submit Data (Print Added Back) ---
+
+// --- Updated Submit Data (Vercel Friendly) ---
 async function submitData() {
   if (tempProducts.length === 0) {
     alert("⚠️ Please add at least one product!");
     return;
   }
 
-  // 1. Button aur Loading setup
   const submitBtn = document.querySelector(".submit-btn");
-  const originalText = submitBtn.innerHTML; // "Submit & Save" mehfooz kar liya
+  const originalText = submitBtn.innerHTML;
   
-  // 2. Button ko disable karein aur loader dikhayein
   submitBtn.disabled = true;
   submitBtn.innerHTML = `<span class="spinner"></span> Saving Products...`;
 
@@ -465,9 +464,11 @@ async function submitData() {
     if (res.ok && data.success) {
       alert("✅ Saved Successfully!");
 
-      // Print logic
-      const printData = encodeURIComponent(JSON.stringify(tempProducts));
-      window.open(`/products/print?data=${printData}`, "_blank");
+      // ✅ STEP 1: Data ko URL mein bhejne ke bajaye LocalStorage mein save karein
+      localStorage.setItem("lastAddedProducts", JSON.stringify(tempProducts));
+
+      // ✅ STEP 2: Khali URL open karein (Koi data string nahi jayegi)
+      window.open(`/products/print`, "_blank");
 
       tempProducts = [];
       renderTable();
@@ -477,7 +478,6 @@ async function submitData() {
   } catch (err) { 
     alert("Error: " + err.message); 
   } finally {
-    // 3. Kaam khatam hone par button wapas asli halat mein (Loader hat jayega)
     submitBtn.disabled = false;
     submitBtn.innerHTML = originalText;
   }
