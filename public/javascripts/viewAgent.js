@@ -56,30 +56,55 @@ document.addEventListener("DOMContentLoaded", () => {
                     html = `<tr><td colspan="9" class="no-data" style="text-align:center; padding:20px;">No records found.</td></tr>`;
                 } else {
                     data.agent.items.forEach(i => {
-                        const dateObj = new Date(i.createdAt);
-                        const status = i.paidAmount >= i.percentageAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid');
-                        const leftAmt = (Number(i.percentageAmount) - Number(i.paidAmount)).toFixed(2);
-                        
-                        html += `
-                        <tr id="row-${i._id}">
-                            <td>${i.totalProductSold}</td>
-                            <td>${i.totalProductAmount}</td>
-                            <td>${i.percentage}%</td>
-                            <td>${i.percentageAmount}</td>
-                            <td class="paid-status"><span class="status-tag">${status}</span></td>
-                            <td>Rs ${i.paidAmount}</td>
-                            <td>Rs ${leftAmt}</td>
-                            <td>${dateObj.toLocaleDateString('en-GB')}<br>
-                            <small style="color: #007bff; font-weight: bold;">${dateObj.toLocaleTimeString('en-GB', {hour:'2-digit', minute:'2-digit', hour12:true})}</small></td>
-                            <td class="actions">
-                                <button class="pay-btn" data-id="${i._id}" id="pay">Pay</button>
-                                ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete">Delete</button>` : ''}
-                                <div class="pay-box" id="paybox-${i._id}" style="display:none; margin-top:5px;">
-                                    <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Amount" style="width:70px">
-                                    <button class="submit-pay-btn" data-id="${i._id}" id="submit">Ok</button>
-                                </div>
-                            </td>
-                        </tr>`;
+                       // ... existing code inside data.agent.items.forEach(i => {
+
+const dateObj = new Date(i.createdAt);
+
+// Pakistan Timezone settings
+const pkrDate = dateObj.toLocaleDateString('en-GB', { 
+    day: '2-digit', 
+    month: '2-digit', 
+    year: 'numeric', 
+    timeZone: 'Asia/Karachi' 
+});
+
+const pkrTime = dateObj.toLocaleTimeString('en-US', { 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    hour12: true, 
+    timeZone: 'Asia/Karachi' 
+}).toUpperCase();
+
+const status = i.paidAmount >= i.percentageAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid');
+const totalAmt = Number(i.totalProductAmount || 0).toFixed(2);
+const percAmt = Number(i.percentageAmount || 0).toFixed(2);
+const paidAmt = Number(i.paidAmount || 0).toFixed(2);
+const leftAmt = (Number(i.percentageAmount || 0) - Number(i.paidAmount || 0)).toFixed(2);
+
+html += `
+<tr id="row-${i._id}">
+   <td>${i.totalProductSold}</td>
+        <td>Rs ${totalAmt}</td>
+        <td>${i.percentage}%</td>
+        <td>Rs ${percAmt}</td>
+        <td class="paid-status"><span class="status-tag">${status}</span></td>
+        <td>Rs ${paidAmt}</td>
+        <td>Rs ${leftAmt}</td>
+    <td>
+        <div>${pkrDate}</div>
+        <small style="color: #007bff; font-weight: bold;">${pkrTime}</small>
+    </td>
+    <td class="actions">
+        <button class="pay-btn" data-id="${i._id}" id="pay">Pay</button>
+        ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete">Delete</button>` : ''}
+        <div class="pay-box" id="paybox-${i._id}" style="display:none; margin-top:5px;">
+            <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Amount" style="width:70px">
+            <button class="submit-pay-btn" data-id="${i._id}" id="submit">Ok</button>
+        </div>
+    </td>
+</tr>`;
+
+// ... rest of the code
                     });
                 }
                 tbody.innerHTML = html;

@@ -2,6 +2,7 @@ import express from 'express';
 import Product from "../models/Product.js";
 import Sale from "../models/Sale.js";
 import Agent from '../models/Agent.js';
+import PrintSale from '../models/PrintSale.js'
 import Item from '../models/Item.js';
 import { isLoggedIn } from "../middleware/isLoggedIn.js";
 import { allowRoles } from "../middleware/allowRoles.js";
@@ -39,19 +40,23 @@ router.get("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => 
    ✅ No FIFO logic, directly decrease stock
 ================================ */
 // Add Sale (POST) - with FIFO logic removed but ensuring proper profit/loss calculation
+/* ================================
+   🟢 2️⃣ Add Sale (POST) - UPDATED
+================================ */
 router.post("/add", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
   try {
-    const { sales, agentID, percentage } = req.body;
+    const { sales, agentID, percentage, customerName } = req.body;
 
-    if (!sales || !Array.isArray(sales) || sales.length === 0) {
+    // Validation
+    if (!customerName) {
+      return res.status(400).json({ success: false, message: "Customer name is required." });
+    }
+    if (!sales || sales.length === 0) {
       return res.status(400).json({ success: false, message: "No sales provided." });
     }
 
-    // 1. Ek hi baar mein saaray products fetch kar lein jo sales mein hain
     const stockIDs = sales.map(s => s.stockID);
     const products = await Product.find({ stockID: { $in: stockIDs } });
-    
-    // Map banayein taake loop mein foran product mil jaye (Database hit kiye baghair)
     const productMap = new Map(products.map(p => [p.stockID, p]));
 
     let totalQuantityForAgent = 0;
@@ -59,65 +64,64 @@ router.post("/add", isLoggedIn, allowRoles("admin", "worker"), async (req, res) 
     const salesToCreate = [];
     const productUpdates = [];
 
-    // 2. Loop sirf calculation ke liye (No Awaits here)
     for (const s of sales) {
-      const { brandName, itemName, colourName, qty, quantitySold, rate, stockID, saleID } = s;
-      const product = productMap.get(stockID);
+      const product = productMap.get(s.stockID);
+      if (!product) throw new Error(`Product not found: ${s.itemName}`);
+      if (s.quantitySold > product.remaining) throw new Error(`Stock low for ${s.itemName}`);
 
-      if (!product) throw new Error(`Product not found: ${itemName}`);
-      if (quantitySold > product.remaining) throw new Error(`Only ${product.remaining} left for ${itemName}!`);
-
-      // Calculations
-      const profit = Math.round(((rate - (product.rate || 0)) * quantitySold + Number.EPSILON) * 100) / 100;
+      // Profit Calculation
+      const profit = Math.round(((s.rate - product.rate) * s.quantitySold) * 100) / 100;
       
-      // Data tayyar karein
       salesToCreate.push({
-        brandName, itemName, colourName, qty, quantitySold, rate, stockID, saleID,
-        profit, refundQuantity: 0, refundStatus: "none"
+        ...s,
+        profit,
+        refundQuantity: 0,
+        refundStatus: "none"
       });
 
-      // Product update ki query tayyar karein
       productUpdates.push({
         updateOne: {
           filter: { _id: product._id },
-          update: { $inc: { remaining: -quantitySold } } // $inc fast hota hai
+          update: { $inc: { remaining: -s.quantitySold } }
         }
       });
 
-      if (agentID && percentage > 0) {
-        totalQuantityForAgent += quantitySold;
-        totalAmountForAgent += quantitySold * rate;
-      }
+      totalQuantityForAgent += s.quantitySold;
+      totalAmountForAgent += (s.quantitySold * s.rate);
     }
 
-    // 3. Sab kuch ek saath execute karein (Bulk Operations)
-    // Ek hi time par: Sales create hongi aur Products update honge
-    await Promise.all([
-      Sale.insertMany(salesToCreate), // Saari sales ek saath
-      Product.bulkWrite(productUpdates) // Saaray products ka stock ek saath update
-    ]);
+    // 1. Database Operations (Execute together)
+    const savedSales = await Sale.insertMany(salesToCreate);
+    await Product.bulkWrite(productUpdates);
 
-    // 4. Agent logic (agar hai)
-    if (agentID && percentage > 0) {
-      const agent = await Agent.findOne({ agentID });
-      if (agent) {
-        const percentageAmount = Math.round((totalAmountForAgent * percentage / 100 + Number.EPSILON) * 100) / 100;
-
-        const agentItem = await Item.create({
-          agent: agent._id,
-          totalProductSold: totalQuantityForAgent,
-          totalProductAmount: totalAmountForAgent,
-          percentage,
-          percentageAmount,
-          paidStatus: "Unpaid"
-        });
-
-        agent.items.push(agentItem._id);
-        await agent.save();
-      }
+    // 2. ✅ Save to PrintSale (Sales History)
+    let dbAgent = null;
+    if (agentID) {
+        dbAgent = await Agent.findOne({ agentID });
     }
 
-    res.json({ success: true, message: `All ${sales.length} sales completed instantly!` });
+    await PrintSale.create({
+        customerName: customerName,
+        salesItems: savedSales.map(sale => sale._id), // Sirf IDs ka array
+        agentId: dbAgent ? dbAgent._id : null
+    });
+
+    // 3. Agent Commission Logic
+    if (dbAgent && percentage > 0) {
+      const percentageAmount = Math.round((totalAmountForAgent * percentage / 100) * 100) / 100;
+      const agentItem = await Item.create({
+        agent: dbAgent._id,
+        totalProductSold: totalQuantityForAgent,
+        totalProductAmount: totalAmountForAgent,
+        percentage,
+        percentageAmount,
+        paidStatus: "Unpaid"
+      });
+      dbAgent.items.push(agentItem._id);
+      await dbAgent.save();
+    }
+
+    res.json({ success: true, message: "Sale and History Saved!" });
 
   } catch (err) {
     console.error("❌ Add Sale Error:", err);
@@ -288,7 +292,6 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
 
 
 
-
 /* ================================
    🟢 4️⃣ Delete Sale (DELETE)
 ================================ */
@@ -325,6 +328,161 @@ router.get('/print', isLoggedIn, allowRoles("admin", "worker"), async (req, res)
 
   // ✅ Sirf page render karein, data LocalStorage se ayega
   res.render('printSales', { currentDate });
+});
+
+
+
+// Sales History Page Route
+/* ================================
+   🟢 3️⃣ Sales History (GET)
+================================ */
+/* ================================
+   🟢 Sales History (GET) 
+================================ */
+router.get('/history', isLoggedIn, allowRoles("admin","worker"), async (req, res) => {
+    try {
+        let { filter = 'month', agentId, from, to, ajax } = req.query;
+        let query = {};
+        const PKT_TIMEZONE = 'Asia/Karachi'; 
+        const nowPKT = moment().tz(PKT_TIMEZONE);
+
+        // --- 1. Filter Logic ---
+        if (filter === 'today') {
+            query.createdAt = { $gte: nowPKT.clone().startOf('day').toDate(), $lte: nowPKT.clone().endOf('day').toDate() };
+        } else if (filter === 'yesterday') {
+            const yesterday = nowPKT.clone().subtract(1, 'days');
+            query.createdAt = { $gte: yesterday.startOf('day').toDate(), $lte: yesterday.endOf('day').toDate() };
+        } else if (filter === 'month') {
+            query.createdAt = { $gte: nowPKT.clone().startOf('month').toDate(), $lte: nowPKT.clone().endOf('day').toDate() };
+        } else if (filter === 'lastMonth') {
+            const lastMonth = nowPKT.clone().subtract(1, 'months');
+            query.createdAt = { $gte: lastMonth.startOf('month').toDate(), $lte: lastMonth.endOf('month').toDate() };
+        } else if (filter === 'custom' && from && to) {
+            query.createdAt = { 
+                $gte: moment.tz(from, PKT_TIMEZONE).startOf('day').toDate(), 
+                $lte: moment.tz(to, PKT_TIMEZONE).endOf('day').toDate() 
+            };
+        }
+
+        if (agentId && agentId !== 'all') {
+            query.agentId = agentId;
+        }
+
+        // --- 2. Database Query ---
+        const history = await PrintSale.find(query)
+            .populate('agentId', 'name')
+            .populate('salesItems') 
+            .sort({ createdAt: -1 })
+            .lean(); 
+
+        const agents = await Agent.find({}, 'name phone').lean();
+        
+        // --- 3. Timezone Correction & Revenue Calculation ---
+        let totalRevenue = 0;
+        history.forEach(bill => {
+            // Vercel par date fix karne ke liye yahan format kar rahe hain
+            bill.formattedDate = moment(bill.createdAt).tz(PKT_TIMEZONE).format('DD/MM/YYYY');
+            bill.formattedTime = moment(bill.createdAt).tz(PKT_TIMEZONE).format('hh:mm A');
+
+            if (bill.salesItems) {
+                bill.salesItems.forEach(item => {
+                    totalRevenue += (item.quantitySold * (item.rate || 0));
+                });
+            }
+        });
+
+        // --- 4. Responses ---
+        if (ajax === 'true') {
+            return res.json({ 
+                success: true, 
+                history, // Isme ab formattedDate aur formattedTime shamil hai
+                totalRevenue,
+                count: history.length 
+            });
+        }
+
+        res.render('salesHistory', { 
+            history, 
+            agents, 
+            role: req.user.role, 
+            filter, 
+            selectedAgent: agentId || 'all', 
+            from, to, 
+            totalRevenue,
+            moment // EJS mein direct use karne ke liye
+        });
+
+    } catch (err) {
+        console.error("❌ History Filter Error:", err);
+        if (req.query.ajax === 'true') return res.status(500).json({ success: false });
+        res.status(500).send("Error loading history");
+    }
+});
+
+
+
+/* ================================
+   🟢 6️⃣ View Individual Bill (GET)
+================================ */
+/* ================================
+   🟢 View Bill Route
+================================ */
+router.get('/bill/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+    try {
+        // 🟢 Optimized Population: Hum specify kar rahe hain ke SalesItems se kya kya chahiye
+        const bill = await PrintSale.findById(req.params.id)
+            .populate({
+                path: 'salesItems',
+                select: 'stockID saleID itemName brandName colourName qty quantitySold rate createdAt' 
+            })
+            .populate('agentId', 'name');
+
+        if (!bill) return res.status(404).send("Bill not found");
+
+        // 🟢 Total calculation (Safety check ke saath)
+        const totalAmount = bill.salesItems.reduce((acc, item) => {
+            const itemRate = item.rate || 0;
+            const itemQty = item.quantitySold || 0;
+            return acc + (itemQty * itemRate);
+        }, 0);
+
+        // Render with all data
+        res.render('viewBill', { 
+            bill, 
+            totalAmount, 
+            role: req.user.role,
+            moment // Timezone fix ke liye moment pass karna zaroori hai
+        });
+    } catch (err) {
+        console.error("❌ View Bill Error:", err);
+        res.status(500).send("Error loading bill details");
+    }
+});
+
+
+
+/* ================================
+   🔴 Delete Bill Route
+================================ */
+router.delete("/delete-bill/:id", isLoggedIn, allowRoles("admin"), async (req, res) => {
+    try {
+        const billId = req.params.id;
+        
+        // 1. Bill ka data nikaalein taake pata chale isme kaunse sales items hain
+        const bill = await PrintSale.findById(billId);
+        if (!bill) return res.status(404).json({ success: false, message: "Bill not found" });
+
+        // 2. Is bill se linked saare individual Sales items delete karein
+        await Sale.deleteMany({ _id: { $in: bill.salesItems } });
+
+        // 3. PrintSale (History record) delete karein
+        await PrintSale.findByIdAndDelete(billId);
+
+        res.json({ success: true, message: "Bill deleted successfully!" });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ success: false, message: "Error deleting bill" });
+    }
 });
 
 

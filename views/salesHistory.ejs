@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Sales History | Hamza Paints</title>
+    <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+    <link rel="stylesheet" href="/stylesheets/salesHistory.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main>
+        <h1>📜 Sales History (Bills)</h1>
+
+        <div class="filter-container" id="filterForm">
+            <select name="filter" id="filter">
+                <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Times</option>
+                <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
+                <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+                <option value="month" <%= (filter === 'month' || !filter) ? 'selected' : '' %>>This Month</option>
+                <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+                <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+            </select>
+
+            <select name="agentId" id="agentFilter">
+                <option value="all">All Agents</option>
+                <% agents.forEach(agent => { %>
+                    <option value="<%= agent._id %>" <%= selectedAgent == agent._id.toString() ? 'selected' : '' %>>
+                    <%= agent.name + " (" + agent.phone + ")" %>
+                  </option>
+                <% }) %>
+            </select>
+
+            <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+            <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+            <button type="button" id="apply">Apply Filter</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>🧾 Total Bills</h3>
+                <p id="totalBillsCount"><%= history.length %></p>
+            </div>
+            <div class="stat-box">
+                <h3>💰 Total Revenue</h3>
+                <p id="totalRevenueText">Rs <%= totalRevenue.toFixed(2) %></p>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableWrapper">
+            <div id="table-loader">
+                <div class="spinner"></div>
+            </div>
+
+            <table id="salesTable">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Customer Name</th>
+                        <th>Items Count</th>
+                        <th>Total Bill</th>
+                        <th>Agent</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+    <% if (history && history.length > 0) { %>
+        <% history.forEach(bill => { 
+            // Total Amount calculate karne ka sahi tareeqa
+            let billTotal = bill.salesItems.reduce((acc, item) => acc + (item.quantitySold * item.rate), 0);
+            
+            // Pakistan Timezone Settings
+            let dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Karachi' };
+            let timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' };
+            
+            let pkrDate = new Date(bill.createdAt).toLocaleDateString('en-GB', dateOptions);
+            let pkrTime = new Date(bill.createdAt).toLocaleTimeString('en-US', timeOptions).toUpperCase();
+        %>
+            <tr>
+                <td>
+                    <%= pkrDate %> <br>
+                    <small style="color: #007bff; font-weight: bold;">
+                        <%= pkrTime %>
+                    </small>
+                </td>
+                <td class="customer-name"><%= bill.customerName %></td>
+                <td><%= bill.salesItems.length %> Items</td>
+                <td style="font-weight: bold; color: #06A56C;">Rs <%= billTotal.toFixed(2) %></td>
+                <td>
+                    <% if(bill.agentId) { %>
+                        <span class="agent-tag"><%= bill.agentId.name %></span>
+                    <% } else { %>
+                        <small>Direct Sale</small>
+                    <% } %>
+                </td>
+                <td>
+                    <button type="button" class="view-btn action-btn" data-id="<%= bill._id %>" id="view" >View</button>
+                    
+                    <% if(role === "admin") { %>
+                        <button type="button" class="delete-btn action-btn" id="delete" data-id="<%= bill._id %>" >Delete</button>
+                    <% } %>
+                </td>
+            </tr>
+        <% }) %>
+    <% } else { %>
+        <tr>
+            <td colspan="6" class="no-data" style="text-align: center; padding: 20px; color: #666;">
+                No history found.
+            </td>
+        </tr>
+    <% } %>
+</tbody>
+            </table>
+        </div>
+    </main>
+
+    <script src="/javascripts/salesHistory.js"></script>
+</body>
+</html>
+
+
+

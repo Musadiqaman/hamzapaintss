@@ -73,28 +73,40 @@
             <% agent.items.forEach(i => { %>
               <tr id="row-<%= i._id %>">
                 <td><%= i.totalProductSold %></td>
-                <td><%= i.totalProductAmount %></td>
+                <td>Rs <%= Number(i.totalProductAmount || 0).toFixed(2) %></td>
                 <td><%= i.percentage %>%</td>
-                <td><%= i.percentageAmount %></td>
+               <td>Rs <%= Number(i.percentageAmount || 0).toFixed(2) %></td>
                 <td class="paid-status">
                   <span class="status-tag">
                     <%= i.paidAmount >= i.percentageAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid') %>
                   </span>
                 </td>
-                <td>Rs <%= i.paidAmount %></td>
+                <td>Rs <%= Number(i.paidAmount || 0).toFixed(2) %></td>
                 <td>Rs <%= (Number(i.percentageAmount) - Number(i.paidAmount)).toFixed(2) %></td>
-               <td>
-  <%= new Date(i.createdAt).toLocaleDateString('en-GB', { 
-      timeZone: 'Asia/Karachi' 
-  }) %>
-  <br>
+             <td>
+  <div>
+    <% 
+      // Date ko ISO string mein convert karke parse karna deployment errors ko khatam karta hai
+      let dateObj = new Date(i.createdAt);
+      
+      let pkrDate = dateObj.toLocaleDateString('en-GB', { 
+          day: '2-digit', 
+          month: '2-digit', 
+          year: 'numeric', 
+          timeZone: 'Asia/Karachi' 
+      });
+
+      let pkrTime = dateObj.toLocaleTimeString('en-US', { 
+          hour: '2-digit', 
+          minute: '2-digit', 
+          hour12: true, 
+          timeZone: 'Asia/Karachi' 
+      });
+    %>
+    <%= pkrDate %>
+  </div>
   <small style="color: #007bff; font-weight: bold;">
-    <%= new Date(i.createdAt).toLocaleTimeString('en-GB', { 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        hour12: true, 
-        timeZone: 'Asia/Karachi' 
-    }) %>
+    <%= pkrTime %>
   </small>
 </td>
                 <td class="actions">
@@ -118,3 +130,5 @@
   <script src="/javascripts/viewAgent.js"></script>
 </body>
 </html>
+
+

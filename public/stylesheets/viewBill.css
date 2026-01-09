@@ -1,0 +1,291 @@
+
+/* ===== THERMAL SAFE RESET ===== */
+/* * {
+  box-sizing: border-box;
+  color: #000 !important;
+  background: transparent !important;
+  font-weight: 550;
+} */
+
+body {
+  background: transparent !important;
+  font-family: Arial, Courier, monospace;
+  font-size: 12px;
+  margin: 0;
+  padding: 0;
+}
+
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #06A56C;
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+}
+
+
+.print-area {
+  width: 76mm;
+  margin: 0;
+  padding: 0;
+  font-family: Arial, Courier, monospace;
+}
+
+/* ===== SHOP HEADER ===== */
+.shop-header {
+  text-align: center;
+  margin-top: 5px;
+  font-family: Arial, Courier, monospace;
+}
+
+#logo {
+  width: 70px;
+  display: block;
+  margin: 1px auto;
+  font-family: Arial, Courier, monospace;
+}
+
+.shop-name-en {
+  font-size: 13px;
+  font-weight: 800;
+  font-family: Arial, Courier, monospace;
+}
+
+.shop-name-ur {
+  font-size: 13.9px;
+  font-weight: 800;
+  font-family: Arial, Courier, monospace;
+}
+
+.shop-phones {
+  font-size: 10px;
+  font-weight: 700;
+  /* margin-top: 1px; */
+  white-space: nowrap;
+  font-family: Arial, Courier, monospace;
+}
+
+.divider-line {
+  font-size: 10px;
+  margin: 1px 0;
+  font-family: Arial, Courier, monospace;
+}
+
+/* ===== TABLE ===== */
+p {
+  font-size: 10px;
+  margin: 1px 0;
+  font-family: Arial, Courier, monospace;
+}
+
+h {
+  text-align: start;
+  margin: 1px 0;
+  font-weight: 600;
+  font-family: Arial, Courier, monospace;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-family: Arial, Courier, monospace;
+}
+
+th, td {
+  font-size: 9px;
+  padding: 1px;
+  text-align: center;
+  border-bottom: 1.2px dashed #000;
+  word-break: break-word;
+  font-weight: 700;
+  font-family: Arial, Courier, monospace;
+}
+
+th {
+  font-weight: 800;
+  font-family: Arial, Courier, monospace;
+}
+
+/* ===== TOTAL ===== */
+.footer {
+   color: #000 !important;
+  background: transparent !important;
+  font-weight: 550;
+  margin-top: 3px;
+  font-size: 12px;
+  font-family: Arial, Courier, monospace;
+  display: flex;
+  justify-content: space-between;
+}
+
+/* ===== THANK YOU ===== */
+.thank-you-section {
+  margin-top: 10px;
+  font-size: 11px;
+  text-align: center;
+  font-weight: 800;
+  font-family: Arial, Courier, monospace;
+}
+
+/* ===== URDU FOOTER ===== */
+.urdu-footer {
+  font-size: 13px;
+  text-align: center;
+  font-weight: 800;
+  margin-top: 6px;
+  font-family: Arial, Courier, monospace;
+}
+
+.urdu-warning {
+  font-size: 13px;
+  text-align: center;
+  font-weight: 900;
+  margin-top: 4px;
+  font-family: Arial, Courier, monospace;
+}
+
+/* ===== DEV FOOTER ===== */
+.dev-footer {
+  margin-top: 3px;
+  font-size: 10px;
+  text-align: center;
+  color: #000 !important;
+  background: transparent !important;
+  font-weight: 550;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #000;
+  font-family: Arial, Courier, monospace;
+}
+
+/* ===== PRINT ===== */
+@media print {
+  html, body {
+    width: 76mm;
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+    font-family: Arial, Courier, monospace;
+  }
+
+  .print-area {
+    width: 76mm;
+    font-family: Arial, Courier, monospace;
+  }
+}
+
+
+main{
+    display: flex;
+    justify-content: flex-start;
+    gap: 20px;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+
+
+.btn-print,
+.btn-back {
+  padding: 11px 20px;
+  border-radius: 12px;
+  font-size: 14.5px;
+  font-weight: 600;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition:
+    background 0.25s ease,
+    transform 0.2s ease,
+    box-shadow 0.25s ease;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.12);
+}
+
+/* Print Button */
+.btn-print {
+  background: linear-gradient(135deg, #06A56C, #08C086);
+  color: #ffffff !important;
+}
+
+.btn-print:hover {
+  background: linear-gradient(135deg, #058457, #06A56C);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(6, 165, 108, 0.35);
+}
+
+.btn-print:active {
+  transform: scale(0.97);
+  box-shadow: 0 5px 12px rgba(6, 165, 108, 0.25);
+}
+
+/* Back Button */
+.btn-back {
+  background: linear-gradient(135deg, #4A5568, #2D3748);
+  color: #ffffff !important;
+}
+
+.btn-back:hover {
+  background: linear-gradient(135deg, #2D3748, #1A202C);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 22px rgba(45, 55, 72, 0.4);
+}
+
+.btn-back:active {
+  transform: scale(0.97);
+  box-shadow: 0 5px 12px rgba(45, 55, 72, 0.25);
+}
+
+
+
+
+/* ===== PRINT LOGIC (HIDE NAVBAR & BUTTONS) ===== */
+@media print {
+  /* 1. Navbar, Sidebar, aur Buttons ko gayab karne ke liye */
+  nav, 
+  .navbar, 
+  #sidebar, 
+  .sidebar, 
+  .no-print-controls, 
+  header, 
+  aside { 
+    display: none !important; 
+  }
+
+  /* 2. Main container ki koi bhi extra space khatam karne ke liye */
+  main {
+    margin: 0 !important;
+    padding: 0 !important;
+    display: block !important; /* Flex hata kar block kar diya */
+  }
+
+  /* 3. Page ki settings */
+  html, body {
+    width: 76mm;
+    margin: 0;
+    padding: 0;
+    background: #fff !important;
+  }
+
+  .print-area {
+    width: 76mm;
+    margin: 0 !important;
+    padding: 0;
+    box-shadow: none !important; /* Print mein shadow nahi chahiye */
+    border: none !important;
+  }
+
+  /* Force black text for clear printing */
+  * {
+    color: #000 !important;
+  }
+}
+
+

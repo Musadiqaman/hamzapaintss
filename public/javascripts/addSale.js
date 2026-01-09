@@ -223,18 +223,31 @@ function renderTable() {
 // ===============================================
 // UPDATED SUBMIT LOGIC (Sirf Loader Add Kiya Hai)
 // ===============================================
+// ===============================================
+// UPDATED SUBMIT LOGIC WITH CUSTOMER NAME
+// ===============================================
+// ===============================================
+// UPDATED SUBMIT LOGIC WITH CUSTOMER NAME SAVING
+// ===============================================
 document.getElementById("submitBtn").addEventListener("click", async function () {
-    if (tempSales.length === 0) return alert("⚠️ Add sales first.");
+    const customerName = document.getElementById("customerName").value.trim();
+    
+    // Validation
+    if (!customerName) {
+        alert("⚠️ Please enter Customer Name.");
+        document.getElementById("customerName").focus();
+        return;
+    }
+    if (tempSales.length === 0) return alert("⚠️ Add at least one sale to the table.");
 
     const submitBtn = document.getElementById("submitBtn");
     const originalText = submitBtn.innerHTML;
 
-    // 1. Loader Start & Disable Button (Taake double entry na ho)
     submitBtn.disabled = true;
     submitBtn.innerHTML = `<span class="spinner"></span> Saving Sales...`;
 
-    // Agent logic (Agent ID aur Percentage pick karna)
     const payload = { 
+        customerName: customerName,
         sales: tempSales, 
         agentID: agentSelect.value || null, 
         percentage: parseFloat(agentPercentage.value) || 0 
@@ -247,28 +260,26 @@ document.getElementById("submitBtn").addEventListener("click", async function ()
             body: JSON.stringify(payload),
         });
 
-        const data = await res.json(); // Backend se success/message lena
+        const data = await res.json();
 
         if (data.success) {
-          alert("✅ Sales Saved Successfully!");
+            alert("✅ Sales Saved Successfully!");
 
-         // ✅ STEP 1: Data ko LocalStorage mein save karein
-          localStorage.setItem("lastAddedSales", JSON.stringify(tempSales));
+            // 🟢 LOCALSTORAGE UPDATES:
+            // 1. Sales items save karein
+            localStorage.setItem("lastAddedSales", JSON.stringify(tempSales));
+            // 2. Customer name bhi save karein (Naya add kiya hai)
+            localStorage.setItem("lastCustomerName", customerName);
 
-         // ✅ STEP 2: Khali URL open karein
-         window.open(`/sales/print`, "_blank");
-
-         location.reload(); 
-} else {
-            // Agar backend koi error bhejta hai (e.g. Stock khatam ho gaya)
+            window.open(`/sales/print`, "_blank");
+            location.reload(); 
+        } else {
             alert("❌ Failed: " + (data.message || "Unknown error"));
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalText;
         }
     } catch (err) { 
-        // Agar internet chala jaye ya server down ho
         alert("❌ Server Connection Error!"); 
-        console.error(err);
         submitBtn.disabled = false;
         submitBtn.innerHTML = originalText;
     }

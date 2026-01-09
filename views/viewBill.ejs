@@ -3,12 +3,23 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>Sale Bill | Hamza Paints</title>
+  <title>View Bill | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
-  <link rel="stylesheet" href="/stylesheets/printSales.css">
+  <link rel="stylesheet" href="/stylesheets/viewBill.css">
 </head>
 
 <body>
+<%- include('partials/navbar') %>
+    
+<main>
+
+   <div class="no-print-controls">
+  <button class="btn btn-print">🖨️ Print Bill</button>
+  <a href="/sales/history" class="btn btn-back">🔙 Back to History</a>
+</div>
+
+
+
   <div class="print-area">
 
     <div class="shop-header">
@@ -28,9 +39,10 @@
       
     </div>
     
-    <p><b>Customer name:  </b><span id="displayName" style="font-weight: bold;"></span></p>
+    <p><b>Customer name:  </b><b><%= bill.customerName %></b></p>
     <br>
-    <p><b>Entry date:</b> <%= currentDate %></p>
+    <p><b>Entry date: <%= new Date(bill.createdAt).toLocaleDateString('en-GB', {timeZone: 'Asia/Karachi'}) %> | 
+            <%= new Date(bill.createdAt).toLocaleTimeString('en-US', {timeZone: 'Asia/Karachi', hour:'2-digit', minute:'2-digit', hour12:true}) %></b> </p>
     <br>
     
 
@@ -50,12 +62,24 @@
         </tr>
       </thead>
       <tbody id="billTableBody">
+        <% bill.salesItems.forEach(item => { %>
+            <tr>
+              <td><%= item.stockID %></td>
+              <td><%= item.saleID %></td>
+              <td><%= item.itemName %></td>
+              <td><%= item.colourName %></td>
+              <td><%= item.qty %></td>
+              <td><%= item.quantitySold %></td>
+              <td>Rs <%= item.rate.toFixed(2) %></td>
+              <td>Rs <%= (item.quantitySold * item.rate).toFixed(2) %></td>
+            </tr>
+            <% }) %>
       </tbody>
     </table>
 
     <div class="footer">
-      <span id="billTotalItems">Total items: 0</span>
-      <span id="billTotalAmount">Total amount: Rs 0.00</span>
+      <span id="billTotalItems">Total items: <%= bill.salesItems.length %></span>
+      <span id="billTotalAmount">Total amount: Rs <%= totalAmount.toFixed(2) %></span>
     </div>
 
     <div class="urdu-footer">
@@ -75,6 +99,8 @@
 
   </div>
 
-  <script src="/javascripts/printSales.js"></script>
+  </main>
+
+  <script src="/javascripts/viewBill.js"></script>
 </body>
 </html>
