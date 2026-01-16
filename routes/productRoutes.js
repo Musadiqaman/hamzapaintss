@@ -295,7 +295,7 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
     }
 
     const product = await Product.findOne({ stockID });
-    if (!product) return res.status(404).send("❌ Product not found");
+    if (!product) return res.status(400).send("❌ Product not found");
 
     if (qty > product.remaining) {
       return res.status(400).send(`❌ Stock short! Available: ${product.remaining}`);
@@ -308,44 +308,13 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
     product.refundStatus = product.refundQuantity >= product.totalProduct ? "Fully Refunded" : "Partially Refunded";
 
     await product.save();
-    res.send(`✅ Refund successful! ${qty} items returned.`);
+    res.send(`✅ Refund successful! ${qty} items returned to company.`);
 
   } catch (err) {
     console.error(err);
     res.status(500).send("❌ Server Error");
   }
 });
-
-
-
-
-
-// ⚠️ Warning: Ye route database ke SARE products ko update kar dega
-router.get('/reset-all-product-refunds', isLoggedIn, allowRoles("admin"), async (req, res) => {
-  try {
-    // updateMany({}) ka matlab hai ke filter empty hai, yani sab par apply hoga
-    const result = await Product.updateMany(
-      {}, 
-      { 
-        $set: { 
-          refundQuantity: 0, 
-          refundStatus: "none" 
-        } 
-      }
-    );
-
-    res.status(200).send({
-      message: "✅ All products reset successfully.",
-      matchedCount: result.matchedCount, // Kitne products mile
-      modifiedCount: result.modifiedCount // Kitne update hue
-    });
-
-  } catch (err) {
-    console.error("❌ Reset Error:", err);
-    res.status(500).send("❌ Error resetting product refund data.");
-  }
-});
-
 
 
 

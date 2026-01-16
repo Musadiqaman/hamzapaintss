@@ -5,22 +5,25 @@ const addButton = document.getElementById("add");
 refundForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  const formData = new FormData(refundForm);
+  // 1. Confirmation Box (English)
+  const confirmRefund = confirm("Are you sure you want to refund this product back to the company?");
   
-  // HTML mein input ka name 'productQuantity' hai, wahan se value uthao
+  if (!confirmRefund) {
+    return; // Agar user cancel kare toh yahin ruk jao
+  }
+
+  const formData = new FormData(refundForm);
   const q = formData.get("productQuantity");
   const s = formData.get("stockID");
 
   const data = {
     stockID: s ? s.trim() : "",
-    refundQuantity: Number(q) // NaN se bachne ke liye Number use karein
+    refundQuantity: Number(q)
   };
 
-  // 404 se bachne ke liye confirmation: 
-  // Agar aapka backend route /products ke andar hai to URL sahi hai.
-  // Agar direct route hai to sirf "/company-refund" hoga.
   const apiEndpoint = "/products/refund"; 
 
+  // Button ko disable karein taake double click na ho
   addButton.disabled = true;
   addButton.innerHTML = "Processing...";
 
@@ -31,18 +34,24 @@ refundForm.addEventListener("submit", async function (e) {
       body: JSON.stringify(data)
     });
 
+    // Backend se message uthao (Text format mein)
     const result = await res.text();
 
-    if (res.status === 404) {
-        refundResult.innerHTML = `<span style="color:red">❌ Error 404: Route not found. Check if URL is ${apiEndpoint}</span>`;
+    if (res.ok) {
+      // ✅ Success: Green message aur form reset
+      refundResult.innerHTML = `<span style="color:green; font-weight:bold;">${result}</span>`;
+      refundForm.reset();
     } else {
-        refundResult.innerHTML = `<span style="color:${res.ok ? 'green' : 'red'}">${result}</span>`;
-        if (res.ok) refundForm.reset();
+      // ❌ Error: Backend ka bheja hua error laal rang mein dikhao
+      // Maslan: "❌ Product not found" ya "❌ Stock short!"
+      refundResult.innerHTML = `<span style="color:red; font-weight:bold;">${result}</span>`;
     }
 
   } catch (err) {
-    refundResult.innerHTML = `<span style="color:red">❌ Request Failed!</span>`;
+    // Network error ke liye
+    refundResult.innerHTML = `<span style="color:red; font-weight:bold;">❌ Request Failed! Check your internet connection.</span>`;
   } finally {
+    // Button ko wapas normal kar do
     addButton.disabled = false;
     addButton.innerHTML = "Refund Now";
   }

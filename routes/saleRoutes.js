@@ -263,13 +263,15 @@ if (refund && refund !== "all") {
 
         for (const s of filteredSales) {
             const purchaseRate = productMap[s.stockID] || 0;
-            let netSoldQty = Math.max(0, (s.quantitySold || 0) - (s.refundQuantity || 0));
-
+           
+            // ✅ Ab ye sirf total sold quantity dikhayega, chahe refund hui ho ya nahi
+            let netSoldQty = s.quantitySold || 0;
+            
             totalSold += netSoldQty;
             totalRevenue += (netSoldQty * (s.rate || 0));
             totalRefunded += ((s.refundQuantity || 0) * (s.rate || 0));
 
-            const saleProfit = ((s.rate || 0) - purchaseRate) * netSoldQty;
+            const saleProfit = s.profit;
             if (saleProfit > 0) totalProfit += saleProfit;
             else totalLoss += Math.abs(saleProfit);
 
@@ -449,7 +451,6 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
 });
 
 
-
 // Sales History Page Route
 /* ================================
    🟢 3️⃣ Sales History (GET)
@@ -605,33 +606,6 @@ router.delete("/delete-bill/:id", isLoggedIn, allowRoles("admin"), async (req, r
         console.error(err);
         res.status(500).json({ success: false, message: "Error deleting bill" });
     }
-});
-
-
-
-// Ye script aapke purane data ko link karne ke liye hai
-router.get("/fix-old-sales", isLoggedIn, allowRoles("admin"), async (req, res) => {
-  try {
-    // 1. Saare Bills uthaein
-    const allBills = await PrintSale.find({});
-    let updatedCount = 0;
-
-    for (const bill of allBills) {
-      if (bill.salesItems && bill.salesItems.length > 0) {
-        // 2. Is Bill ke andar jitni sales hain, un sab mein billId save kar do
-        await Sale.updateMany(
-          { _id: { $in: bill.salesItems } }, 
-          { $set: { billId: bill._id } }
-        );
-        updatedCount += bill.salesItems.length;
-      }
-    }
-
-    res.send(`✅ Success! ${updatedCount} purani sales ko unke Bills ke sath link kar diya gaya hai.`);
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("❌ Error fixing data: " + err.message);
-  }
 });
 
 
