@@ -142,7 +142,7 @@ router.delete("/delete-agent/:id",isLoggedIn,allowRoles("admin"), async (req, re
 
 
 
-router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+router.get('/view/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     const role = req.user.role;
     try {
         let { filter, from, to } = req.query;
@@ -150,7 +150,7 @@ router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (
         const nowPKT = moment.tz(PKT_TIMEZONE);
         let start, end;
 
-        // Default "all" handle karne ke liye
+        // Date Logic (Keep as is)
         if (filter === "today") {
             start = nowPKT.clone().startOf('day').toDate();
             end = nowPKT.clone().endOf('day').toDate();
@@ -172,10 +172,15 @@ router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (
 
         if (start && end) query.createdAt = { $gte: start, $lte: end };
 
+        // 🟢 NESTED POPULATE: Items ke andar Bill ka data bhi mangwa rahe hain
         const agent = await Agent.findById(req.params.id).populate({
             path: "items",
             match: query,
-            options: { sort: { createdAt: -1 } }
+            options: { sort: { createdAt: -1 } },
+            populate: {
+                path: "billId", // AgentItem model mein jo field hai
+                select: "customerName createdAt" // Bill model se jo fields chahiye (Optional)
+            }
         }).lean();
 
         if (!agent) return res.status(404).send("Agent not found");
@@ -194,14 +199,13 @@ router.get('/view-agent/:id', isLoggedIn, allowRoles("admin", "worker"), async (
 
         const responseData = { role, agent, stats, filter: filter || 'all', from, to };
 
-        // 🟢 AJAX Request Handle (Ye page ko refresh hone se bachayega)
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, ...responseData });
         }
 
         res.render("viewAgent", responseData);
     } catch (err) {
-        console.error(err);
+        console.error("❌ Populate Error:", err);
         res.status(500).send("Error loading agent page");
     }
 });

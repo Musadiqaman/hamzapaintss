@@ -1,6 +1,7 @@
 import express from 'express';
 import Product from "../models/Product.js";
 import Sale from "../models/Sale.js";
+import Item from '../models/Item.js';
 import { isLoggedIn } from "../middleware/isLoggedIn.js";
 import { allowRoles } from "../middleware/allowRoles.js";
 import moment from 'moment-timezone'; // 🟢 Library Import
@@ -167,7 +168,16 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
         }
 
         // --- Refund status ---
-        if (refund && refund !== "all") query.refundStatus = refund;
+     // Refund Filter Logic
+if (refund && refund !== "all") {
+    if (refund === "both") {
+        // Agar 'both' select kiya hai to Partially aur Fully dono ko dhundo
+        query.refundStatus = { $in: ["Partially Refunded", "Fully Refunded"] };
+    } else {
+        // Agar koi specific status select kiya hai (none, Partially, ya Fully)
+        query.refundStatus = refund;
+    }
+}
 
         // --- Fetch with Lean (Fast Speed) ---
         const filteredProducts = await Product.find(query).sort({ createdAt: -1 }).lean();
@@ -241,79 +251,6 @@ router.delete("/delete-product/:id",isLoggedIn,allowRoles("admin"), async (req, 
 
 
 
-router.get('/refund',isLoggedIn,allowRoles("admin", "worker"),(req,res)=>{
-const role=req.user.role;
-res.render('refundProducts',{role});
-});
-
-
-
-
-router.post('/refund',isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
-  try {
-    let { stockID, saleID, productQuantity } = req.body;
-
-    saleID = saleID.trim(); // 🆕 added
-
-    stockID = stockID.trim();
-    productQuantity = parseInt(productQuantity);
-
-    if (!stockID || !productQuantity || productQuantity <= 0) {
-      return res.status(400).send("❌ Invalid StockID or quantity");
-    }
-
-    const sale = await Sale.findOne({ stockID, saleID }); // 🔄 changed
-    const product = await Product.findOne({ stockID });
-
-    if (!sale || !product) {
-      return res.status(404).send("❌ Sale or Product not found");
-    }
-
-    // Maximum refundable quantity based on sale
-    const maxRefundable = sale.quantitySold - sale.refundQuantity;
-    if (productQuantity > maxRefundable) {
-      return res.status(400).send(`❌ Refund quantity exceeds remaining sold quantity. Max allowed: ${maxRefundable}`);
-    }
-
-    const refundQty = productQuantity;
-
-    // --- Update Sale ---
-    const purchaseRate = product.rate || 0;
-    const refundProfit = parseFloat(((sale.rate - purchaseRate) * refundQty).toFixed(2));
-    sale.profit = parseFloat((sale.profit - refundProfit).toFixed(2));
-    if (sale.profit < 0) sale.profit = 0;
-    sale.refundQuantity += refundQty;
-
-    if (sale.refundQuantity === 0) sale.refundStatus = "Not Refunded";
-    else if (sale.refundQuantity >= sale.quantitySold) sale.refundStatus = "Fully Refunded";
-    else sale.refundStatus = "Partially Refunded";
-
-    await sale.save();
-
-    // --- Update Product ---
-    product.remaining = Math.min(product.remaining + refundQty, product.totalProduct);
-    
-    const allSales = await Sale.find({ stockID });
-    const totalRefundedQty = allSales.reduce((acc, s) => acc + (s.refundQuantity || 0), 0);
-    product.refundQuantity = Math.min(totalRefundedQty, product.totalProduct);
-
-    if (product.refundQuantity === 0) product.refundStatus = "Not Refunded";
-    else if (product.refundQuantity >= product.totalProduct) product.refundStatus = "Fully Refunded";
-    else product.refundStatus = "Partially Refunded";
-
-    await product.save();
-
-    res.send(`✅ Refund successful. ${refundQty} items returned to stock for SaleID: ${saleID}`); // 🔄 changed
-
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).send("❌ Internal Server Error");
-  }
-});
-
-
-
 
 router.get('/print', isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
   let currentDate;
@@ -338,6 +275,76 @@ router.get('/print', isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
 });
 
 
+
+router.get('/refund',isLoggedIn,allowRoles("admin", "worker"),(req,res)=>{
+const role=req.user.role;
+res.render('refundProducts',{role});
+});
+
+
+
+router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  try {
+    let { stockID, refundQuantity } = req.body;
+    
+    // Number conversion handle karen safely
+    const qty = Number(refundQuantity);
+
+    if (!stockID || isNaN(qty) || qty <= 0) {
+      return res.status(400).send("❌ Invalid Input: Quantity must be a number");
+    }
+
+    const product = await Product.findOne({ stockID });
+    if (!product) return res.status(404).send("❌ Product not found");
+
+    if (qty > product.remaining) {
+      return res.status(400).send(`❌ Stock short! Available: ${product.remaining}`);
+    }
+
+    product.remaining -= qty;
+    product.refundQuantity = (product.refundQuantity || 0) + qty;
+    
+    // Status update
+    product.refundStatus = product.refundQuantity >= product.totalProduct ? "Fully Refunded" : "Partially Refunded";
+
+    await product.save();
+    res.send(`✅ Refund successful! ${qty} items returned.`);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Server Error");
+  }
+});
+
+
+
+
+
+// ⚠️ Warning: Ye route database ke SARE products ko update kar dega
+router.get('/reset-all-product-refunds', isLoggedIn, allowRoles("admin"), async (req, res) => {
+  try {
+    // updateMany({}) ka matlab hai ke filter empty hai, yani sab par apply hoga
+    const result = await Product.updateMany(
+      {}, 
+      { 
+        $set: { 
+          refundQuantity: 0, 
+          refundStatus: "none" 
+        } 
+      }
+    );
+
+    res.status(200).send({
+      message: "✅ All products reset successfully.",
+      matchedCount: result.matchedCount, // Kitne products mile
+      modifiedCount: result.modifiedCount // Kitne update hue
+    });
+
+  } catch (err) {
+    console.error("❌ Reset Error:", err);
+    res.status(500).send("❌ Error resetting product refund data.");
+  }
+});
 
 
 

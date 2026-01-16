@@ -54,16 +54,28 @@ document.addEventListener("DOMContentLoaded", () => {
                         const timeStr = dateObj.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' });
 
                         html += `
-                        <tr>
-                            <td>${a.name }</td>
-                            <td>${a.phone }</td>
-                            <td>${a.cnic }</td>
-                            <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
-                            <td class="action-buttons">
-                                <button id="view"><a href="/agents/view-agent/${a._id}" style="text-decoration: none; color: inherit;">View</a></button>
-                                ${data.role === "admin" ? `<button type="button" class="delete-btn" data-id="${a._id}" id="delete" >Delete</button>` : ''}
-                            </td>
-                        </tr>`;
+    <tr>
+        <td>${a.name}</td>
+        <td>${a.phone}</td>
+        <td style="color:red ; font-weight: bold;">
+            ${
+                // Har item ka balance nikal kar unka total sum karna
+                a.items && a.items.length > 0 
+                ? a.items.reduce((acc, item) => acc + (item.percentageAmount - item.paidAmount), 0).toLocaleString()
+                : '0'
+            }
+        </td>
+        <td>
+            ${dateStr}<br>
+            <small style="color: #007bff; font-weight: bold;">${timeStr}</small>
+        </td>
+        <td class="action-buttons">
+            <button id="view">
+                <a href="/agents/view/${a._id}" style="text-decoration: none; color: inherit;">View</a>
+            </button>
+            ${data.role === "admin" ? `<button type="button" class="delete-btn" data-id="${a._id}" id="delete">Delete</button>` : ''}
+        </td>
+    </tr>`;
                     });
                 }
                 tbody.innerHTML = html;

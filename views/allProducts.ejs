@@ -52,12 +52,13 @@
         <option value="out" <%=stockStatus==='out' ? 'selected' : '' %>>Out of Stock</option>
       </select>
 
-      <select name="refund" id="refundFilter">
-        <option value="all" <%=selectedRefund==='all' ? 'selected' : '' %>>All Status</option>
-        <option value="none" <%=selectedRefund==='none' ? 'selected' : '' %>>Not Refunded</option>
-        <option value="Partially Refunded" <%=selectedRefund==='Partially Refunded' ? 'selected' : '' %>>Partially Refunded</option>
-        <option value="Fully Refunded" <%=selectedRefund==='Fully Refunded' ? 'selected' : '' %>>Fully Refunded</option>
-      </select>
+     <select name="refund" id="refundFilter" hidden>
+       <option value="all" <%=selectedRefund==='all' ? 'selected' : '' %>>All Status</option>
+       <option value="none" <%=selectedRefund==='none' ? 'selected' : '' %>>Not Refunded</option>
+       <option value="both" <%=selectedRefund==='both' ? 'selected' : '' %>>Both (Partial & Full)</option>
+      <option value="Partially Refunded" <%=selectedRefund==='Partially Refunded' ? 'selected' : '' %>>Partially Refunded</option>
+      <option value="Fully Refunded" <%=selectedRefund==='Fully Refunded' ? 'selected' : '' %>>Fully Refunded</option>
+    </select>
 
       <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
       <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
@@ -81,7 +82,7 @@
         <h3><span style="font-size: 17px;">💹</span>Remaining Stock Value</h3>
         <p>Rs <%= stats.remaining ? stats.remaining.toFixed(2) : '0.00' %></p>
       </div>
-      <div class="stat-box">
+      <div class="stat-box" hidden>
         <h3>↩️Refunded Stock Value</h3>
         <p id="refund-stock">Rs <%= stats.totalRefundedValue ? stats.totalRefundedValue.toFixed(2) : '0.00' %></p>
       </div>
@@ -97,6 +98,7 @@
       <table>
         <thead>
           <tr>
+            <th>Stock ID</th>
             <th>Brand</th>
             <th>Item</th>
             <th>Color</th>
@@ -105,8 +107,8 @@
             <th>Remaining</th>
             <th>Rate</th>
             <th>Total Amount</th>
-            <th>Status</th>
-            <th>Refund (Qty)</th>
+            <th hidden>Status</th>
+            <th hidden>Refund (Qty)</th>
             <th>Date</th>
             <% if(role=="admin" ){ %>
               <th>Action</th>
@@ -121,6 +123,7 @@
           <% } else { %>
             <% products.forEach(p=> { %>
               <tr>
+                <td><%= p.stockID %></td>
                 <td><%= p.brandName %></td>
                 <td><%= p.itemName %></td>
                 <td><%= p.colourName %></td>
@@ -129,8 +132,8 @@
                 <td><%= p.remaining %></td>
                 <td>Rs <%= p.rate %></td>
                 <td>Rs <%= (p.totalProduct * p.rate).toFixed(2) %></td>
-                <td class="refund-status"><%= p.refundStatus %></td>
-                <td class="refund-quantity"><%= p.refundQuantity %></td>
+                <td class="refund-status" hidden><%= p.refundStatus %></td>
+                <td class="refund-quantity" hidden><%= p.refundQuantity %></td>
                 <td>
                   <%= new Date(p.createdAt).toLocaleDateString('en-GB', { day: '2-digit' , month: 'short' , year: 'numeric' , timeZone: 'Asia/Karachi' }) %>
                   <br>
@@ -160,3 +163,4 @@
 
 </body>
 </html>
+

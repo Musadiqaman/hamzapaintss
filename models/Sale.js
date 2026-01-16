@@ -11,7 +11,16 @@ const saleSchema = new mongoose.Schema({
   profit: { type: Number },
   refundQuantity:{ type: Number, default: 0 }, 
   refundStatus:{ type: String, default: "none" },
-  saleID:{type: String , required: true}
+  saleID:{type: String , required: true},
+  agentItemId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "AgentItem",
+    default: null 
+  },
+  billId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "PrintSale" 
+    }
 
 }, { timestamps: true });
 

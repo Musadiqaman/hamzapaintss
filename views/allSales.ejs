@@ -46,12 +46,13 @@
         <option value="all">All Units</option>
       </select>
 
-      <select name="refund" id="refundFilter" data-value="<%= selectedRefund || 'all' %>">
-        <option value="all">All Status</option>
-        <option value="none">Not Refunded</option>
-        <option value="Partially Refunded">Partially Refunded</option>
-        <option value="Fully Refunded">Fully Refunded</option>
-      </select>
+    <select name="refund" id="refundFilter" data-value="<%= selectedRefund || 'all' %>">
+     <option value="all" <%= selectedRefund === 'all' ? 'selected' : '' %>>All Status</option>
+     <option value="none" <%= selectedRefund === 'none' ? 'selected' : '' %>>Not Refunded</option>
+     <option value="both" <%= selectedRefund === 'both' ? 'selected' : '' %>>Both (Partial & Full)</option>
+     <option value="Partially Refunded" <%= selectedRefund === 'Partially Refunded' ? 'selected' : '' %>>Partially Refunded</option>
+    <option value="Fully Refunded" <%= selectedRefund === 'Fully Refunded' ? 'selected' : '' %>>Fully Refunded</option>
+    </select>
 
       <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
       <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
@@ -120,7 +121,7 @@
                 <td>Rs <%= s.rate.toFixed(2) %></td>
                 <td>Rs <%= (s.quantitySold * s.rate).toFixed(2) %></td>
                 <td class="<%= s.profit < 0 ? 'loss' : 'profit' %>">
-                  Rs <%= Math.abs(s.profit).toFixed(2) %>
+                  Rs <%= s.profit.toFixed(2) %>
                 </td>
                 <td class="refund-status"><%= s.refundStatus %></td>
                 <td class="refund-quantity"><%= s.refundQuantity %></td>

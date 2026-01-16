@@ -36,7 +36,7 @@ document.addEventListener("DOMContentLoaded", () => {
         tbody.style.opacity = "0.3";
 
         try {
-            const response = await fetch(`/agents/view-agent/${agentId}?${params}`, {
+            const response = await fetch(`/agents/view/${agentId}?${params}`, {
                 headers: { 
                     'X-Requested-With': 'XMLHttpRequest', 
                     'Accept': 'application/json' 
@@ -81,25 +81,33 @@ const percAmt = Number(i.percentageAmount || 0).toFixed(2);
 const paidAmt = Number(i.paidAmount || 0).toFixed(2);
 const leftAmt = (Number(i.percentageAmount || 0) - Number(i.paidAmount || 0)).toFixed(2);
 
+// ✅ Bill Link logic (Check karein ke billId exist karti hai ya nahi)
+const billLinkHtml = i.billId 
+    ? `<a href="/sales/bill/${i.billId._id}"  class="bill-link" 
+          style="display:block; margin-top:5px; color:#007bff; text-decoration:none; font-size:11px; font-weight:bold;">
+          📄 View Bill
+       </a>` 
+    : '<small style="color:gray; display:block; margin-top:5px;">No Bill</small>';
+
 html += `
 <tr id="row-${i._id}">
-   <td>${i.totalProductSold}</td>
-        <td>Rs ${totalAmt}</td>
-        <td>${i.percentage}%</td>
-        <td>Rs ${percAmt}</td>
-        <td class="paid-status"><span class="status-tag">${status}</span></td>
-        <td>Rs ${paidAmt}</td>
-        <td>Rs ${leftAmt}</td>
+    <td>${i.totalProductSold}</td>
+    <td>Rs ${totalAmt}</td>
+    <td>${i.percentage}%</td>
+    <td>Rs ${percAmt}</td>
+    <td class="paid-status"><span class="status-tag">${status}</span></td>
+    <td>Rs ${paidAmt}</td>
+    <td>Rs ${leftAmt}</td>
     <td>
         <div>${pkrDate}</div>
-        <small style="color: #007bff; font-weight: bold;">${pkrTime}</small>
-    </td>
+        <small style="color: #666;">${pkrTime}</small>
+        ${billLinkHtml} </td>
     <td class="actions">
-        <button class="pay-btn" data-id="${i._id}" id="pay">Pay</button>
-        ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete">Delete</button>` : ''}
+        <button class="pay-btn" data-id="${i._id}"  id="pay"  >Pay</button>
+        ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}" id="delete" >Delete</button>` : ''}
         <div class="pay-box" id="paybox-${i._id}" style="display:none; margin-top:5px;">
             <input class="payinput" type="number" id="payInput-${i._id}" placeholder="Amount" style="width:70px">
-            <button class="submit-pay-btn" data-id="${i._id}" id="submit">Ok</button>
+            <button class="submit-pay-btn" data-id="${i._id}" id="submit" >Ok</button>
         </div>
     </td>
 </tr>`;

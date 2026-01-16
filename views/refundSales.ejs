@@ -4,9 +4,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Refund Products | Hamza Paints</title>
+  <title>Refund Sales | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
-  <link rel="stylesheet" href="/stylesheets/refundProducts.css">
+  <link rel="stylesheet" href="/stylesheets/refundSales.css">
 </head>
 
 <body>
@@ -18,11 +18,12 @@
 
       <div class="content-wrapper">
         <div class="form-wrapper">
-          <h1>Refund Products</h1>
+          <h1>Refund Sales</h1>
 
           <form id="refundForm" class="form-container">
-            <input type="text" name="stockID" placeholder="Enter Product StockID" required />
-            <input min="1" max="1000" type="number" name="productQuantity" placeholder="Enter Quantity of Product" required />
+            <input type="text" name="stockID" placeholder="Enter Sale StockID" required />
+            <input type="text" name="saleID" placeholder="Enter Sale SaleID" required />
+            <input min="1" max="1000" type="number" name="productQuantity" placeholder="Enter Quantity of Sale" required />
             <button type="submit" id="add">Refund Now</button>
           </form>
 
@@ -30,7 +31,7 @@
         </div>
 
     </main>
-    <script src="/javascripts/refundProducts.js"></script>
+    <script src="/javascripts/refundSales.js"></script>
 
     </div>
 </body>

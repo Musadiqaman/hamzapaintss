@@ -5,21 +5,27 @@ const addButton = document.getElementById("add");
 refundForm.addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  // 1. Loader Setup
-  const originalText = addButton.innerHTML; // "Refund Now" ko save kiya
-  addButton.disabled = true; // Multiple clicks block kiye
-  addButton.innerHTML = `<span class="spinner"></span> Processing...`; // Spinner dikhaya
-
   const formData = new FormData(refundForm);
+  
+  // HTML mein input ka name 'productQuantity' hai, wahan se value uthao
+  const q = formData.get("productQuantity");
+  const s = formData.get("stockID");
+
   const data = {
-    stockID: formData.get("stockID").trim(),
-    saleID: formData.get("saleID").trim(),
-    productQuantity: parseInt(formData.get("productQuantity"))
+    stockID: s ? s.trim() : "",
+    refundQuantity: Number(q) // NaN se bachne ke liye Number use karein
   };
 
+  // 404 se bachne ke liye confirmation: 
+  // Agar aapka backend route /products ke andar hai to URL sahi hai.
+  // Agar direct route hai to sirf "/company-refund" hoga.
+  const apiEndpoint = "/products/refund"; 
+
+  addButton.disabled = true;
+  addButton.innerHTML = "Processing...";
+
   try {
-    // Call refund API
-    const res = await fetch("/products/refund", {
+    const res = await fetch(apiEndpoint, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(data)
@@ -27,19 +33,17 @@ refundForm.addEventListener("submit", async function (e) {
 
     const result = await res.text();
 
-    // ✅ Show refund message
-    refundResult.innerHTML = `<span style="color:${res.ok ? 'green' : 'red'}">${result}</span>`;
-
-    if (res.ok) {
-      refundForm.reset();
+    if (res.status === 404) {
+        refundResult.innerHTML = `<span style="color:red">❌ Error 404: Route not found. Check if URL is ${apiEndpoint}</span>`;
+    } else {
+        refundResult.innerHTML = `<span style="color:${res.ok ? 'green' : 'red'}">${result}</span>`;
+        if (res.ok) refundForm.reset();
     }
 
   } catch (err) {
-    console.error(err);
-    refundResult.innerHTML = `<span style="color:red">❌ Something went wrong. Try again!</span>`;
+    refundResult.innerHTML = `<span style="color:red">❌ Request Failed!</span>`;
   } finally {
-    // 2. Reset Button (Finally block hamesha chalta hai chahe success ho ya error)
     addButton.disabled = false;
-    addButton.innerHTML = originalText;
+    addButton.innerHTML = "Refund Now";
   }
 });

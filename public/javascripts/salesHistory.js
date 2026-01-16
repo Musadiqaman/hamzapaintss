@@ -49,7 +49,11 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 data.history.forEach(bill => {
                     // 1. Total Amount Calculation
-                    const billTotal = bill.salesItems.reduce((acc, item) => acc + (item.quantitySold * item.rate), 0);
+                    let billTotal = bill.salesItems.reduce((acc, item) => {
+    // Actual Qty = Jitni bechi thi - Jitni wapas (refund) hui
+    const actualQty = (item.quantitySold || 0) - (item.refundQuantity || 0);
+    return acc + (actualQty * (item.rate || 0));
+}, 0);
                     
                     // 2. Pakistan Timezone Fix (Deployment ke liye zaroori hai)
                     const dateObj = new Date(bill.createdAt);

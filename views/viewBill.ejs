@@ -15,7 +15,7 @@
 
    <div class="no-print-controls">
   <button class="btn btn-print">🖨️ Print Bill</button>
-  <a href="/sales/history" class="btn btn-back">🔙 Back to History</a>
+  <!-- <a href="/sales/history" class="btn btn-back" >🔙 Back to History</a> -->
 </div>
 
 
@@ -63,17 +63,17 @@
       </thead>
       <tbody id="billTableBody">
         <% bill.salesItems.forEach(item => { %>
-            <tr>
-              <td><%= item.stockID %></td>
-              <td><%= item.saleID %></td>
-              <td><%= item.itemName %></td>
-              <td><%= item.colourName %></td>
-              <td><%= item.qty %></td>
-              <td><%= item.quantitySold %></td>
-              <td>Rs <%= item.rate.toFixed(2) %></td>
-              <td>Rs <%= (item.quantitySold * item.rate).toFixed(2) %></td>
-            </tr>
-            <% }) %>
+    <tr>
+      <td><%= item.stockID %></td>
+      <td><%= item.saleID %></td>
+      <td><%= item.itemName %></td>
+      <td><%= item.colourName %></td>
+      <td><%= item.qty %></td> 
+      <td><%= (item.quantitySold - item.refundQuantity) %></td>
+      <td>Rs <%= item.rate.toFixed(2) %></td>
+      <td>Rs <%= ((item.quantitySold - item.refundQuantity) * item.rate).toFixed(2) %></td>
+    </tr>
+<% }) %>
       </tbody>
     </table>
 

@@ -1,3 +1,1 @@
 # hamzapaints
-
-hi

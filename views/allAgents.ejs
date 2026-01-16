@@ -60,37 +60,49 @@
           <tr>
             <th>Agent Name</th>
             <th>Agent Phone</th>
-            <th>Agent CNIC</th>
+            <th>Left amount</th>
             <th>Register Date</th>
             <th>Action</th>
           </tr>
         </thead>
         <tbody>
-          <% if (agents.length === 0) { %>
-            <tr><td colspan="5" class="no-data">No agents found.</td></tr>
-          <% } else { %>
-            <% agents.forEach(a => { %>
-              <tr>
-               <td><%= a.name  %></td>
-               <td><%= a.phone %></td>
-               <td><%= a.cnic %></td>
-                <td>
-                  <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone: 'Asia/Karachi' }) %>
-                  <br>
-                  <small style="color: #007bff; font-weight: bold;">
-                    <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone: 'Asia/Karachi' }) %>
-                  </small>
-                </td>
-                <td class="action-buttons">
-                  <button id="view"><a href="/agents/view-agent/<%= a._id %>" style="text-decoration:none; color:inherit;">View</a></button>
-                  <% if(role == "admin") { %>
-                    <button class="delete-btn" data-id="<%= a._id %>" id="delete" >Delete</button>
-                  <% } %>
-                </td>
-              </tr>
-            <% }) %>
+  <% if (agents.length === 0) { %>
+    <tr><td colspan="5" class="no-data">No agents found.</td></tr>
+  <% } else { %>
+    <% agents.forEach(a => { %>
+      <tr>
+        <td><%= a.name %></td>
+        <td><%= a.phone %></td>
+        <td style="color:red ; font-weight: bold;">
+          <% 
+            // Har agent ka total left amount nikalne ke liye logic
+            let totalLeftAmount = 0;
+            if (a.items && a.items.length > 0) {
+              a.items.forEach(item => {
+                totalLeftAmount += (item.percentageAmount - item.paidAmount);
+              });
+            }
+          %>
+          <%= totalLeftAmount.toLocaleString() %> </td>
+        <td>
+          <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone: 'Asia/Karachi' }) %>
+          <br>
+          <small style="color: #007bff; font-weight: bold;">
+            <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone: 'Asia/Karachi' }) %>
+          </small>
+        </td>
+        <td class="action-buttons">
+          <button id="view">
+            <a href="/agents/view/<%= a._id %>" style="text-decoration:none; color:inherit;">View</a>
+          </button>
+          <% if(role == "admin") { %>
+            <button class="delete-btn" data-id="<%= a._id %>" id="delete">Delete</button>
           <% } %>
-        </tbody>
+        </td>
+      </tr>
+    <% }) %>
+  <% } %>
+</tbody>
       </table>
     </div>
   </main>

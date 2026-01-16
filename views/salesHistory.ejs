@@ -67,7 +67,11 @@
     <% if (history && history.length > 0) { %>
         <% history.forEach(bill => { 
             // Total Amount calculate karne ka sahi tareeqa
-            let billTotal = bill.salesItems.reduce((acc, item) => acc + (item.quantitySold * item.rate), 0);
+            let billTotal = bill.salesItems.reduce((acc, item) => {
+    // Actual Qty = Jitni bechi thi - Jitni wapas (refund) hui
+    const actualQty = (item.quantitySold || 0) - (item.refundQuantity || 0);
+    return acc + (actualQty * (item.rate || 0));
+}, 0);
             
             // Pakistan Timezone Settings
             let dateOptions = { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'Asia/Karachi' };

@@ -47,12 +47,8 @@ router.post("/add", isLoggedIn, allowRoles("admin", "worker"), async (req, res) 
   try {
     const { sales, agentID, percentage, customerName } = req.body;
 
-    // Validation
-    if (!customerName) {
-      return res.status(400).json({ success: false, message: "Customer name is required." });
-    }
-    if (!sales || sales.length === 0) {
-      return res.status(400).json({ success: false, message: "No sales provided." });
+    if (!customerName || !sales || sales.length === 0) {
+      return res.status(400).json({ success: false, message: "Missing data." });
     }
 
     const stockIDs = sales.map(s => s.stockID);
@@ -66,10 +62,10 @@ router.post("/add", isLoggedIn, allowRoles("admin", "worker"), async (req, res) 
 
     for (const s of sales) {
       const product = productMap.get(s.stockID);
-      if (!product) throw new Error(`Product not found: ${s.itemName}`);
-      if (s.quantitySold > product.remaining) throw new Error(`Stock low for ${s.itemName}`);
+      if (!product || s.quantitySold > product.remaining) {
+        throw new Error(`Stock error for ${s.itemName}`);
+      }
 
-      // Profit Calculation
       const profit = Math.round(((s.rate - product.rate) * s.quantitySold) * 100) / 100;
       
       salesToCreate.push({
@@ -90,38 +86,56 @@ router.post("/add", isLoggedIn, allowRoles("admin", "worker"), async (req, res) 
       totalAmountForAgent += (s.quantitySold * s.rate);
     }
 
-    // 1. Database Operations (Execute together)
+    // 1. Sales & Products Update
     const savedSales = await Sale.insertMany(salesToCreate);
     await Product.bulkWrite(productUpdates);
 
-    // 2. ✅ Save to PrintSale (Sales History)
+    // 2. Bill Create karen (Ye hamesha banna chahiye)
     let dbAgent = null;
     if (agentID) {
         dbAgent = await Agent.findOne({ agentID });
     }
 
-    await PrintSale.create({
+    const savedBill = await PrintSale.create({
         customerName: customerName,
-        salesItems: savedSales.map(sale => sale._id), // Sirf IDs ka array
+        salesItems: savedSales.map(sale => sale._id),
         agentId: dbAgent ? dbAgent._id : null
     });
 
-    // 3. Agent Commission Logic
+    // 3. ✅ Bill ID ko hamesha update karen (Agent ho ya na ho)
+    const saleIds = savedSales.map(s => s._id);
+    
+    // Default update (Sirf Bill ID)
+    await Sale.updateMany(
+      { _id: { $in: saleIds } },
+      { $set: { billId: savedBill._id } }
+    );
+
+    // 4. Agent Commission Logic (Sirf agar Agent ho)
     if (dbAgent && percentage > 0) {
       const percentageAmount = Math.round((totalAmountForAgent * percentage / 100) * 100) / 100;
+      
       const agentItem = await Item.create({
         agent: dbAgent._id,
+        billId: savedBill._id,
         totalProductSold: totalQuantityForAgent,
         totalProductAmount: totalAmountForAgent,
         percentage,
         percentageAmount,
         paidStatus: "Unpaid"
       });
+
+      // ✅ Agent Item ID bhi update karen unhi sales par
+      await Sale.updateMany(
+        { _id: { $in: saleIds } },
+        { $set: { agentItemId: agentItem._id } }
+      );
+
       dbAgent.items.push(agentItem._id);
       await dbAgent.save();
     }
 
-    res.json({ success: true, message: "Sale and History Saved!" });
+    res.json({ success: true, message: "Sale and History Saved!", billId: savedBill._id });
 
   } catch (err) {
     console.error("❌ Add Sale Error:", err);
@@ -224,7 +238,16 @@ router.get("/all", isLoggedIn, allowRoles("admin"), async (req, res) => {
         }
 
         // 🟢 Refund Filter
-        if (refund && refund !== "all") query.refundStatus = refund;
+       // Sale Refund Filter Logic
+if (refund && refund !== "all") {
+    if (refund === "both") {
+        // Dono refunded status ko filter mein shamil karein
+        query.refundStatus = { $in: ["Partially Refunded", "Fully Refunded"] };
+    } else {
+        // Normal filter (none, Partially, ya Fully)
+        query.refundStatus = refund;
+    }
+}
 
         // 🟢 Data Fetching (Optimized)
         const filteredSales = await Sale.find(query).sort({ createdAt: -1 }).lean();
@@ -332,6 +355,101 @@ router.get('/print', isLoggedIn, allowRoles("admin", "worker"), async (req, res)
 
 
 
+
+
+router.get('/refund',isLoggedIn,allowRoles("admin", "worker"),(req,res)=>{
+const role=req.user.role;
+res.render('refundSales',{role});
+});
+
+
+
+router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  try {
+    let { stockID, saleID, productQuantity } = req.body;
+    saleID = saleID ? saleID.trim() : "";
+    stockID = stockID ? stockID.trim() : "";
+    productQuantity = parseInt(productQuantity);
+
+    if (!stockID || !productQuantity || productQuantity <= 0) {
+      return res.status(400).json({ success: false, message: "❌ Invalid Input" });
+    }
+
+    const sale = await Sale.findOne({ stockID, saleID });
+    const product = await Product.findOne({ stockID });
+
+    if (!sale || !product) {
+      return res.status(404).json({ success: false, message: "❌ Sale or Product not found" });
+    }
+
+    // Maximum refundable quantity check
+    const maxRefundable = sale.quantitySold - (sale.refundQuantity || 0);
+    if (productQuantity > maxRefundable) {
+      return res.status(400).json({ success: false, message: `❌ Refund quantity exceeds remaining sold quantity. Max allowed: ${maxRefundable}` });
+    }
+
+    const refundQty = productQuantity;
+    const refundAmount = refundQty * sale.rate;
+
+    // --- 1. Update Sale (Profit & Qty) ---
+    const purchaseRate = product.rate || 0;
+    const refundProfit = parseFloat(((sale.rate - purchaseRate) * refundQty).toFixed(2));
+    
+    sale.profit = Math.max(0, parseFloat((sale.profit - refundProfit).toFixed(2)));
+    sale.refundQuantity = (sale.refundQuantity || 0) + refundQty;
+
+    if (sale.refundQuantity >= sale.quantitySold) {
+        sale.refundStatus = "Fully Refunded";
+    } else {
+        sale.refundStatus = "Partially Refunded";
+    }
+    await sale.save();
+
+    // --- 2. Update Product (Stock wapas barhao) ---
+    product.remaining = product.remaining + refundQty;
+    await product.save();
+
+    // --- 3. Update Agent Commission ---
+    if (sale.agentItemId) {
+        const agentItem = await Item.findById(sale.agentItemId);
+        if (agentItem) {
+            agentItem.totalProductSold -= refundQty;
+            agentItem.totalProductAmount -= refundAmount;
+
+            const newCommission = (agentItem.totalProductAmount * agentItem.percentage) / 100;
+            agentItem.percentageAmount = Math.round(newCommission * 100) / 100;
+
+            if (agentItem.paidAmount >= agentItem.percentageAmount) {
+                agentItem.paidStatus = "Paid";
+            } else if (agentItem.paidAmount > 0) {
+                agentItem.paidStatus = "Partial";
+            } else {
+                agentItem.paidStatus = "Unpaid";
+            }
+            await agentItem.save();
+        }
+    }
+
+    
+
+    // ✅ Simple and Clean Response
+   res.json({ 
+    success: true, 
+    message: sale.billId 
+        ? "✅ Refund successful." 
+        : "✅ Refund successful, but Bill ID not found.",
+    billId: sale.billId || null 
+});
+
+
+  } catch (err) {
+    console.error("❌ Refund Error:", err);
+    res.status(500).json({ success: false, message: "❌ Internal Server Error" });
+  }
+});
+
+
+
 // Sales History Page Route
 /* ================================
    🟢 3️⃣ Sales History (GET)
@@ -380,16 +498,22 @@ router.get('/history', isLoggedIn, allowRoles("admin","worker"), async (req, res
         // --- 3. Timezone Correction & Revenue Calculation ---
         let totalRevenue = 0;
         history.forEach(bill => {
-            // Vercel par date fix karne ke liye yahan format kar rahe hain
-            bill.formattedDate = moment(bill.createdAt).tz(PKT_TIMEZONE).format('DD/MM/YYYY');
-            bill.formattedTime = moment(bill.createdAt).tz(PKT_TIMEZONE).format('hh:mm A');
+        // 1. Timezone Fix (Moment-Timezone use karte hue)
+        bill.formattedDate = moment(bill.createdAt).tz(PKT_TIMEZONE).format('DD/MM/YYYY');
+        bill.formattedTime = moment(bill.createdAt).tz(PKT_TIMEZONE).format('hh:mm A');
 
-            if (bill.salesItems) {
-                bill.salesItems.forEach(item => {
-                    totalRevenue += (item.quantitySold * (item.rate || 0));
-                });
-            }
+         if (bill.salesItems) {
+         bill.salesItems.forEach(item => {
+            // 2. Refund Minus Logic: Revenue sirf asali sale par calculate hoga
+            // Actual Qty = Jitni bechi thi - Jitni refund hui
+            const actualQty = (item.quantitySold || 0) - (item.refundQuantity || 0);
+            const itemRate = item.rate || 0;
+
+            // Revenue mein sirf bachi hui quantity ka paisa jama hoga
+            totalRevenue += (actualQty * itemRate);
         });
+    }
+});
 
         // --- 4. Responses ---
         if (ajax === 'true') {
@@ -433,7 +557,7 @@ router.get('/bill/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, r
         const bill = await PrintSale.findById(req.params.id)
             .populate({
                 path: 'salesItems',
-                select: 'stockID saleID itemName brandName colourName qty quantitySold rate createdAt' 
+                select: 'stockID saleID itemName brandName refundQuantity colourName qty quantitySold rate createdAt' 
             })
             .populate('agentId', 'name');
 
@@ -441,9 +565,10 @@ router.get('/bill/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, r
 
         // 🟢 Total calculation (Safety check ke saath)
         const totalAmount = bill.salesItems.reduce((acc, item) => {
-            const itemRate = item.rate || 0;
-            const itemQty = item.quantitySold || 0;
-            return acc + (itemQty * itemRate);
+        const itemRate = item.rate || 0;
+        // Refund ko minus kar ke asali sold qty nikalna
+        const actualQty = (item.quantitySold || 0) - (item.refundQuantity || 0);
+        return acc + (actualQty * itemRate);
         }, 0);
 
         // Render with all data
@@ -471,11 +596,8 @@ router.delete("/delete-bill/:id", isLoggedIn, allowRoles("admin"), async (req, r
         // 1. Bill ka data nikaalein taake pata chale isme kaunse sales items hain
         const bill = await PrintSale.findById(billId);
         if (!bill) return res.status(404).json({ success: false, message: "Bill not found" });
-
-        // 2. Is bill se linked saare individual Sales items delete karein
-        await Sale.deleteMany({ _id: { $in: bill.salesItems } });
-
-        // 3. PrintSale (History record) delete karein
+        
+        // 2. PrintSale (History record) delete karein
         await PrintSale.findByIdAndDelete(billId);
 
         res.json({ success: true, message: "Bill deleted successfully!" });
@@ -484,6 +606,34 @@ router.delete("/delete-bill/:id", isLoggedIn, allowRoles("admin"), async (req, r
         res.status(500).json({ success: false, message: "Error deleting bill" });
     }
 });
+
+
+
+// Ye script aapke purane data ko link karne ke liye hai
+router.get("/fix-old-sales", isLoggedIn, allowRoles("admin"), async (req, res) => {
+  try {
+    // 1. Saare Bills uthaein
+    const allBills = await PrintSale.find({});
+    let updatedCount = 0;
+
+    for (const bill of allBills) {
+      if (bill.salesItems && bill.salesItems.length > 0) {
+        // 2. Is Bill ke andar jitni sales hain, un sab mein billId save kar do
+        await Sale.updateMany(
+          { _id: { $in: bill.salesItems } }, 
+          { $set: { billId: bill._id } }
+        );
+        updatedCount += bill.salesItems.length;
+      }
+    }
+
+    res.send(`✅ Success! ${updatedCount} purani sales ko unke Bills ke sath link kar diya gaya hai.`);
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("❌ Error fixing data: " + err.message);
+  }
+});
+
 
 
 

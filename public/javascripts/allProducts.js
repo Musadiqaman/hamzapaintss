@@ -346,7 +346,7 @@ async function updateTable() {
                 statsPs[1].innerText = `Rs ${Number(data.stats.totalValue || 0).toFixed(2)}`;
                 statsPs[2].innerText = data.stats.totalRemaining || 0;
                 statsPs[3].innerText = `Rs ${Number(data.stats.remaining || 0).toFixed(2)}`;
-                statsPs[4].innerText = `Rs ${Number(data.stats.totalRefundedValue || 0).toFixed(2)}`;
+                // statsPs[4].innerText = `Rs ${Number(data.stats.totalRefundedValue || 0).toFixed(2)}`;
             }
 
             // 🟢 3. Build Table Content
@@ -367,6 +367,7 @@ async function updateTable() {
 
                     html += `
                     <tr>
+                        <td>${p.stockID}</td>
                         <td>${p.brandName}</td>
                         <td>${p.itemName}</td>
                         <td>${p.colourName}</td>
@@ -375,8 +376,8 @@ async function updateTable() {
                         <td>${p.remaining}</td>
                         <td>Rs ${p.rate}</td>
                         <td>Rs ${(Number(p.totalProduct || 0) * Number(p.rate || 0)).toFixed(2)}</td>
-                        <td class="refund-status">${p.refundStatus || 'none'}</td>
-                        <td class="refund-quantity">${p.refundQuantity || 0}</td>
+                        <td class="refund-status"  hidden>${p.refundStatus || 'none'}</td>
+                        <td class="refund-quantity"  hidden >${p.refundQuantity || 0}</td>
                         <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
                         ${data.role === "admin" ? `<td><button type="button" class="delete-btn" data-id="${p._id}" id="delete" >Delete</button></td>` : ''}
                     </tr>`;

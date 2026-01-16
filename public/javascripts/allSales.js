@@ -370,7 +370,7 @@ async function updateTable() {
                         <td>${s.quantitySold}</td>
                         <td>Rs ${s.rate.toFixed(2)}</td>
                         <td>Rs ${(s.quantitySold * s.rate).toFixed(2)}</td>
-                        <td class="${profitVal < 0 ? 'loss' : 'profit'}">Rs ${Math.abs(profitVal).toFixed(2)}</td>
+                        <td class="${profitVal < 0 ? 'loss' : 'profit'}">Rs ${profitVal.toFixed(2)}</td>
                         <td class="refund-status">${s.refundStatus || 'none'}</td>
                         <td class="refund-quantity">${s.refundQuantity || 0}</td>
                         <td>${dateStr}<br><small style="color: #007bff; font-weight: bold;">${timeStr}</small></td>
