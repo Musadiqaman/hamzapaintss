@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Products History | Hamza Paints</title>
+    <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+    <link rel="stylesheet" href="/stylesheets/productsHistory.css">
+</head>
+<body>
+    <%- include('partials/navbar') %>
+
+    <main>
+        <h1>📦 Products History (Bills)</h1>
+
+        <div class="filter-container" id="filterForm">
+            <select name="filter" id="filter">
+                <option value="all"       <%= filter === 'all'       ? 'selected' : '' %>>All Times</option>
+                <option value="today"     <%= filter === 'today'     ? 'selected' : '' %>>Today</option>
+                <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+                <option value="month"     <%= (filter === 'month' || !filter) ? 'selected' : '' %>>This Month</option>
+                <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+                <option value="custom"    <%= filter === 'custom'    ? 'selected' : '' %>>Custom Range</option>
+            </select>
+
+            <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+            <input type="date" name="to"   id="to"   value="<%= to   || '' %>" style="display:none;">
+
+            <button type="button" id="apply">Apply Filter</button>
+
+            <span style="color:#ccc; margin-right:10px;">|</span>
+
+            <input type="text" id="billSearchInput" placeholder="Bill ID se search karein">
+            <button type="button" id="searchBillBtn">Search</button>
+        </div>
+
+        <div class="stats">
+            <div class="stat-box">
+                <h3>🧾 Total Bills</h3>
+                <p id="totalBillsCount"><%= totalDocs %></p>
+            </div>
+            <div class="stat-box">
+                <h3>💰 Total Value</h3>
+                <p id="totalValueText">Rs <%= totalValue.toFixed(2) %></p>
+            </div>
+        </div>
+
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Showing <strong id="showingFrom">0</strong> -
+                <strong id="showingTo">0</strong>
+                of <strong id="totalCount"><%= totalDocs %></strong> Rows
+            </div>
+            <div class="pagination-controls">
+                <select id="limitSelect">
+                    <option value="25"  <%= limit == 25  ? 'selected' : '' %>>25 row / page</option>
+                    <option value="50"  <%= limit == 50  ? 'selected' : '' %>>50 row / page</option>
+                    <option value="100" <%= limit == 100 ? 'selected' : '' %>>100 row / page</option>
+                    <option value="200" <%= limit == 200 ? 'selected' : '' %>>200 row / page</option>
+                </select>
+                <button id="prevPage">← Prev</button>
+                <span id="pageInfo">Page <%= currentPage %> of <%= totalPages %></span>
+                <button id="nextPage">Next →</button>
+            </div>
+        </div>
+
+        <div class="table-container" id="tableWrapper">
+            <div id="table-loader">
+                <div class="spinner"></div>
+            </div>
+
+            <table id="productsTable">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Bill ID</th>
+                        <th>Company</th>
+                        <th>Rows Count</th>
+                        <th>Total Value</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="tableBody">
+                    <% if (history && history.length > 0) { %>
+                        <% history.forEach(bill => {
+                            let billTotal = bill.productsItems.reduce((acc, item) => {
+                                const actualQty = (item.totalProduct || 0) - (item.refundQuantity || 0);
+                                return acc + (actualQty * (item.rate || 0));
+                            }, 0);
+                            let pkrDate = new Date(bill.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', timeZone:'Asia/Karachi' });
+                            let pkrTime = new Date(bill.createdAt).toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Karachi' }).toUpperCase();
+                        %>
+                        <tr>
+                            <td>
+                                <%= pkrDate %><br>
+                                <small style="color:#007bff;font-weight:bold;"><%= pkrTime %></small>
+                            </td>
+                            <td class="customer-name" style="font-weight:bold;"><%= bill.billID %></td>
+                            <td>
+                                <% if(bill.companyId) { %>
+                                    <span class="agent-tag"><%= bill.companyId.name %></span>
+                                <% } else { %>
+                                    <small>Cash Purchase</small>
+                                <% } %>
+                            </td>
+                            <td><%= bill.productsItems.length %> Items</td>
+                            <td style="font-weight:bold;color:#06A56C;">Rs <%= billTotal.toFixed(2) %></td>
+                            <td>
+                                <button type="button" class="view-btn action-btn" data-id="<%= bill._id %>" id="view" >View</button>
+                                <% if(role === "admin") { %>
+                                    <button type="button" class="delete-btn action-btn" data-id="<%= bill._id %>" id="delete" >Delete</button>
+                                <% } %>
+                            </td>
+                        </tr>
+                        <% }) %>
+                    <% } else { %>
+                        <tr>
+                            <td colspan="6" class="no-data" style="text-align:center;padding:20px;color:#666;">
+                                No history found.
+                            </td>
+                        </tr>
+                    <% } %>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+    <script type="application/json" id="__initData__">
+        <%- JSON.stringify({
+            currentPage: currentPage,
+            totalPages:  totalPages,
+            totalDocs:   totalDocs,
+            limit:       limit,
+            filter:      filter,
+            from:        from || '',
+            to:          to   || '',
+            role:        role
+        }) %>
+    </script>
+
+    <script src="/javascripts/productsHistory.js"></script>
+</body>
+</html>

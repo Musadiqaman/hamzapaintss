@@ -3,7 +3,7 @@ const router = express.Router();
 import { isLoggedIn } from "../middleware/isLoggedIn.js";
 import { allowRoles } from "../middleware/allowRoles.js";
 import ItemDefinition from "../models/ItemDefinition.js";
-
+import { deleteAndSync } from "../app.js";
 
 // 1. ADD PAGE RENDER
 router.get('/add', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
@@ -18,7 +18,7 @@ router.get('/add', isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
 });
 
 // 2. API: GET ITEMS FOR A SPECIFIC BRAND
-router.get('/api/get-items/:brandName', isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
+router.get('/api/get-items/:brandName', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     try {
         const brand = await ItemDefinition.findOne({ 
             brandName: { $regex: new RegExp(`^${req.params.brandName}$`, "i") } 
@@ -34,14 +34,13 @@ router.get('/api/get-items/:brandName', isLoggedIn,allowRoles("admin", "worker")
     }
 });
 
-
-// 3. POST: ADD OR UPDATE ITEM (Merging Colors Logic Added)
+// 3. POST: ADD OR UPDATE ITEM
 router.post('/add-item', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     try {
         const { itemsList, brandName, colors, units } = req.body;
         
-        // 🟢 Trim brand name to avoid leading/trailing spaces
         const finalBrandName = brandName.trim(); 
+        const formattedUnits = units ? units.map(u => ({ unitname: u.trim() })) : [];
 
         let brandDoc = await ItemDefinition.findOne({ 
             brandName: { $regex: new RegExp(`^${finalBrandName}$`, "i") } 
@@ -49,15 +48,22 @@ router.post('/add-item', isLoggedIn, allowRoles("admin", "worker"), async (req, 
 
         if (!brandDoc) {
             const products = itemsList.map(name => ({
-                itemName: name.trim(), // 🟢 Items ko bhi trim karein
+                itemName: name.trim(),
                 hasColors: colors.length > 0,
                 colors: colors
             }));
-            // Ab brandName waisa hi save hoga jaisa aapne bheja
-            brandDoc = new ItemDefinition({ brandName: finalBrandName, units, products });
+            brandDoc = new ItemDefinition({ 
+                brandName: finalBrandName, 
+                units: formattedUnits, 
+                products 
+            });
         } else {
             if (units && units.length > 0) {
-                brandDoc.units = [...new Set([...brandDoc.units, ...units])];
+                units.forEach(newUnitStr => {
+                    const cleanUnit = newUnitStr.trim();
+                    const exists = brandDoc.units.some(u => u.unitname.toLowerCase() === cleanUnit.toLowerCase());
+                    if (!exists) brandDoc.units.push({ unitname: cleanUnit });
+                });
             }
 
             itemsList.forEach(itemName => {
@@ -67,7 +73,6 @@ router.post('/add-item', isLoggedIn, allowRoles("admin", "worker"), async (req, 
                 if (idx > -1) {
                     const oldColors = brandDoc.products[idx].colors || [];
                     colors.forEach(newCol => {
-                        // 🟢 Case-insensitive color check
                         const exists = oldColors.some(c => c.colour.toLowerCase() === newCol.colour.toLowerCase());
                         if (!exists) oldColors.push(newCol);
                     });
@@ -83,17 +88,16 @@ router.post('/add-item', isLoggedIn, allowRoles("admin", "worker"), async (req, 
             });
         }
 
+        brandDoc.syncedToAtlas = false; // ✅ hamesha false karo save se pehle
         await brandDoc.save();
         res.json({ success: true });
     } catch (err) {
-        console.error(err);
+        console.error("Save Error:", err);
         res.status(500).json({ success: false, message: err.message });
     }
 });
 
-
-
-// 3. ALL DATA VIEW
+// 4. ALL DATA VIEW
 router.get('/all', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     try {
         const role = req.user.role;
@@ -104,61 +108,116 @@ router.get('/all', isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
     }
 });
 
-
-// 4. DELETE BRAND
+// 5. DELETE BRAND
 router.post('/delete-brand', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     try {
-        const brand = await ItemDefinition.findByIdAndDelete(req.body.brandId);
+        const brandId = req.body.brandId;
+
+        const brand = await ItemDefinition.findById(brandId);
         if (!brand) {
             return res.status(404).json({ success: false, message: "Brand nahi mila!" });
         }
-        res.json({ success: true, message: "Poora Brand aur uske products delete ho gaye!" });
+
+        await deleteAndSync(ItemDefinition, brandId); // ✅ PendingDelete automatically handle hota hai
+
+        res.json({ success: true, message: "Poora Brand aur uske products delete ho gaye! 🗑️" });
     } catch (err) { 
+        console.error("🔴 Error deleting brand:", err);
         res.status(500).json({ success: false, message: "Brand delete karne mein masla hua." }); 
     }
 });
 
-// 5. DELETE PRODUCT
+// 6. DELETE PRODUCT
 router.post('/delete-product', isLoggedIn, allowRoles("admin","worker"), async (req, res) => {
     try {
         const { brandId, productId } = req.body;
-        const result = await ItemDefinition.findByIdAndUpdate(
+
+        const brand = await ItemDefinition.findById(brandId);
+        if (!brand) return res.status(404).json({ success: false, message: "Brand nahi mila!" });
+
+        const productExists = brand.products.some(p => p._id.toString() === productId);
+        if (!productExists) return res.status(404).json({ success: false, message: "Product nahi mila!" });
+
+        // ✅ $pull + syncedToAtlas: false ek saath
+        await ItemDefinition.findByIdAndUpdate(
             brandId, 
-            { $pull: { products: { _id: productId } } },
+            { 
+                $pull: { products: { _id: productId } },
+                $set: { syncedToAtlas: false }
+            },
             { new: true }
         );
-        if (!result) {
-            return res.status(404).json({ success: false, message: "Item ya Brand nahi mila!" });
-        }
-        res.json({ success: true, message: "Item kamyabi se nikal diya gaya!" });
+
+        res.json({ success: true, message: "Item kamyabi se nikal diya gaya! 🗑️" });
     } catch (err) { 
+        console.error("🔴 Error pulling product:", err);
         res.status(500).json({ success: false, message: "Item delete nahi ho saka." }); 
     }
 });
 
-// 6. DELETE COLOR
+// 7. DELETE COLOR
 router.post('/delete-color', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     try {
         const { brandId, productId, colorId } = req.body;
+
+        const brand = await ItemDefinition.findById(brandId);
+        if (!brand) return res.status(404).json({ success: false, message: "Brand nahi mila!" });
+
+        const product = brand.products.find(p => p._id.toString() === productId);
+        if (!product) return res.status(404).json({ success: false, message: "Product nahi mila!" });
+
+        const colorExists = product.colors.some(c => c._id.toString() === colorId);
+        if (!colorExists) return res.status(404).json({ success: false, message: "Color nahi mila!" });
+
+        // ✅ $pull + syncedToAtlas: false ek saath
         const result = await ItemDefinition.findOneAndUpdate(
             { _id: brandId, "products._id": productId },
-            { $pull: { "products.$.colors": { _id: colorId } } },
+            { 
+                $pull: { "products.$.colors": { _id: colorId } },
+                $set: { syncedToAtlas: false }
+            },
             { new: true }
         );
-        if (!result) {
-            return res.status(404).json({ success: false, message: "Color delete karne ke liye data nahi mila!" });
-        }
-        res.json({ success: true, message: "Color list se saaf kar diya gaya!" });
+
+        if (!result) return res.status(404).json({ success: false, message: "Color delete karne ke liye data nahi mila!" });
+
+        res.json({ success: true, message: "Color list se saaf kar diya gaya! 🗑️" });
     } catch (err) { 
+        console.error("🔴 Error pulling color:", err);
         res.status(500).json({ success: false, message: "Color delete karne mein error aya." }); 
     }
 });
 
 
+// 8. DELETE UNIT
+router.post('/delete-unit', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+    try {
+        const { brandId, unitId } = req.body;
+        
+        const brand = await ItemDefinition.findById(brandId);
+        if (!brand) return res.status(404).json({ success: false, message: "Brand nahi mila!" });
 
+        const unitExists = brand.units.some(u => u._id.toString() === unitId);
+        if (!unitExists) return res.status(404).json({ success: false, message: "Unit nahi mila!" });
 
+        // ✅ $pull + syncedToAtlas: false ek saath
+        const result = await ItemDefinition.findByIdAndUpdate(
+            brandId,
+            { 
+                $pull: { units: { _id: unitId } },
+                $set: { syncedToAtlas: false }
+            },
+            { new: true }
+        );
 
+        if (!result) return res.status(404).json({ success: false, message: "Unit ya Brand nahi mila!" });
 
+        res.json({ success: true, message: "Unit kamyabi se delete kar diya gaya! 🗑️" });
+    } catch (err) {
+        console.error("🔴 Unit Delete Error:", err);
+        res.status(500).json({ success: false, message: "Unit delete karne mein error aya." });
+    }
+});
 
 
 

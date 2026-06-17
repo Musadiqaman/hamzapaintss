@@ -30,7 +30,7 @@ body {
 
 
 .print-area {
-  width: 76mm;
+  width: 86mm;
   margin: 0;
   padding: 0;
   font-family: Arial, Courier, monospace;
@@ -250,6 +250,7 @@ main{
 @media print {
   /* 1. Navbar, Sidebar, aur Buttons ko gayab karne ke liye */
   nav, 
+  #hamburger,
   .navbar, 
   #sidebar, 
   .sidebar, 

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>View Product Bill | Hamza Paints</title>
+  <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+  <link rel="stylesheet" href="/stylesheets/viewBill.css">
+</head>
+
+<body>
+<%- include('partials/navbar') %>
+    
+<main>
+
+   <div class="no-print-controls">
+  <button class="btn btn-print">🖨️ Print Bill</button>
+  <!-- <a href="/sales/history" class="btn btn-back" >🔙 Back to History</a> -->
+</div>
+
+
+
+  <div class="print-area">
+
+    <div class="shop-header">
+      <img src="/images/weldon-paints-logo.png" id="logo">
+      <div class="shop-name-en">
+        Hamza Weldon Paint & Hardware Store
+      </div>
+      <div class="shop-name-ur">
+        حمزہ ویلڈن پینٹ اینڈ ہارڈویئر سٹور
+      </div>
+      <div class="shop-phones">
+        <span dir="ltr">0319-9303154</span>(حمزہ)
+        <span dir="ltr">0332-9780911</span>(اسماعیل)
+        <span dir="ltr">0335-0502041</span>(مبارک شاہ)
+      </div>
+      <br>
+      
+    </div>
+    
+    <p><b>Bill ID:  </b><b><%= bill.billID %></b></p>
+    <br>
+    <p><b>Bill Type:  </b><b><%= bill.billtype %></b></p>
+    <br>
+    <p><b>Entry date: <%= new Date(bill.createdAt).toLocaleDateString('en-GB', {timeZone: 'Asia/Karachi'}) %> | 
+            <%= new Date(bill.createdAt).toLocaleTimeString('en-US', {timeZone: 'Asia/Karachi', hour:'2-digit', minute:'2-digit', hour12:true}) %></b> </p>
+    <br>
+    
+
+    <h3>Remarks:</h3>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Stock ID</th>
+          <th>Brand</th>
+          <th>Item</th>
+          <th>Color</th>
+          <th>Unit</th>
+          <th>Qty</th>
+          <th>R.f</th>
+          <th>Price</th>
+          <th>Total</th>
+        </tr>
+      </thead>
+      <tbody id="billTableBody">
+        <% bill.productsItems.forEach(item => { %>
+    <tr>
+      <td><%= item.stockID %></td>
+     <td><%= item.brandName %></td>
+      <td><%= item.itemName %></td>
+      <td><%= item.colourName %></td>
+      <td><%= item.qty %></td> 
+      <td><%= item.totalProduct %></td>
+      <td><%= item.refundQuantity %></td>
+      <td><%= item.rate.toFixed(2) %></td>
+      <td><%= ((item.totalProduct - item.refundQuantity) * item.rate).toFixed(2) %></td>
+    </tr>
+<% }) %>
+      </tbody>
+    </table>
+
+    <div class="footer">
+      <span id="billTotalItems">Total items: <%= bill.productsItems.length %></span>
+      <span id="billTotalAmount">Total amount: Rs <%= totalAmount.toFixed(2) %></span>
+    </div>
+
+    <div class="urdu-footer">
+      پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6 کوہاٹ بورڈ ہائی وے چوک
+    </div>
+
+    <div class="urdu-warning">
+      .بل کے بغیر واپسی نہیں ہوگی
+    </div>
+    <div class="thank-you-section">
+      THANK YOU FOR VISITING HAMZA PAINTS
+    </div>
+
+    <div class="dev-footer">
+      <span>Software Developed by: MUHAMMAD SHOUKAT (03358004900)</span><br>
+    </div>
+
+  </div>
+
+  </main>
+
+  <script src="/javascripts/viewBill.js"></script>
+</body>
+</html>

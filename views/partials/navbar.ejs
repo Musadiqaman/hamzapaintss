@@ -6,95 +6,123 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hamza Paints | Admin</title>
 
-  <link rel="stylesheet" href="/stylesheets/navbar.css">
+  <link rel="stylesheet" href="/stylesheets/navbar2.css">
+  <link rel="stylesheet" href="/fontawesome/css/all.min.css">
+  <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+  
 </head>
 
 <body>
 
- 
-  <!-- ================= HAMBURGER (MOBILE) ================= -->
-  <button class="hamburger" id="hamburger">☰</button>
+  <button class="hamburger" id="hamburger"><i class="fa-solid fa-bars"></i></button>
 
-  <!-- ================= OVERLAY (MOBILE) ================= -->
   <div class="overlay" id="overlay"></div>
 
-  <!-- ================= SIDEBAR ================= -->
   <aside class="sidebar" id="sidebar">
-    <div class="logo">
+    <div class="logo"  >
       <img src="/images/weldon-paints-logo.png" alt="Hamza Paints">
       <h3>Hamza Paints</h3>
     </div>
 
     <ul>
-
       <li>
         <a href="/home" class="dropdown">
-          <div class="menu-left">🏠 Home</div>
+          <div class="menu-left"><i class="fa-solid fa-house"></i> Home</div>
         </a>
       </li>
 
       <div class="menu-group">
         <li class="dropdown">
-          <div class="menu-left">📦 Products</div>
-          <span class="arrow">▶</span>
+          <div class="menu-left"><i class="fa-solid fa-boxes-stacked"></i> Products</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
         </li>
         <ul class="submenu">
-          <li><a href="/products/add">Add Product</a></li>
-          <li><a href="/products/all">All Products</a></li>
-          <li><a href="/products/refund" style="color: red;">Company Refund</a></li>
+          <li><a href="/products/add"><i class="fa-solid fa-circle-plus"></i> Add Product</a></li>
+          <li><a href="/products/all"><i class="fa-solid fa-list-ul"></i> All Products</a></li>
+          <li><a href="/products/history"><i class="fa-solid fa-clock-rotate-left"></i> Products History</a></li>
+          <li><a href="/products/refund"><i class="fa-solid fa-rotate-left"></i> Company Refund</a></li>
         </ul>
       </div>
 
       <div class="menu-group">
         <li class="dropdown">
-          <div class="menu-left">📊 Sales</div>
-          <span class="arrow">▶</span>
+          <div class="menu-left"><i class="fa-solid fa-chart-line"></i> Sales</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
         </li>
         <ul class="submenu">
-          <li><a href="/sales/add">Add Sale</a></li>
-          <% if(role==="admin" ){ %>
-            <li><a href="/sales/all">All Sales</a></li>
-            <% } %>
-            <li><a href="/sales/history">📜 Sales History</a></li>
-            <li><a href="/sales/refund"> ↩️ Refund Sales</a></li>
+          <li><a href="/sales/add"><i class="fa-solid fa-circle-plus"></i> Add Sale</a></li>
+         
+            <li><a href="/sales/all"><i class="fa-solid fa-table-list"></i> All Sales</a></li>
+       
+          <li><a href="/sales/history"><i class="fa-solid fa-clock-rotate-left"></i> Sales History</a></li>
+          <li><a href="/sales/refund"><i class="fa-solid fa-rotate-left"></i> Refund Sales</a></li>
         </ul>
       </div>
 
       <div class="menu-group">
         <li class="dropdown">
-          <div class="menu-left">👥 Agents</div>
-          <span class="arrow">▶</span>
+          <div class="menu-left"><i class="fa-solid fa-user-tie"></i> Agents</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
         </li>
         <ul class="submenu">
-          <li><a href="/agents/add">Add Agent</a></li>
-          <li><a href="/agents/all">All Agents</a></li>
+          <li><a href="/agents/add"><i class="fa-solid fa-user-plus"></i> Add Agent</a></li>
+          <li><a href="/agents/all"><i class="fa-solid fa-users"></i> All Agents</a></li>
         </ul>
       </div>
 
-       <div class="menu-group">
+      <div class="menu-group">
         <li class="dropdown">
-          <div class="menu-left">🟢 Dynamic</div>
-          <span class="arrow">▶</span>
+          <div class="menu-left"><i class="fa-solid fa-database"></i> Dynamic</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
         </li>
         <ul class="submenu">
-          <li><a href="/dynamic/add">Add Data</a></li>
-          <li><a href="/dynamic/all">All Data</a></li>
+          <li><a href="/dynamic/add"><i class="fa-solid fa-circle-plus"></i> Add Data</a></li>
+          <li><a href="/dynamic/all"><i class="fa-solid fa-table"></i> All Data</a></li>
         </ul>
       </div>
 
-    
+      <div class="menu-group">
+        <li class="dropdown">
+          <div class="menu-left"><i class="fa-solid fa-book"></i> Khata</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </li>
+        <ul class="submenu">
+          <li><a href="/customers/add"><i class="fa-solid fa-user-plus"></i> Add Customer</a></li>
+          <li><a href="/customers/all"><i class="fa-solid fa-address-book"></i> All Customers Khata</a></li>
+        </ul>
+      </div>
+
+      <div class="menu-group">
+        <li class="dropdown">
+          <div class="menu-left"><i class="fa-solid fa-user-group"></i> Guests</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </li>
+        <ul class="submenu">
+          <li><a href="/guest/add"><i class="fa-solid fa-circle-plus"></i> Add Guest Expense</a></li>
+          <li><a href="/guest/all"><i class="fa-solid fa-receipt"></i> All Guests Expenses</a></li>
+        </ul>
+      </div>
+
+      <div class="menu-group">
+        <li class="dropdown">
+          <div class="menu-left"><i class="fa-solid fa-building"></i> Company Obrai</div>
+          <i class="fa-solid fa-chevron-right arrow"></i>
+        </li>
+        <ul class="submenu">
+          <li><a href="/company/add"><i class="fa-solid fa-circle-plus"></i> Add Company</a></li>
+          <li><a href="/company/all"><i class="fa-solid fa-building-columns"></i> All Company Obrai</a></li>
+        </ul>
+      </div>
 
       <li>
-        <a href="/auth/logout" class="logout">🔓 Logout</a>
+        <a href="/auth/logout" class="logout"><i class="fa-solid fa-arrow-right-from-bracket"></i> Logout</a>
       </li>
 
     </ul>
   </aside>
-   
-  
 
-  <!-- ================= JS ================= -->
   <script src="/javascripts/navbar.js" defer></script>
+
 
 </body>
 

@@ -22,3 +22,4 @@ export const allowRoles = (...roles) => {
     }
   };
 };
+

@@ -6,6 +6,11 @@
   <title>All Products | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/allProducts.css">
+  <script src="/javascripts/jspdf.umd.min.js"></script>
+  <script src="/javascripts/jspdf.plugin.autotable.min.js"></script>
+  <script src="/javascripts/moment.min.js"></script>
+  <!-- docx.js for Word generation (browser side) -->
+  <script src="/javascripts/docx.min.js"></script>
 </head>
 
 <body>
@@ -16,12 +21,12 @@
 
     <form class="filter-container" method="GET" action="/products/all" id="filterForm">
       <select name="filter" id="filter">
-        <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Times</option>
-        <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
+        <option value="all"       <%= filter === 'all'       ? 'selected' : '' %>>All Times</option>
+        <option value="today"     <%= filter === 'today'     ? 'selected' : '' %>>Today</option>
         <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
-        <option value="month" <%= (filter === 'month' || !filter) ? 'selected' : '' %>>This Month</option>
+        <option value="month"     <%= (filter === 'month' || !filter) ? 'selected' : '' %>>This Month</option>
         <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-        <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+        <option value="custom"    <%= filter === 'custom'    ? 'selected' : '' %>>Custom Range</option>
       </select>
 
       <select name="brand" id="brandFilter">
@@ -44,39 +49,49 @@
       </select>
 
       <select name="stockStatus" id="stockStatusFilter">
-        <option value="all" <%= stockStatus === 'all' ? 'selected' : '' %>>All Stock</option>
-        <option value="in" <%= stockStatus === 'in' ? 'selected' : '' %>>In Stock</option>
-        <option value="out" <%= stockStatus === 'out' ? 'selected' : '' %>>Out of Stock</option>
+        <option value="all" <%= stockStatus === 'all'      ? 'selected' : '' %>>All Stock</option>
+        <option value="in"  <%= stockStatus === 'in'       ? 'selected' : '' %>>In Stock</option>
+        <option value="out" <%= stockStatus === 'out'      ? 'selected' : '' %>>Out of Stock</option>
+        <option value="archived" <%= stockStatus === 'archived' ? 'selected' : '' %>>Archived</option>
       </select>
 
       <select name="refund" id="refundFilter">
-        <option value="all" <%= selectedRefund === 'all' ? 'selected' : '' %>>All Status</option>
-        <option value="none" <%= selectedRefund === 'none' ? 'selected' : '' %>>Not Refunded</option>
-        <option value="both" <%= selectedRefund === 'both' ? 'selected' : '' %>>Both (Partial & Full)</option>
+        <option value="all"               <%= selectedRefund === 'all'               ? 'selected' : '' %>>All Status</option>
+        <option value="none"              <%= selectedRefund === 'none'              ? 'selected' : '' %>>Not Refunded</option>
+        <option value="both"              <%= selectedRefund === 'both'              ? 'selected' : '' %>>Both (Partial & Full)</option>
         <option value="Partially Refunded" <%= selectedRefund === 'Partially Refunded' ? 'selected' : '' %>>Partially Refunded</option>
-        <option value="Fully Refunded" <%= selectedRefund === 'Fully Refunded' ? 'selected' : '' %>>Fully Refunded</option>
+        <option value="Fully Refunded"    <%= selectedRefund === 'Fully Refunded'    ? 'selected' : '' %>>Fully Refunded</option>
       </select>
 
       <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-      <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+      <input type="date" name="to"   id="to"   value="<%= to   || '' %>" style="display:none;">
       <button type="submit" id="apply" style="display:none;">Apply Range</button>
     </form>
 
+    <div id="download">
+      <% if(role == 'admin'){ %>
+        <button id="bulkDeleteBtn">🗑️ Delete Bulk</button>
+        <button id="generatePDF" class="generatePDFbtn">📥 Download PDF</button>
+        <button id="generateWord" class="generatePDFbtn">📄 Download Word</button>
+        <button id="archiveBtn">📁 Archive Selected</button>
+      <% } %>
+    </div>
+
     <div class="stats">
       <div class="stat-box">
-        <h3><span style="font-size: 17px;">🛒</span>Total Products</h3>
+        <h3><span style="font-size:17px;">🛒</span>Total Products</h3>
         <p><%= stats.totalStock || 0 %></p>
       </div>
       <div class="stat-box">
-        <h3><span style="font-size: 17px;">💰</span>Products Value</h3>
+        <h3><span style="font-size:17px;">💰</span>Products Value</h3>
         <p>Rs <%= stats.totalValue ? stats.totalValue.toLocaleString() : '0.00' %></p>
       </div>
       <div class="stat-box">
-        <h3><span style="font-size: 17px;">🧱</span>Items In Stock</h3>
+        <h3><span style="font-size:17px;">🧱</span>Items In Stock</h3>
         <p><%= stats.totalRemaining || 0 %></p>
       </div>
       <div class="stat-box">
-        <h3><span style="font-size: 17px;">💹</span>Remaining Value</h3>
+        <h3><span style="font-size:17px;">💹</span>R.Value</h3>
         <p>Rs <%= stats.remaining ? stats.remaining.toLocaleString() : '0.00' %></p>
       </div>
       <div class="stat-box">
@@ -85,65 +100,129 @@
       </div>
     </div>
 
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Showing <strong id="showingFrom">0</strong> -
+        <strong id="showingTo">0</strong>
+        of <strong id="totalCount">0</strong> Rows
+      </div>
+      <div class="pagination-controls">
+        <select id="limitSelect">
+          <option value="25">25 row / page</option>
+          <option value="50">50 row / page</option>
+          <option value="100">100 row / page</option>
+          <option value="200">200 row / page</option>
+        </select>
+        <button id="prevPage">← Prev</button>
+        <span id="pageInfo">Page 1 of 1</span>
+        <button id="nextPage">Next →</button>
+      </div>
+    </div>
+
     <div class="table-container" id="tableContainer">
-      <div id="table-loader" style="display: none;">
+      <div id="table-loader" style="display:none;">
         <div class="spinner"></div>
-        <p style="margin-top:10px; color:#06A56C; font-weight: bold;">Updating...</p>
+        <p style="margin-top:10px; color:#06A56C; font-weight:bold;">Updating...</p>
       </div>
 
       <table>
         <thead>
           <tr>
+            <th><input type="checkbox" id="selectAll"></th>
             <th>Stock ID</th>
+            <th>QR Code</th>
             <th>Brand</th>
             <th>Item</th>
             <th>Color</th>
             <th>Unit</th>
-            <th>Total Prod</th>
-            <th>Remaining</th>
+            <th>T.Qty</th>
+            <th>R.Qty</th>
             <th>Rate</th>
-            <th>Total Amount</th>
-            <th>Status</th>
-            <th>Refund</th>
+            <th>S.Rate</th>
             <th>Date</th>
+            <th>Obrai?</th>
             <% if(role == "admin"){ %>
               <th>Action</th>
             <% } %>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="productTableBody">
           <% if (products.length === 0) { %>
             <tr>
-              <td colspan="13" class="no-data">No products found for the selected filter.</td>
+              <td colspan="14" class="no-data">No products found for the selected filter.</td>
             </tr>
           <% } else { %>
             <% products.forEach(p => { %>
-              <tr>
+              <tr data-id="<%= p._id %>">
+                <td><input type="checkbox" class="row-checkbox" value="<%= p._id %>"></td>
                 <td><strong><%= p.stockID %></strong></td>
+                <td>
+                  <div class="qr-wrapper">
+                    <img src="<%= p.qrCode %>" alt="QR Code" class="qr-image">
+                    <button type="button" class="print-btn" 
+    data-qr="<%= p.qrCode %>"
+    data-brand="<%= p.brandName %>"
+    data-item="<%= p.itemName %>"
+    data-colour="<%= p.colourName %>"
+    data-unit="<%= p.qty %>">Print</button>
+                  </div>
+                </td>
                 <td><%= p.brandName %></td>
                 <td><%= p.itemName %></td>
                 <td><%= p.colourName %></td>
                 <td><%= p.qty %></td>
-                <td><%= p.totalProduct %></td>
-                <td class="stock-<%= p.remaining <= 0 ? 'red' : 'green' %>">
-               <%= p.remaining %>
-               </td>
 
+                <!-- T.Qty -->
+                <td class="view-mode" data-field="totalProduct"><%= p.totalProduct %></td>
 
-                <td>Rs <%= p.rate %></td>
-                <td>Rs <%= (p.totalProduct * p.rate).toFixed(2) %></td>
-                <td class="refund-status"><%= p.refundStatus %></td>
-                <td class="refund-quantity"><%= p.refundQuantity || 0 %></td>
+                <!-- R.Qty -->
+                <td class="view-mode <%= p.remaining <= 0 ? 'stock-out' : 'stock-in' %>" data-field="remaining"><%= p.remaining %></td>
+
+                <!-- Rate -->
+                <td class="view-mode" data-field="rate">Rs <%= p.rate %></td>
+
+                <!-- S.Rate -->
+                <td class="view-mode" data-field="saleRate">Rs <%= p.saleRate %></td>
+
                 <td>
-                  <%= new Date(p.createdAt).toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Karachi' }) %>
+                  <%= new Date(p.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Karachi' }) %>
                   <br>
-                  <small style="color: #007bff; font-weight: bold;">
-                    <%= new Date(p.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' }) %>
+                  <small style="color:#007bff; font-weight:bold;">
+                    <%= new Date(p.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Karachi' }) %>
                   </small>
                 </td>
-                <% if(role == "admin"){ %>
-                  <td><button type="button" class="delete-btn" data-id="<%= p._id %>"  id="delete">Delete</button></td>
-                <% } %>
+
+                <!-- Company / Cash -->
+                <td>
+                  <% if (p.companyId) { %>
+                    <div style="font-size:12px; line-height:1.4;">
+                      <!-- <strong><%= p.companyName %></strong><br>
+                      <span style="color:#555;"><%= p.companyPhone %></span><br> -->
+                      <a href="/company/view/<%= p.companyId %>"
+   style="color:#2196F3; font-weight:bold; text-decoration:none; font-size:11px;">
+   📄 View
+</a>
+                    </div>
+                  <% } else { %>
+                    <span style="color:#999; font-weight:bold;">💵 Cash</span>
+                  <% } %>
+                </td>
+   <% if(role == "admin"){ %>
+                <td class="action-cell">
+                  <!-- Edit icon -->
+                  <button id="edit" type="button" class="edit-icon-btn" data-id="<%= p._id %>"
+                    data-totalproduct="<%= p.totalProduct %>"
+                    data-remaining="<%= p.remaining %>"
+                    data-rate="<%= p.rate %>"
+                    data-salerate="<%= p.saleRate %>"
+                    title="Edit"
+                  >✏️</button>
+
+               
+                    <button type="button" class="delete-btn" data-id="<%= p._id %>" id="delete" >🗑️</button>
+               
+                </td>
+                   <% } %>
               </tr>
             <% }) %>
           <% } %>
@@ -151,18 +230,28 @@
       </table>
     </div>
 
-    <div id="db-data-provider" data-definitions='<%= JSON.stringify(definitions) %>' style="display: none;"></div>
+    <div id="db-data-provider" data-definitions='<%= JSON.stringify(definitions) %>' style="display:none;"></div>
   </main>
 
   <script>
-    // Server-side variables pass to JavaScript
-    window.selectedBrand = "<%= selectedBrand || 'all' %>";
-    window.selectedItem = "<%= selectedItem || 'all' %>";
+    window.selectedBrand  = "<%= selectedBrand  || 'all' %>";
+    window.selectedItem   = "<%= selectedItem   || 'all' %>";
     window.selectedColour = "<%= selectedColour || 'all' %>";
-    window.selectedUnit = "<%= selectedUnit || 'all' %>";
+    window.selectedUnit   = "<%= selectedUnit   || 'all' %>";
+    window.role           = "<%= role %>";
+    window.currentPage    = 1;
+    window.currentLimit   = 25;
+    window.totalPages     = 1;
+    window.totalCount     = 0;
   </script>
 
   <script src="/javascripts/allProducts.js"></script>
 
+  <div id="print-container">
+    <img id="print-image" src="" alt="QR Print">
+    <div id="print-label"></div>
+  </div>
 </body>
 </html>
+
+

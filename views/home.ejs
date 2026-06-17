@@ -1,192 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Home | Hamza Paints</title>
-
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/home.css" />
 </head>
-
 <body>
   <%- include('partials/navbar') %>
-<main class="dashboard">
-      <section class="welcome glass-panel">
-        <div class="welcome-text">
-          <h1>Welcome to Dashboard</h1>
-          <p>Complete overview of your paint store management system</p>
-        </div>
-        
-      </section>
 
-      <section class="stats">
-        <div class="stat-card glass">
-          <div class="icon-glow cyan"><i class="fas fa-cubes"></i></div>
-          <h3>Total Products</h3>
-          <p class="val-cyan">
-            <%= stats.totalStock || 0 %>
-          </p>
-        </div>
+  <main class="dashboard">
 
-        <div class="stat-card glass">
-          <div class="icon-glow pink"><i class="fas fa-file-invoice-dollar"></i></div>
-          <h3>Products Value</h3>
-          <p class="val-green">Rs <%= stats.totalValue.toLocaleString() %>
-          </p>
-        </div>
-
-        <div class="stat-card glass">
-          <div class="icon-glow blue"><i class="fas fa-warehouse"></i></div>
-          <h3>Items In Stock</h3>
-          <p class="val-cyan">
-            <%= stats.totalRemaining || 0 %>
-          </p>
-        </div>
-
-        <div class="stat-card glass">
-          <div class="icon-glow green"><i class="fas fa-chart-line"></i></div>
-          <h3>Remaining Stock Value</h3>
-          <p class="val-green">Rs <%= stats.remainingValue.toLocaleString() %>
-          </p>
-        </div>
-
-        <div class="stat-card glass" hidden>
-          <div class="icon-glow red"><i class="fas fa-undo"></i></div>
-          <h3>Refunded Value</h3>
-          <p class="val-red">Rs <%= stats.totalRefundedValue.toLocaleString() %>
-          </p>
-        </div>
-
-        <div class="stat-card glass">
-          <div class="icon-glow purple"><i class="fas fa-user-tie"></i></div>
-          <h3>Active Agents</h3>
-          <p class="val-cyan">
-            <%= stats.activeAgents %>
-          </p>
-        </div>
-      </section>
-
-      <section class="actions">
-        <a href="/products/add" class="action-btn neon-blue">
-          <i class="fas fa-plus-circle"></i> Add Product
-        </a>
-        <a href="/products/all" class="action-btn neon-pink">
-          <i class="fas fa-boxes-stacked"></i> All Products
-        </a>
-        <a href="/sales/refund" class="action-btn neon-purple">
-          <i class="fas fa-exchange-alt"></i> Refunds
-        </a>
-        <a href="/sales/add" class="action-btn neon-pink">
-          <i class="fas fa-cart-plus"></i> New Sale
-        </a>
-        <a href="/agents/add" class="action-btn neon-blue">
-          <i class="fas fa-user-plus"></i> Add Agent
-        </a>
-        <a href="/agents/all" class="action-btn neon-blue">
-          <i class="fas fa-users-cog"></i> Manage Agents
-        </a>
-      </section>
-
-
-      <div class="calculator-container">
-        <h1>Room Paint Calculator</h1>
-
-        <div class="calculator-grid">
-
-          <!-- LEFT FORM -->
-          <form class="paint-form" id="calcForm">
-
-            <label>
-              Room Length (ft)
-              <input type="number" id="length" required>
-            </label>
-
-            <label>
-              Room Width (ft)
-              <input type="number" id="width" required>
-            </label>
-
-            <label>
-              Room Height (ft)
-              <input type="number" id="height" required>
-            </label>
-
-            <label>
-              Door Area (sq ft)
-              <input type="number" id="doorArea" value="0">
-            </label>
-
-            <label class="full">
-              Window Area (sq ft)
-              <input type="number" id="windowArea" value="0">
-            </label>
-
-            <label class="checkbox full">
-              <input type="checkbox" id="ceiling" checked>
-              Include Ceiling
-            </label>
-
-            <button type="submit">Calculate Paint</button>
-          </form>
-
-          <!-- RIGHT RESULTS -->
-          <div class="results-box" id="results">
-            <p>Wall Area: <span id="wallArea">0</span> sq ft</p>
-            <p>Ceiling Area: <span id="ceilingArea">0</span> sq ft</p>
-            <p>Total Area: <span id="totalArea">0</span> sq ft</p>
-            <p>Paint Required: <span id="paintLiters">0</span> litres</p>
-            <p>Suggested Buckets (1L): <span id="paintBuckets">0</span></p>
-          </div>
-
-        </div>
+    <section class="welcome glass-panel">
+      <div class="welcome-text">
+        <h1>Welcome to Dashboard</h1>
+        <p>Complete overview of your paint store management system</p>
       </div>
+    </section>
 
-      <script>
-        document.getElementById('calcForm').addEventListener('submit', function (e) {
-          e.preventDefault();
 
-          const length = +lengthInput.value;
-          const width = +widthInput.value;
-          const height = +heightInput.value;
-          const door = +doorAreaInput.value || 0;
-          const windowA = +windowAreaInput.value || 0;
-          const includeCeiling = ceiling.checked;
 
-          const perimeter = 2 * (length + width);
-          let wallArea = perimeter * height - (door + windowA);
-          if (wallArea < 0) wallArea = 0;
+  
 
-          const ceilingArea = includeCeiling ? length * width : 0;
-          const totalArea = wallArea + ceilingArea;
 
-          const paintLiters = totalArea / 100; // 1L = 100 sq ft
-          const buckets = Math.ceil(paintLiters);
+    <div class="calculator-container">
 
-          wallAreaSpan.textContent = wallArea.toFixed(2);
-          ceilingAreaSpan.textContent = ceilingArea.toFixed(2);
-          totalAreaSpan.textContent = totalArea.toFixed(2);
-          paintLitersSpan.textContent = paintLiters.toFixed(2);
-          paintBucketsSpan.textContent = buckets;
-        });
+      <!-- FILTER -->
+     <form id="filterForm">
+     <select name="filter" id="filterSelect">
+    <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Times</option>
+    <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
+    <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+    <option value="month" <%= (filter === 'month' || !filter) ? 'selected' : '' %>>This Month</option>
+    <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+  </select>
 
-        /* shortcuts */
-        const lengthInput = document.getElementById('length');
-        const widthInput = document.getElementById('width');
-        const heightInput = document.getElementById('height');
-        const doorAreaInput = document.getElementById('doorArea');
-        const windowAreaInput = document.getElementById('windowArea');
-        const ceiling = document.getElementById('ceiling');
+  <input type="date" name="from" id="fromDate" value="<%= from || '' %>">
+  <input type="date" name="to" id="toDate" value="<%= to || '' %>">
+  
+  <button type="submit" id="apply">Apply Filter</button>
+</form>
+     <br>
+      <!-- Loader -->
+      <div class="spinner" id="loader" style="display:none;"></div>
 
-        const wallAreaSpan = document.getElementById('wallArea');
-        const ceilingAreaSpan = document.getElementById('ceilingArea');
-        const totalAreaSpan = document.getElementById('totalArea');
-        const paintLitersSpan = document.getElementById('paintLiters');
-        const paintBucketsSpan = document.getElementById('paintBuckets');
-      </script>
-    </main>
-    <script src="/javascripts/home.js"></script>
+      <!-- Calculator Grid -->
+      <div class="calculator-grid" id="calculatorGrid">
+        <%- include('partials/calculator-grid', { stats }) %>
+      </div>
+    </div>
+
+    <!-- 🚗 Car Game Floating Button -->
+<button id="carOpenBtn" title="Car Dodge 🚗">🚗</button>
+
+<!-- 🚗 Car Game Modal -->
+<div id="carModal">
+  <div class="car-modal-content">
+    <div class="car-header">
+      <h2>🚗 Car Dodge</h2>
+      <div class="car-header-actions">
+        <button id="carSoundBtn">🔊</button>
+        <button id="closeCarModal">✕</button>
+      </div>
+    </div>
+
+    <div class="car-scorebar">
+      <div><span class="car-label">Score</span><span id="carScore">0</span></div>
+      <div><span class="car-label">Best</span><span id="carBest">0</span></div>
+    </div>
+
+    <div class="car-canvas-wrap">
+      <canvas id="carCanvas" width="240" height="360"></canvas>
+      <div id="carGameOverOverlay">
+        <h3>Crashed 💥</h3>
+        <p>Score: <span id="carFinalScore"></span></p>
+        <button id="carRestartBtn">Play Again</button>
+      </div>
+    </div>
+
+    <div class="car-dpad">
+      <button class="car-dpad-btn" data-dir="left">⬅️</button>
+      <button class="car-dpad-btn" data-dir="right">➡️</button>
+    </div>
+
+    <p class="car-hint">Use arrow keys or swipe to switch lanes 🎮</p>
+  </div>
+</div>
+
+  </main>
+
+  <script src="/javascripts/home.js"></script>
+  <script src="/javascripts/snake.js"></script>
 </body>
-
 </html>
+

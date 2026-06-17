@@ -151,7 +151,6 @@ button#apply:hover {
 }
 
 table {
-
   width: 100%;
   min-width: 900px;
   /* ensures horizontal scroll on small screens */
@@ -173,7 +172,7 @@ th {
 }
 
 td {
-  padding: 2px 1px;
+  padding: 1px 2px;
   font-size: 13px;
   font-weight: 400;
   text-align: center;
@@ -212,7 +211,7 @@ tbody tr {
   background: #FFC5C5;
   color: #DF0404;
   border: 2px solid #DF0404;
-  padding: 5px 10px;
+  padding: 5px 6px;
   border-radius: 8px;
   font-size: 12px;
   cursor: pointer;
@@ -223,10 +222,28 @@ tbody tr {
   color: #fff;
 }
 
+
+#bulkDeleteBtn{
+  background: #FFC5C5;
+  color: #DF0404;
+  border: 2px solid #DF0404;
+  padding: 5px 6px;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+
+#bulkDeleteBtn:hover {
+  background: #FF4D4D;
+  color: #fff;
+}
+
+
 td.loss,
 #total-loss,
 .refund-status,
-.refund-quantity {
+.refund-quantity,#refund-profit {
   font-weight: 700;
   color: #ff4d4d;
 }
@@ -364,3 +381,62 @@ td.loss,
       opacity: 0.2;
       pointer-events: none;
     }
+
+
+
+    
+#download{
+    display:flex;
+    justify-content:flex-start;
+    max-width:1200px;
+    margin:0 auto 20px;
+    gap: 5px;
+}
+
+    
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 2px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info {
+  color: #555;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-controls button {
+  padding: 2px 19px;
+  background: #06A56C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination-controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#pageInfo {
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
+}

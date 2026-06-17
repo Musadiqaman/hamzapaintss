@@ -5,7 +5,6 @@
   <title>All Agents | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/allAgents.css">
-
 </head>
 
 <body>
@@ -14,21 +13,27 @@
   <main>
     <h1>All Agents</h1>
 
-  <form class="filter-container" id="filterForm">
-  <select name="filter" id="filter">
-    <option value="all" <%= filter === 'all' || !filter ? 'selected' : '' %>>All Times</option>
-    <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
-    <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
-    <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
-    <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
-    <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
-  </select>
+    <form class="filter-container" id="filterForm" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+      <select name="filter" id="filter">
+        <option value="all"       <%= filter === 'all' || !filter ? 'selected' : '' %>>All Times</option>
+        <option value="today"     <%= filter === 'today'      ? 'selected' : '' %>>Today</option>
+        <option value="yesterday" <%= filter === 'yesterday'  ? 'selected' : '' %>>Yesterday</option>
+        <option value="month"     <%= filter === 'month'      ? 'selected' : '' %>>This Month</option>
+        <option value="lastMonth" <%= filter === 'lastMonth'  ? 'selected' : '' %>>Last Month</option>
+        <option value="custom"    <%= filter === 'custom'     ? 'selected' : '' %>>Custom Range</option>
+      </select>
 
-  <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
-  <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
-  
-  <button type="button" id="apply">Apply Filter</button>
-</form>
+      <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+      <input type="date" name="to"   id="to"   value="<%= to   || '' %>" style="display:none;">
+
+      <button type="button" id="apply">Apply Filter</button>
+
+      <span style="color:#ccc; margin:0 10px;">|</span>
+
+      <input type="text" id="billSearchInput" name="search" placeholder="Enter Phone or Name"
+        style="padding:8px; border:1px solid #ccc; border-radius:4px; width:200px;">
+      <button type="button" id="searchBillBtn">Search</button>
+    </form>
 
     <div class="stats">
       <div class="stat-box">
@@ -37,22 +42,46 @@
       </div>
       <div class="stat-box">
         <h3>Total % Commission 💵</h3>
-        <p>Rs <%= Number(stats.totalPercentageAmount || 0).toFixed(2) %></p>
+        <p>Rs <%= Number(stats.totalPercentageAmount  || 0).toFixed(2) %></p>
       </div>
       <div class="stat-box">
         <h3>Paid % Commission ✅</h3>
-        <p>Rs <%= Number(stats.totalPercentageAmountGiven || 0).toFixed(2) %></p>
+        <p style="color: #8B5CF6 ; font-weight:bold;" >Rs <%= Number(stats.totalPercentageAmountGiven || 0).toFixed(2) %></p>
       </div>
       <div class="stat-box" id="negative">
         <h3>Left % Commission ⏳</h3>
-        <p>Rs <%= Number(stats.totalPercentageAmountLeft || 0).toFixed(2) %></p>
+        <p>Rs <%= Number(stats.totalPercentageAmountLeft  || 0).toFixed(2) %></p>
+      </div>
+    </div>
+
+    <!-- PAGINATION TOP -->
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Showing <strong id="showingFrom"><%=
+          pagination.totalCount === 0 ? 0 : ((pagination.page - 1) * pagination.limit) + 1
+        %></strong> -
+        <strong id="showingTo"><%=
+          Math.min(pagination.page * pagination.limit, pagination.totalCount)
+        %></strong>
+        of <strong id="totalCount"><%= pagination.totalCount %></strong> Rows
+      </div>
+      <div class="pagination-controls">
+        <select id="limitSelect">
+          <option value="25"  <%= pagination.limit == 25  ? 'selected' : '' %>>25 row / page</option>
+          <option value="50"  <%= pagination.limit == 50  ? 'selected' : '' %>>50 row / page</option>
+          <option value="100" <%= pagination.limit == 100 ? 'selected' : '' %>>100 row / page</option>
+          <option value="200" <%= pagination.limit == 200 ? 'selected' : '' %>>200 row / page</option>
+        </select>
+        <button id="prevPage" <%= !pagination.hasPrev ? 'disabled' : '' %>>← Prev</button>
+        <span id="pageInfo">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+        <button id="nextPage" <%= !pagination.hasNext ? 'disabled' : '' %>>Next →</button>
       </div>
     </div>
 
     <div class="table-container" id="tableContainer">
-      <div id="table-loader">
+      <div id="table-loader" style="display:none;">
         <div class="spinner"></div>
-        <p style="margin-top:10px; color:#06A56C; font-weight: bold;">Updating...</p>
+        <p style="margin-top:10px; color:#06A56C; font-weight:bold;">Updating...</p>
       </div>
 
       <table>
@@ -60,51 +89,61 @@
           <tr>
             <th>Agent Name</th>
             <th>Agent Phone</th>
-            <th>Left amount</th>
+            <th>Left Commission</th>
             <th>Register Date</th>
             <th>Action</th>
           </tr>
         </thead>
-        <tbody>
-  <% if (agents.length === 0) { %>
-    <tr><td colspan="5" class="no-data">No agents found.</td></tr>
-  <% } else { %>
-    <% agents.forEach(a => { %>
-      <tr>
-        <td><%= a.name %></td>
-        <td><%= a.phone %></td>
-        <td style="color:red ; font-weight: bold;">
-          <% 
-            // Har agent ka total left amount nikalne ke liye logic
-            let totalLeftAmount = 0;
-            if (a.items && a.items.length > 0) {
-              a.items.forEach(item => {
-                totalLeftAmount += (item.percentageAmount - item.paidAmount);
-              });
-            }
-          %>
-          <%= totalLeftAmount.toLocaleString() %> </td>
-        <td>
-          <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone: 'Asia/Karachi' }) %>
-          <br>
-          <small style="color: #007bff; font-weight: bold;">
-            <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone: 'Asia/Karachi' }) %>
-          </small>
-        </td>
-        <td class="action-buttons">
-          <button id="view">
-            <a href="/agents/view/<%= a._id %>" style="text-decoration:none; color:inherit;">View</a>
-          </button>
-          <% if(role == "admin") { %>
-            <button class="delete-btn" data-id="<%= a._id %>" id="delete">Delete</button>
+        <tbody id="agentTableBody">
+          <% if (agents.length === 0) { %>
+            <tr><td colspan="5" class="no-data">No agents found.</td></tr>
+          <% } else { %>
+            <% agents.forEach(a => { %>
+              <tr>
+                <td><%= a.name %></td>
+                <td><%= a.phone %></td>
+                <td style="color:red; font-weight:bold;">
+                  <%
+                    let totalLeftAmount = 0;
+                    if (a.items && a.items.length > 0) {
+                      a.items.forEach(item => {
+                        totalLeftAmount += (item.percentageAmount - item.paidAmount);
+                      });
+                    }
+                  %>
+                  <%= totalLeftAmount.toLocaleString() %>
+                </td>
+                <td>
+                  <%= new Date(a.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone:'Asia/Karachi' }) %>
+                  <br>
+                  <small style="color:#007bff; font-weight:bold;">
+                    <%= new Date(a.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Karachi' }) %>
+                  </small>
+                </td>
+                <td class="action-buttons">
+                  <button id="view">
+                    <a href="/agents/view/<%= a._id %>" style="text-decoration:none; color:inherit;">View</a>
+                  </button>
+                  <% if (role === "admin") { %>
+                    <button class="delete-btn" data-id="<%= a._id %>" id="delete">Delete</button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }) %>
           <% } %>
-        </td>
-      </tr>
-    <% }) %>
-  <% } %>
-</tbody>
+        </tbody>
       </table>
     </div>
+
+    <!-- DATA PROVIDER -->
+    <div id="db-data-provider"
+      data-page="<%= pagination.page %>"
+      data-limit="<%= pagination.limit %>"
+      data-total-pages="<%= pagination.totalPages %>"
+      data-total-count="<%= pagination.totalCount %>"
+      style="display:none;">
+    </div>
+
   </main>
 
   <script src="/javascripts/allAgents.js"></script>

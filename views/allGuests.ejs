@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>All Guests | Hamza Paints</title>
+  <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+  <link rel="stylesheet" href="/stylesheets/allGuests.css">
+</head>
+
+<body>
+  <%- include('partials/navbar') %>
+
+  <main>
+    <h1>All Guests Expenses</h1>
+
+    <form class="filter-container" id="filterForm" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+      <select name="filter" id="filter">
+        <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Times</option>
+        <option value="today" <%= filter === 'today' ? 'selected' : '' %>>Today</option>
+        <option value="yesterday" <%= filter === 'yesterday' ? 'selected' : '' %>>Yesterday</option>
+        <option value="month" <%= filter === 'month' ? 'selected' : '' %>>This Month</option>
+        <option value="lastMonth" <%= filter === 'lastMonth' ? 'selected' : '' %>>Last Month</option>
+        <option value="custom" <%= filter === 'custom' ? 'selected' : '' %>>Custom Range</option>
+      </select>
+
+      <input type="date" name="from" id="from" value="<%= from || '' %>" style="display:none;">
+      <input type="date" name="to" id="to" value="<%= to || '' %>" style="display:none;">
+      
+      <button type="button" id="apply">Apply Filter</button>
+    </form>
+
+    <div class="stats">
+      <div class="stat-box">
+        <h3>🕴️ Total Guests Entries</h3>
+        <p><%= stats.totalGuests %></p>
+      </div>
+      <div class="stat-box">
+        <h3>Total Amount 💵</h3>
+        <p>Rs. <%= Number(stats.totalAmountSum || 0).toLocaleString('en-IN') %></p>
+      </div>
+    </div>
+
+      <div class="pagination-container">
+      <div class="pagination-info">
+        Showing <strong id="showingFrom">0</strong> –
+        <strong id="showingTo">0</strong>
+        of <strong id="totalCount">0</strong> Guests
+      </div>
+      <div class="pagination-controls">
+        <select id="limitSelect">
+          <option value="25"  <%= pagination.limit == 25  ? 'selected' : '' %>>25 / page</option>
+          <option value="50"  <%= pagination.limit == 50  ? 'selected' : '' %>>50 / page</option>
+          <option value="100" <%= pagination.limit == 100 ? 'selected' : '' %>>100 / page</option>
+          <option value="200" <%= pagination.limit == 200 ? 'selected' : '' %>>200 / page</option>
+        </select>
+        <button id="prevPage" <%= !pagination.hasPrev ? 'disabled' : '' %>>← Prev</button>
+        <span id="pageInfo">Page <%= pagination.page %> of <%= pagination.totalPages %></span>
+        <button id="nextPage" <%= !pagination.hasNext ? 'disabled' : '' %>>Next →</button>
+      </div>
+    </div>
+
+    <div class="table-container" id="tableContainer">
+      <div id="table-loader" style="display: none;">
+        <div class="spinner"></div>
+        <p style="margin-top:10px; color:#06A56C; font-weight: bold;">Updating...</p>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Guest Name</th>
+            <th>Description</th>
+            <th>Amount</th>
+            <th>Remarks</th>
+            <th>Date</th>
+             <% if(role == "admin") { %>
+            <th>Action</th>
+             <% } %>
+          </tr>
+        </thead>
+        <tbody id="agentTableBody">
+          <% if (!guests || guests.length === 0) { %>
+            <tr><td colspan="6" class="no-data">No guests Expenses found.</td></tr>
+          <% } else { %>
+            <% guests.forEach(g => { %>
+              <tr>
+                <td><strong><%= g.guestName %></strong></td>
+                <td><%= g.title %></td>
+                <td style="color: #c0392b; font-weight: bold;">Rs. <%= Number(g.amount || 0).toFixed(0) %></td>
+                <td><%= g.remarks || 'N/A' %></td>
+                <td>
+                  <%= new Date(g.createdAt).toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric', timeZone: 'Asia/Karachi' }) %>
+                  <br>
+                  <small style="color: #007bff; font-weight: bold;">
+                    <%= new Date(g.createdAt).toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone: 'Asia/Karachi' }) %>
+                  </small>
+                </td>
+                <% if(role == "admin") { %>
+                <td class="action-buttons">
+                    <button class="delete-btn" data-id="<%= g._id %>" id="delete" >Delete</button>
+                </td>
+                 <% } %>
+              </tr>
+            <% }) %>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="db-data-provider"
+         data-page="<%= pagination.page %>"
+         data-limit="<%= pagination.limit %>"
+         data-total-pages="<%= pagination.totalPages %>"
+         data-total-count="<%= pagination.totalCount %>"
+         style="display:none;">
+    </div>
+  </main>
+
+  <script src="/javascripts/allGuests.js"></script>
+</body>
+</html>

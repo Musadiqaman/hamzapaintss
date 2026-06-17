@@ -1,11 +1,10 @@
-/* ================= RESET ================= */
+/* ================= RESET & CORE ================= */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-/* ================= SCROLLBAR ================= */
 ::-webkit-scrollbar {
   width: 6px;
 }
@@ -24,17 +23,16 @@ body {
   overflow-x: hidden;
 }
 
-/* ================= MAIN (SIDEBAR SAFE) ================= */
 main {
   padding: 25px;
   transition: .3s ease;
 }
 
-/* ================= BACK BUTTON (ALL AGENTS) ================= */
+/* ================= BACK BUTTON & TITLE ================= */
 #BackBtn {
   position: fixed;
   top: 15px;
-  left: 280px; /* Sidebar ke baad */
+  left: 380px;
   z-index: 999;
   display: flex;
   align-items: center;
@@ -63,7 +61,6 @@ main {
   font-size: 18px;
 }
 
-/* ================= TITLE ================= */
 h1 {
   color: #06a56c;
   text-align: center;
@@ -71,7 +68,7 @@ h1 {
   font-size: 21px;
 }
 
-/* ================= FILTERS ================= */
+/* ================= FILTERS & STATS ================= */
 .filter-container {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -80,16 +77,246 @@ h1 {
   margin: 0 auto 18px;
 }
 
-input[type="date"],
-button {
+input[type="date"], select, button {
   padding: 9px 12px;
   border-radius: 5px;
   border: 1px solid #363636bb;
   font-size: 13px;
   background: #fff;
-  text-align: start;
   cursor: pointer;
 }
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 4px;
+  max-width: 1200px;
+  margin: 0 auto 18px;
+}
+
+.stat-box {
+  background: #fff;
+  border-radius: 10px;
+  border: #06A56C 2px solid;
+  padding: 2px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, .1);
+  text-align: center;
+}
+
+.stat-box h3 { color: #06a56c; font-size: 15px; font-weight: 700; margin-bottom: 1px; }
+.stat-box p { font-size: 18px; font-weight: 800; }
+.stat-box#negative, .status-tag { color: #ff4d4d; font-weight: 800; }
+
+/* ================= MAIN DATA TABLE (REMAINS SAME) ================= */
+.table-container {
+  max-width: 1200px;
+  margin: 0 auto 40px auto;
+  overflow-x: auto;
+  border-radius: 10px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  background: white;
+}
+
+table {
+  width: 100%;
+  min-width: 900px;
+  /* ensures horizontal scroll on small screens */
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+thead {
+  background: #06a56c;
+  color: white;
+}
+
+th {
+  color: #ffffff;
+  padding: 9px 5px;
+  font-size: 13px;
+  text-align: center;
+  word-wrap: break-word;
+}
+
+td {
+  padding: 2px 1px;
+  font-size: 13px;
+  font-weight: 400;
+  text-align: center;
+  border-bottom: 1px solid #13a354;
+  word-wrap: break-word;
+}
+
+tbody tr:hover td {
+  background: #baded0;
+  font-weight: 400;
+}
+
+.no-data {
+  padding: 12px;
+  color: #888;
+  text-align: center;
+}
+
+/* Scrollable tbody */
+tbody {
+  display: block;
+  max-height: 325px;
+  overflow-y: auto;
+  width: 100%;
+}
+
+thead,
+tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+
+/* ================= PAYMENT HISTORY MODAL TABLE (NEW CUSTOM CSS) ================= */
+.history-table {
+  width: 100% !important;
+  min-width: unset !important; /* Modal ke liye width auto */
+  border-collapse: collapse;
+  table-layout: fixed;
+  border: 1px solid #ddd;
+}
+
+.history-table thead {
+  background: #ef6c00 !important; /* Orange theme for history */
+  display: table;
+  width: 100%;
+}
+
+.history-table thead th {
+  padding: 12px 8px;
+  color: #FFFFFF !important;
+  font-weight: 600;
+  font-size: 14px;
+  border: none;
+  background-color: #06A56C;
+}
+
+.history-table tbody {
+  display: block;
+  max-height: 300px; /* Modal scrolling height */
+  overflow-y: auto;
+  width: 100%;
+  background: #fff;
+}
+
+.history-table tbody tr {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+  border-bottom: 1px solid #b90a0a;
+}
+
+.history-table tbody td {
+  padding: 12px 8px;
+  font-size: 13px;
+  color: #333;
+  border-bottom: 1px solid #eee !important;
+  background: transparent;
+  border-bottom: 1px solid #13a354;
+}
+
+
+
+.history-table tbody tr:hover td {
+  background: #baded0;
+  font-weight: 400;
+}
+
+/* ================= MODAL STYLES ================= */
+.custom-modal {
+  display: none; position: fixed; top: 0; left: 0;
+  width: 100%; height: 100%; background: rgba(0,0,0,0.6);
+  backdrop-filter: blur(5px); z-index: 10000;
+  justify-content: center; align-items: center;
+}
+
+.modal-content {
+  background: white; width: 90%; max-width: 420px;
+  border-radius: 12px; overflow: hidden; box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.modal-header { padding: 15px; color: white; font-weight: bold; text-align: center; }
+.blue-header { background: #2196F3; }
+.orange-header { background: #ef6c00; }
+
+.modal-body { padding: 20px; }
+.scroll-body { max-height: 400px; overflow-y: auto; padding: 10px; }
+
+.form-group { margin-bottom: 15px; }
+.form-group label { display: block; margin-bottom: 5px; font-weight: 600; font-size: 14px; }
+.form-group input { width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px; }
+
+.modal-footer { padding: 12px; background: #f9f9f9; display: flex; gap: 10px; }
+.btn-m { flex: 1; padding: 10px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; }
+.btn-save { background: #2196F3; color: white; }
+.btn-cancel { background: #eee; color: #555; }
+
+/* ================= ACTION BUTTONS ================= */
+.delete-btn {
+  background-color: #FFC5C5; color: #DF0404; border: 2px solid #DF0404;
+  padding: 4px; border-radius: 8px; width: 60px; font-size: 13px; transition: 0.3s;
+}
+.delete-btn:hover { background-color: #FF4D4D; color: white; transform: scale(1.05); }
+
+.pay-btn, .submit-pay-btn {
+  background-color: #a6e7d8; color: #008767; border: 2px solid #00B087;
+  padding: 4px 8px; border-radius: 8px; font-size: 13px; cursor: pointer;
+}
+.pay-btn:hover { background-color: #00B087; color: white; }
+
+/* ================= LOADER ================= */
+#tableLoader {
+  display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(255, 255, 255, 0.8); z-index: 100;
+  justify-content: center; align-items: center; flex-direction: column;
+}
+.spinner {
+  width: 35px; height: 35px; border: 4px solid rgba(0, 0, 0, 0.1);
+  border-left-color: #06A56C; border-radius: 50%; animation: spin 1s linear infinite;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ================= MOBILE FIXES ================= */
+@media (max-width: 1024px) {
+  main { margin-left: 250px; }
+  #BackBtn { left: 260px; }
+}
+
+@media (max-width: 768px) {
+  main { margin-left: 0 !important; padding-top: 80px; }
+  #BackBtn { position: absolute; top: 20px; right: 15px; left: auto; width: fit-content; }
+  .filter-container, .stats { grid-template-columns: repeat(2, 1fr); }
+  table { min-width: 700px; }
+}
+
+@media (max-width: 480px) {
+  h1 { font-size: 18px; }
+  th, td { font-size: 12px; }
+  .stat-box p { font-size: 14px; }
+  #BackBtn { padding: 6px 10px; font-size: 12px; }
+}
+
+button#apply {
+  background-color: #a6e7d8;
+  color: #008767;
+  border: 2px solid #00b087;
+  font-weight: 600;
+  padding: 8px 10px;
+  transition: 0.3s ease;
+}
+
+#apply:hover {
+  background-color: #00b087;
+  color: white;
+  transform: scale(1.05);
+}
+
 
 select {
   padding: 9px 12px;
@@ -108,199 +335,31 @@ select:focus {
   box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
 }
 
-button#apply {
-  background-color: #a6e7d8;
-  color: #008767;
-  border: 2px solid #00b087;
-  font-weight: 600;
-  padding: 8px 10px;
-  transition: 0.3s ease;
+
+.top-actions{
+  display: flex; 
+  gap: 10px; 
+  justify-content: center; 
+  margin-bottom: 15px;
 }
 
-#apply:hover {
-  background-color: #00b087;
-  color: white;
-  transform: scale(1.05);
+#editAgentBtn{
+width: auto; 
+padding: 6px 15px; 
+background: #e3f2fd; 
+color: #1976d2; 
+border: 1px solid #2196F3;
 }
 
-/* ================= STATS ================= */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 4px;
-  max-width: 1200px;
-  margin: 0 auto 18px;
+
+#viewHistoryBtn{
+width: auto; 
+padding: 6px 15px; 
+background: #fff3e0; 
+color: #ef6c00; 
+border: 1px solid #ff9800;
 }
 
-.stat-box {
-  background: #fff;
-  border-radius: 10px;
-  border: #06A56C 2px solid;
-  padding: 2px;
-  box-shadow: 0 3px 8px rgba(0, 0, 0, .1);
-  text-align: center;
-}
-
-.stat-box h3 {
-  color: #06a56c;
-  font-size: 15px;
-  font-weight: 700;
-  margin-bottom: 1px;
-}
-
-.stat-box p {
-  font-size: 18px;
-  font-weight: 800;
-}
-
-.stat-box#negative {
-  color: #ff4d4d;
-}
-
-/* ================= TABLE & LOADER ================= */
-.table-container {
-  max-width: 1200px;
-  margin: 0 auto 20px auto; /* Space fix */
-  overflow-x: auto;
-  border-radius: 10px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: white;
-  position: relative;
-  min-height: 100px;
-}
-
-#tableLoader {
-  display: none; /* JS se control karein */
-  position: absolute;
-  top: 0; left: 0; width: 100%; height: 100%;
-  background: rgba(255, 255, 255, 0.8);
-  z-index: 100;
-  justify-content: center;
-  align-items: center;
-  flex-direction: column;
-}
-
-.spinner {
-  width: 35px;
-  height: 35px;
-  border: 4px solid rgba(0, 0, 0, 0.1);
-  border-left-color: #06A56C;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin { to { transform: rotate(360deg); } }
-
-table {
-  width: 100%;
-  min-width: 900px;
-  border-collapse: collapse;
-  table-layout: fixed;
-}
-
-thead {
-  background: #06a56c;
-  color: white;
-}
-
-th {
-  color: #ffffff;
-  padding: 16px 5px;
-  font-size: 13px;
-  text-align: center;
-}
-
-td {
-  padding: 10px 5px;
-  font-size: 14px;
-  text-align: center;
-  border-bottom: 1px solid #13a354;
-}
-
-tbody {
-  display: block;
-  max-height: 300px;
-  overflow-y: auto;
-  width: 100%;
-}
-
-thead, tbody tr {
-  display: table;
-  width: 100%;
-  table-layout: fixed;
-}
-
-/* ================= BUTTONS ================= */
- button#add:focus {
-   outline: none;
-   box-shadow: 0 0 5px rgba(0, 184, 135, 0.6);
- }
-
-
-
-
-
- .delete-btn {
-   margin-top: 3px;
-   background-color: #FFC5C5;
-   /* Light red background color */
-   color: #DF0404;
-   /* Red text color */
-   border: 2px solid #DF0404;
-   /* Red border */
-   padding: 4px;
-   border-radius: 8px;
-   /* Rounded corners */
-   width: 60px;
-   font-size: 13px;
-   margin-bottom: 5px;
-   /* Space between inputs */
-   transition: all 0.3s ease;
-   /* Smooth transition for background, border, and scale */
-   cursor: pointer;
- }
-
-
-
- .delete-btn:hover {
-   background-color: #FF4D4D;
-   /* Darker red background on hover */
-   border-color: #D30000;
-   /* Darker red border on hover */
-   transform: scale(1.05);
-   /* Slightly scale the button for a popping effect */
-   color: white;
- }
-
-
- .delete-btn:focus {
-   outline: none;
-   /* Remove default outline */
-   box-shadow: 0 0 5px rgba(255, 77, 77, 0.6);
-   /* Red glow effect on focus*/
- }
-
-
- button#pay {
-   margin-top: 3px;
-   background-color: #a6e7d8;
-   /* Light red background color */
-   color: white;
-   /* Red text color */
-   border: 2px solid #00B087;
-   /* Red border */
-   padding: 4px;
-   border-radius: 8px;
-   /* Rounded corners */
-   width: 60px;
-   font-size: 13px;
-   margin-bottom: 5px;
-   /* Space between inputs */
-   transition: all 0.3s ease;
-   /* Smooth transition for background, border, and scale */
-   cursor: pointer;
-   color: #008767;
- }
 
 
  button#pay:hover {
@@ -325,10 +384,6 @@ thead, tbody tr {
   border: 1px solid #363636bb;
 }
 
-
-
-
- /* Submit Button */
  button#submit {
    margin-top: 3px;
    background-color: #FFD700;
@@ -362,57 +417,5 @@ thead, tbody tr {
    box-shadow: 0 0 5px rgba(255, 215, 0, 0.6);
  }
 
-.stat-box#negative {
-  color: #ff4d4d;
-  font-weight: 800;
-}
 
-.status-tag{
-  color: #ff4d4d;
-  font-weight: 800;
-}
-
-
-/* ================= MOBILE FIXES ================= */
-
-@media (max-width: 1024px) {
-  main { margin-left: 250px; }
-  #BackBtn { left: 260px; }
-}
-
-@media (max-width: 768px) {
-  main { margin-left: 0 !important; padding-top: 80px; }
-  
-  /* Back Button (All Agents) Mobile Fix */
-  #BackBtn {
-    position: absolute;
-    top: 20px;
-    right: 15px;
-    left: auto; /* Left se hata kar right pe set kiya */
-    width: fit-content;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-  }
-
-  .filter-container, .stats {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  table { min-width: 700px; }
-}
-
-@media (max-width: 480px) {
-  h1 { font-size: 18px; }
-  th, td { font-size: 12px; }
-  .stat-box p { font-size: 14px; }
-  
-  /* All Agents button mobile par chota kiya */
-  #BackBtn {
-    padding: 6px 10px;
-    font-size: 12px;
-  }
-  #BackBtn .backbtn {
-    width: 28px;
-    height: 28px;
-    font-size: 14px;
-  }
-}
+ 

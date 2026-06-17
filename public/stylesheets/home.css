@@ -1,461 +1,545 @@
-/* ===============================
-GLOBAL RESET
-================================ */
-:root {
-  --bg-body: #0b2f2a;
-  --text-body: #fff;
+/* =========================================================
+   HOME / DASHBOARD PAGE STYLES
+   Matches sidebar theme: Inter font, #06A56C accent
+   ========================================================= */
 
-  --welcome-start: #0ea57a;
-  --welcome-end: #067b5c;
-
-  --card-bg: #ffffff;
-  --card-text: #222222;
-
-  --icon-cyan: #0ea57a;
-  --icon-pink: #ff4d7e;
-  --icon-blue: #3b82f6;
-  --icon-green: #22c55e;
-  --icon-red: #ef4444;
-  --icon-purple: #8b5cf6;
-
-  --text-muted: #777777;
-
-  --val-cyan: #0ea57a;
-  --val-green: #22c55e;
-  --val-red: #ef4444;
-
-  --action-bg: #ffffff;
-  --action-text: #0ea57a;
-  --action-hover-bg: #0ea57a;
-  --action-hover-text: #ffffff;
+/* ---------------- WELCOME / GLASS PANEL ---------------- */
+.welcome.glass-panel {
+    background: linear-gradient(135deg, #06A56C 0%, #04875a 100%);
+    border-radius: 18px;
+    padding: 30px 35px;
+    margin-bottom: 28px;
+    box-shadow: 0 8px 30px rgba(6, 165, 108, 0.25);
+    color: #ffffff;
+    position: relative;
+    overflow: hidden;
 }
 
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: 'Poppins', sans-serif;
-}
-
-body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f4f7fa;
-  overflow-x: hidden;
-}
-
-main {
-  /* margin-left:250px;              sidebar width */
-  padding: 25px;
-  transition: .3s ease;
-}
-/* ===============================
-DASHBOARD LAYOUT
-================================ */
-
-
-/* ===============================
-WELCOME SECTION
-================================ */
-.welcome {
-  background: linear-gradient(135deg, var(--welcome-start), var(--welcome-end));
-  border-radius: 16px;
-  padding: 30px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 30px;
-  color: var(--text-body);
-  width: 100%;
+.welcome.glass-panel::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -10%;
+    width: 250px;
+    height: 250px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 50%;
 }
 
 .welcome-text h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 6px;
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+    margin-bottom: 6px;
 }
 
 .welcome-text p {
-  font-size: 14px;
-  opacity: 0.9;
-  line-height: 1.4;
+    font-size: 14.5px;
+    opacity: 0.9;
+    font-weight: 400;
 }
 
+/* ---------------- FILTER FORM ---------------- */
+.calculator-container {
+    background: #ffffff;
+    border-radius: 18px;
+    padding: 24px;
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.04);
+    border: 1px solid #e2e8f0;
+}
 
+#filterForm {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 12px;
+}
 
-/* ===============================
-STATS GRID
-================================ */
-.stats {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 20px;
-  margin-bottom: 35px;
-  width: 100%;
+#filterForm select,
+#filterForm input[type="date"] {
+    padding: 10px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    font-family: inherit;
+    font-weight: 500;
+    color: #334155;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+    outline: none;
+}
+
+#filterForm select:focus,
+#filterForm input[type="date"]:focus {
+    border-color: #06A56C;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(6, 165, 108, 0.1);
+}
+
+#filterForm select {
+    cursor: pointer;
+    min-width: 150px;
+}
+
+#filterForm input[type="date"] {
+    color-scheme: light;
+}
+
+#apply {
+    background: #06A56C;
+    color: #ffffff;
+    border: none;
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 12px rgba(6, 165, 108, 0.2);
+}
+
+#apply:hover {
+    background: #058f5e;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(6, 165, 108, 0.3);
+}
+
+#apply:active {
+    transform: translateY(0);
+}
+
+/* ---------------- LOADER / SPINNER ---------------- */
+.spinner {
+    width: 38px;
+    height: 38px;
+    border: 4px solid #e2e8f0;
+    border-top: 4px solid #06A56C;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 25px auto;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ---------------- CALCULATOR GRID WRAPPER ---------------- */
+.calculator-grid {
+    margin-top: 20px;
+    display: grid;
+    grid-template-columns: 1.4fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+/* ---------------- PAINT FORM (STAT INPUTS) ---------------- */
+.paint-form {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+}
+
+.paint-form label {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #64748b;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.paint-form input[type="number"] {
+    padding: 12px 14px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 700;
+    font-family: inherit;
+    color: #1e293b;
+    background: #ffffff;
+    pointer-events: none;
+}
+
+.paint-form hr {
+    grid-column: 1 / -1;
+    border: none;
+    border-top: 1px dashed #ff0000;
+    margin: 4px 0 !important;
+}
+
+/* ---------------- RESULTS BOX ---------------- */
+.results-box {
+    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border: 1px solid #d1fae5;
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    box-shadow: 0 4px 20px rgba(6, 165, 108, 0.06);
+    height: fit-content;
+}
+
+.results-box hr {
+    border: none;
+    border-top: 1px solid #e2e8f0;
 }
 
 .stat-card {
-  background-color: var(--card-bg);
-  color: var(--card-text);
-  border-radius: 12px;
-  padding: 25px;
-  position: relative;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.12);
-  transition: transform 0.25s ease;
-  cursor: default;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
 }
 
-.stat-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
+.stat-card p {
+    font-size: 14px;
+    font-weight: 600;
+    color: #64748b;
 }
 
-.icon-glow {
-  position: absolute;
-  top: 18px;
-  right: 18px;
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
+.stat-card strong {
+    font-size: 20px;
+    font-weight: 800;
+    color: #1e293b;
 }
 
-.icon-glow.cyan { background-color: var(--icon-cyan); }
-.icon-glow.pink { background-color: var(--icon-pink); }
-.icon-glow.blue { background-color: var(--icon-blue); }
-.icon-glow.green { background-color: var(--icon-green); }
-.icon-glow.red { background-color: var(--icon-red); }
-.icon-glow.purple { background-color: var(--icon-purple); }
-
-.icon-glow i {
-  font-size: 18px;
-}
-
-.stat-card h3 {
-  font-size: 13px;
-  color: var(--text-muted);
-  margin-bottom: 8px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-}
-
-.val-cyan,
-.val-green,
-.val-red {
-  font-size: 24px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-}
-
-.val-cyan { color: var(--val-cyan); }
-.val-green { color: var(--val-green); }
-.val-red { color: var(--val-red); }
-
-/* ===============================
-ACTIONS
-================================ */
-.actions {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 18px;
-  width: 100%;
-}
-
-.action-btn {
-  background-color: var(--action-bg);
-  color: var(--action-text);
-  text-decoration: none;
-  padding: 16px 20px;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  border: 2px solid var(--action-text);
-  transition: background-color 0.3s ease, color 0.3s ease, transform 0.3s ease;
-  cursor: pointer;
-  user-select: none;
-}
-
-.action-btn i {
-  font-size: 18px;
-  transition: transform 0.3s ease;
-}
-
-.action-btn:hover {
-  background-color: var(--action-hover-bg);
-  color: var(--action-hover-text);
-  transform: translateY(-4px);
-  border-color: var(--action-hover-text);
-}
-
-.action-btn:hover i {
-  transform: scale(1.2);
-}
-
-/* Optional: colored buttons */
-.action-btn.neon-blue {
-  border-color: var(--icon-cyan);
-  color: var(--icon-cyan);
-}
-
-.action-btn.neon-blue:hover {
-  background-color: var(--icon-cyan);
-  color: #fff;
-  border-color: var(--icon-cyan);
-}
-
-.action-btn.neon-pink {
-  border-color: var(--icon-cyan);
-  color: var(--icon-cyan);
-}
-
-.action-btn.neon-pink:hover {
-  background-color: var(--icon-cyan);
-  color: #fff;
-  border-color: var(--icon-cyan);
-}
-
-.action-btn.neon-purple {
-  border-color: var(--icon-cyan);
-  color: var(--icon-cyan);
-}
-
-.action-btn.neon-purple:hover {
-  background-color: var(--action-hover-bg);
-  color: #fff;
-  border-color: var(--icon-green);
-}
-
-/* ===============================
-RESPONSIVE
-================================ */
-
-
-
-@media (max-width: 768px) {
-  .dashboard {
-    padding: 18px;
-  }
-
-  .welcome {
-    flex-direction: column;
+/* Total cash in counter highlight */
+.results-box > div:last-child {
+    background: linear-gradient(135deg, #06A56C 0%, #04875a 100%);
+    border-radius: 14px;
+    padding: 20px 24px;
+    color: #ffffff;
     text-align: center;
-    gap: 18px;
-  }
+    box-shadow: 0 6px 20px rgba(6, 165, 108, 0.25);
+}
 
-  .welcome-text h1 {
-    font-size: 22px;
-  }
+.results-box > div:last-child small {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1px;
+}
 
-  .welcome-icon i {
-    font-size: 40px;
-  }
+.results-box > div:last-child h2 {
+    font-weight: 800;
+    letter-spacing: -1px;
+}
 
-  .stats,
-  .actions {
-    grid-template-columns: 1fr;
-  }
+/* ---------------- RESPONSIVE ---------------- */
+@media screen and (max-width: 900px) {
+    .calculator-grid {
+        grid-template-columns: 1fr;
+    }
+}
 
-  .icon-glow {
-    width: 36px;
-    height: 36px;
-  }
+@media screen and (max-width: 600px) {
+    .welcome.glass-panel {
+        padding: 22px 20px;
+    }
+
+    .welcome-text h1 {
+        font-size: 21px;
+    }
+
+    .calculator-container {
+        padding: 16px;
+    }
+
+    #filterForm {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #filterForm select,
+    #filterForm input[type="date"],
+    #apply {
+        width: 100%;
+    }
+
+    .paint-form {
+        grid-template-columns: 1fr;
+        padding: 18px;
+    }
+
+    .results-box {
+        padding: 20px;
+    }
+
+    .results-box > div:last-child h2 {
+        font-size: 1.8em;
+    }
 }
 
 
+/* =========================================================
+   🚗 CAR DODGE GAME WIDGET STYLES
+   ========================================================= */
 
-/* ===== GLOBAL STYLES ===== */
-
-
-/* ===== MAIN CONTAINER ===== */
-.calculator-container{
-  width: 100%;
-  margin:40px auto;
-  background:#ffffff;
-  border-radius:24px;
-  padding:40px;
-  box-shadow:0 25px 60px rgba(0,0,0,.15);
+/* --- Floating Open Button --- */
+#carOpenBtn {
+    position: fixed;
+    bottom: 24px;
+    right: 90px;
+    background: #06A56C;
+    color: #ffffff;
+    border: none;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    font-size: 26px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 6px 20px rgba(6, 165, 108, 0.35);
+    z-index: 9990;
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ===== TITLE ===== */
-.calculator-container h1{
-  text-align:center;
-  margin-bottom:30px;
-  font-size:32px;
-  color: #007e3d;
+#carOpenBtn:hover {
+    background: #058f5e;
+    transform: scale(1.08) rotate(6deg);
 }
 
-/* ===== GRID LAYOUT ===== */
-.calculator-grid{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:40px;
-}
-
-/* ===== LEFT FORM ===== */
-.paint-form{
-  display:grid;
-  grid-template-columns:1fr 1fr;
-  gap:18px;
-  font-weight: 700;
-  color: #3a3939;
-}
-
-.paint-form label{
-  display:flex;
-  flex-direction:column;
-  font-size:14px;
-}
-
-.paint-form input{
-  margin-top: 6px;
-  padding: 10px 12px;
-  font-size: 15px;
-  border-radius: 10px;
-  border: 1.5px solid gray;
-  outline: none;   /* 🔥 IMPORTANT */
-}
-
-.paint-form input:focus{
-  border: 1.5px solid #16e193;
-}
-
-
-.full{
-  grid-column:1 / -1;
-}
-
-.checkbox{
-  flex-direction:row;
-  align-items:center;
-  gap:10px;
-}
-
-/* ===== BUTTON ===== */
-.paint-form button{
-  grid-column:1 / -1;
-  padding:16px;
-  border:none;
-  border-radius:14px;
-  font-size:18px;
-  font-weight:700;
-  cursor:pointer;
-  background:linear-gradient(135deg,#2ee46c,#22c55e);
-  color:rgb(255, 255, 255);
-}
-
-/* ===== RIGHT RESULTS ===== */
-.results-box{
-  width: 85%;
-  background:#1675033a;
-  border-radius:18px;
-  padding:30px;
-  border:1px solid #0ddd71f7;
-  color: #000000;
-  font-weight: 700;
-}
-
-.results-box p{
-  font-size:18px;
-  margin:14px 0;
-}
-
-.results-box span{
-  color:#009637;
-  font-weight:700;
-}
-
-/* ===== RESPONSIVE ===== */
-@media(max-width:900px){
-  .calculator-grid{
-    grid-template-columns:1fr;
-  }
-}
-/* =========================
-   TABLET & MOBILE
-========================= */
-@media (max-width: 900px){
-  .calculator-grid{
-    grid-template-columns:1fr;
-    gap:30px;
-  }
-
-  .calculator-container{
-    padding:24px 18px;
-  }
-}
-
-/* =========================
-   MOBILE
-========================= */
-@media (max-width: 600px){
-  .calculator-container{
-    margin:20px 0px;
-    padding:22px 18px;
-    border-radius:18px;
-  }
-
-  .calculator-container h1{
-    font-size:24px;
-  }
-
-  .paint-form{
-    grid-template-columns:1fr;
-    gap:14px;
-  }
-
-  .paint-form input{
-    padding:10px;
-    font-size:14px;
-  }
-
-  .paint-form button{
-    padding:14px;
-    font-size:16px;
-  }
-
-  .results-box{
-    padding:18px;
+/* --- Modal Overlay --- */
+#carModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
     width: 100%;
-  }
-
-  .results-box p{
-    font-size:15px;
-  }
+    height: 100%;
+    background: rgba(15, 23, 42, 0.55);
+    backdrop-filter: blur(4px);
+    z-index: 10050;
+    align-items: center;
+    justify-content: center;
+    animation: carFadeIn 0.25s ease;
 }
 
-/* =========================
-   SMALL MOBILE (VERY SMALL)
-========================= */
-@media (max-width: 400px){
-  .calculator-container{
-    padding:18px 14px;
-  }
+@keyframes carFadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
 
-  .calculator-container h1{
-    font-size:20px;
-  }
+/* --- Modal Card --- */
+.car-modal-content {
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 22px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+    position: relative;
+    text-align: center;
+    animation: carPopIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
 
-  .paint-form label{
-    font-size:12px;
-  }
+@keyframes carPopIn {
+    from { transform: scale(0.9); opacity: 0; }
+    to   { transform: scale(1); opacity: 1; }
+}
 
-  .paint-form input{
-    padding:8px 10px;
-    font-size:13px;
-  }
+/* --- Header --- */
+.car-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+    gap: 8px;
+}
 
-  .paint-form button{
-    padding:12px;
-    font-size:15px;
-  }
+.car-header h2 {
+    font-size: 18px;
+    font-weight: 800;
+    color: #064e3b;
+    letter-spacing: -0.5px;
+    flex: 1;
+}
 
-  .results-box p{
-    font-size:14px;
-  }
+.car-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+#carSoundBtn, #closeCarModal {
+    background: #f1f5f9;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 8px;
+    font-size: 15px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748b;
+}
+
+#carSoundBtn:hover {
+    background: #d1fae5;
+}
+
+#closeCarModal:hover {
+    background: #fee2e2;
+    color: #ef4444;
+}
+
+/* --- Score Bar --- */
+.car-scorebar {
+    display: flex;
+    justify-content: center;
+    gap: 24px;
+    margin-bottom: 12px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #475569;
+}
+
+.car-scorebar span.car-label {
+    color: #94a3b8;
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.5px;
+    margin-right: 4px;
+}
+
+#carScore { color: #06A56C; }
+#carBest  { color: #f59e0b; }
+
+/* --- Canvas Wrapper --- */
+.car-canvas-wrap {
+    position: relative;
+    border-radius: 14px;
+    overflow: hidden;
+    border: 2px solid #06A56C;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 240px;
+    aspect-ratio: 2 / 3;
+    box-shadow: 0 4px 16px rgba(6, 165, 108, 0.15);
+}
+
+#carCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+    touch-action: none;
+}
+
+/* --- Game Over Overlay --- */
+#carGameOverOverlay {
+    display: none;
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(15, 23, 42, 0.65);
+    color: #ffffff;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    border-radius: 12px;
+    animation: carFadeIn 0.2s ease;
+}
+
+#carGameOverOverlay h3 {
+    font-size: 20px;
+    font-weight: 800;
+}
+
+#carGameOverOverlay p {
+    font-size: 13px;
+    opacity: 0.85;
+}
+
+#carRestartBtn {
+    background: #06A56C;
+    color: #ffffff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 6px;
+    transition: all 0.2s ease;
+}
+
+#carRestartBtn:hover {
+    background: #058f5e;
+    transform: translateY(-1px);
+}
+
+/* --- Hint Text --- */
+.car-hint {
+    margin-top: 12px;
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 500;
+}
+
+/* --- Left/Right control buttons --- */
+.car-dpad {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin: 16px auto 0;
+}
+
+.car-dpad-btn {
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 20px;
+    color: #06A56C;
+    cursor: pointer;
+    width: 60px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.15s ease;
+    user-select: none;
+}
+
+.car-dpad-btn:active {
+    background: #06A56C;
+    color: #ffffff;
+    transform: scale(0.95);
+}
+
+/* Show dpad only on touch/small screens */
+@media (min-width: 769px) {
+    .car-dpad { display: none; }
+}
+
+/* --- Mobile tweaks --- */
+@media screen and (max-width: 480px) {
+    .car-modal-content {
+        max-width: 95%;
+        padding: 16px;
+    }
+
+    #carOpenBtn {
+        bottom: 18px;
+        right: 80px;
+        width: 50px;
+        height: 50px;
+        font-size: 22px;
+    }
 }

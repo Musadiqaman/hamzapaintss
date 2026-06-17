@@ -6,6 +6,10 @@ const printSaleSchema = new mongoose.Schema({
         required: true,
         trim: true
     },
+    billtype:{
+        type: String,
+        require: true
+    },
     salesItems: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Sale'
@@ -13,14 +17,24 @@ const printSaleSchema = new mongoose.Schema({
     agentId: {
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Agent',
+        default: null,
+        index: true
+    },
+    customerId: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'Customer',
         default: null
     },
     billID:{
-        type:String,
-        require:true,
-    }
+        type: String,
+        require: true,
+        index: true
+    },
+    syncedToAtlas: { type: Boolean, default: false }
 }, { timestamps: true });
 
-// ✅ Ye line sabse zaroori hai
+// ✅ createdAt index
+printSaleSchema.index({ createdAt: -1 });
+
 const PrintSale = mongoose.model('PrintSale', printSaleSchema);
 export default PrintSale;

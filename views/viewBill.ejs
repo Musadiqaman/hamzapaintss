@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>View Bill | Hamza Paints</title>
+  <title>View Sale Bill | Hamza Paints</title>
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/viewBill.css">
 </head>
@@ -41,6 +41,8 @@
     
     <p><b>Bill ID:  </b><b><%= bill.billID %></b></p>
     <br>
+    <p><b>Bill Type:  </b><b><%= bill.billtype %></b></p>
+    <br>
     <p><b>Customer name:  </b><b><%= bill.customerName %></b></p>
     <br>
     <p><b>Entry date: <%= new Date(bill.createdAt).toLocaleDateString('en-GB', {timeZone: 'Asia/Karachi'}) %> | 
@@ -53,12 +55,13 @@
     <table>
       <thead>
         <tr>
-          <th>Stock ID</th>
-          <th>Sale ID</th>
+          <th>S.ID</th>
+          <th>Brand</th>
           <th>Item</th>
           <th>Color</th>
           <th>Unit</th>
           <th>Qty</th>
+          <th>R.f</th>
           <th>Price</th>
           <th>Total</th>
         </tr>
@@ -66,14 +69,15 @@
       <tbody id="billTableBody">
         <% bill.salesItems.forEach(item => { %>
     <tr>
-      <td><%= item.stockID %></td>
       <td><%= item.saleID %></td>
+     <td><%= item.brandName.split(' ')[0] %></td>
       <td><%= item.itemName %></td>
-      <td><%= item.colourName %></td>
+      <td><%= item.colourName?.split(' ')[0] || '' %></td>
       <td><%= item.qty %></td> 
-      <td><%= (item.quantitySold - item.refundQuantity) %></td>
-      <td>Rs <%= item.rate.toFixed(2) %></td>
-      <td>Rs <%= ((item.quantitySold - item.refundQuantity) * item.rate).toFixed(2) %></td>
+      <td><%= item.quantitySold %></td>
+      <td><%= item.refundQuantity %></td>
+      <td><%= item.rate.toFixed(2) %></td>
+      <td><%= ((item.quantitySold - item.refundQuantity) * item.rate).toFixed(2) %></td>
     </tr>
 <% }) %>
       </tbody>
@@ -96,7 +100,7 @@
     </div>
 
     <div class="dev-footer">
-      <span>Software Developed by: M.SHOUKAT (0335 8004900)</span><br>
+      <span>Software Developed by: MUHAMMAD SHOUKAT (03358004900)</span><br>
     </div>
 
   </div>

@@ -11,7 +11,7 @@
 
 <body>
   <div class="login-wrapper">
-    <h1>Admin Login</h1>
+    <h1>Login Now</h1>
     <form id="loginForm" class="form-container">
       <input type="text" name="username" placeholder="Enter Username" required />
       <div class="password-wrapper">
@@ -20,9 +20,13 @@
       </div>
       <button id="login" type="submit">Login</button>
     </form>
+
+    <div id="loader" style="display:none; justify-content:center; align-items:center; margin-top:18px;">
+      <div class="spin"></div>
+    </div>
+
     <p id="message"></p>
   </div>
-
 
   <script src="/javascripts/login.js"></script>
 </body>

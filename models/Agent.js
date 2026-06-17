@@ -6,27 +6,28 @@ const agentSchema = new mongoose.Schema({
     required: true,
     unique: true
   },
-
   name: {
     type: String,
     required: true
   },
-
   phone: {
     type: String,
-    required: true
+    required: true,
+    index: true
   },
-
   cnic: {
     type: String
   },
-
   items: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "AgentItem"
     }
-  ]
+  ],
+  syncedToAtlas: { type: Boolean, default: false }
 }, { timestamps: true });
+
+// ✅ createdAt index
+agentSchema.index({ createdAt: -1 });
 
 export default mongoose.model("Agent", agentSchema);

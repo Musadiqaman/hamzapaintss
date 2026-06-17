@@ -119,13 +119,11 @@ button#apply {
 /* ================= TABLE CONTAINER & LOADER ================= */
 .table-container {
   max-width: 1200px;
-  margin: 0 auto; /* Niche ka gap khatam */
+  margin: 0 auto 40px auto;
   overflow-x: auto;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   background: white;
-  position: relative; /* Loader center karne ke liye */
-  min-height: 100px; /* Space kam kar diya */
 }
 
 /* Loader Fix: Default hide aur center alignment */
@@ -157,10 +155,13 @@ button#apply {
   100% { transform: rotate(360deg); }
 }
 
+
+
 /* ================= TABLE STYLE ================= */
 table {
   width: 100%;
   min-width: 900px;
+  /* ensures horizontal scroll on small screens */
   border-collapse: collapse;
   table-layout: fixed;
 }
@@ -172,27 +173,42 @@ thead {
 
 th {
   color: #ffffff;
-  padding: 16px 5px;
+  padding: 9px 5px;
   font-size: 13px;
   text-align: center;
+  word-wrap: break-word;
 }
 
 td {
   padding: 2px 1px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 400;
   text-align: center;
   border-bottom: 1px solid #13a354;
+  word-wrap: break-word;
 }
 
+tbody tr:hover td {
+  background: #baded0;
+  font-weight: 400;
+}
+
+.no-data {
+  padding: 12px;
+  color: #888;
+  text-align: center;
+}
+
+/* Scrollable tbody */
 tbody {
   display: block;
-  max-height: 280px; /* Space control karne ke liye */
+  max-height: 325px;
   overflow-y: auto;
   width: 100%;
 }
 
-thead, tbody tr {
+thead,
+tbody tr {
   display: table;
   width: 100%;
   table-layout: fixed;
@@ -248,4 +264,92 @@ thead, tbody tr {
   th, td { font-size: 12px; padding: 8px 2px; }
   .stat-box p { font-size: 14.5px; }
   .table-container { margin-bottom: 20px; }
+}
+
+
+
+
+#billSearchInput {
+    padding: 8px 12px;
+    border: 1px solid #ccc; /* Gray thora light rakha hai professional look ke liye */
+    border-radius: 4px;
+    width: 250px;
+    outline: none; /* Default blue outline khatam karne ke liye */
+    transition: border-color 0.3s ease; /* Smooth transition */
+}
+
+#billSearchInput:focus {
+    /* border: none; <--- Isko nikal diya taake input hile nahi */
+    border: 1px solid #28a745;
+    box-shadow: 0 0 5px rgba(40, 167, 69, 0.2); /* Halki si chamak focus par */
+}
+
+#searchBillBtn {
+    padding: 8px 15px;
+    background: #28a745;
+    color: white;
+    border: 1px solid #28a745; /* Border add kiya taake height input ke barabar rahe */
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+#searchBillBtn:hover {
+    background: #218838; /* Hover par thora dark green */
+    border-color: #1e7e34;
+}
+
+#searchBillBtn:active {
+    transform: scale(0.98); /* Click karne par dabne wala effect */
+}
+
+
+   
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 2px;
+  flex-wrap: wrap;
+  gap: 10px;
+  /* border-bottom: 2px solid red; */
+  margin-bottom: 15px;
+}
+
+.pagination-info {
+  color: #555;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-controls button {
+  padding: 2px 19px;
+  background: #06A56C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination-controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#pageInfo {
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
 }
