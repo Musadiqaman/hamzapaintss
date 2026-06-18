@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8" />
   <title>Add Product | Hamza Paints</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
   <link rel="stylesheet" href="/stylesheets/addProduct.css">
+  <script src="/javascripts/qrcode.min.js"></script>
 </head>
 <body>
   <%- include('partials/navbar') %>
@@ -12,7 +14,31 @@
   <main>
     <h1>Add New Products</h1>
 
-    <div class="form-container">
+    <!-- ========================= -->
+    <!-- CARD 1: SELECT COMPANY    -->
+    <!-- ========================= -->
+    <div class="selectcompany">
+      <button class="hidden-company">Hide</button>
+      <select id="companySelect">
+        <option value="">Select Company (Optional - Obrai)</option>
+        <% companys.forEach(company => { %>
+          <option
+            value="<%= company._id %>"
+            data-name="<%= company.name %>"
+            data-phone="<%= company.phone %>"
+          >
+            <%= company.name %> (<%= company.phone %>)
+          </option>
+        <% }) %>
+      </select>
+    </div>
+
+    <!-- ========================= -->
+    <!-- CARD 2: PRODUCT FORM      -->
+    <!-- ========================= -->
+    <div class="product-form">
+
+      <!-- BRAND -->
       <select id="brandName">
         <option value="">Select Brand</option>
         <% definitions.forEach(def => { %>
@@ -20,46 +46,67 @@
         <% }) %>
       </select>
 
+      <!-- ITEM -->
       <select id="itemName">
         <option value="">Select Item</option>
       </select>
 
+      <!-- COLOUR -->
       <select id="colourCode" disabled>
         <option value="">Select Colour</option>
       </select>
 
+      <!-- UNIT -->
       <select id="quantitative">
         <option value="">Select Unit</option>
       </select>
 
-      <input id="totalProduct" type="number" class="totalproduct" placeholder="Total Product" min="1">
-      <input id="rate" type="number" placeholder="Rate" min="1">
+      <input id="totalProduct" type="number" placeholder="Total Qty" min="1">
+      <input id="rate"         type="number" placeholder="Purchase Rate" min="1">
+      <input id="saleRate"     type="number" placeholder="Sale Rate" min="1">
 
       <button id="add">Add Product</button>
+
     </div>
 
+    <!-- ========================= -->
+    <!-- TABLE                     -->
+    <!-- ========================= -->
     <div class="table-container">
       <table>
         <thead>
           <tr>
             <th>Brand</th>
             <th>Item</th>
+            <th>QR Code</th>
             <th>Color</th>
             <th>Unit</th>
-            <th>Total Product</th>
-            <th>Rate</th>
-            <th>Total</th>
+            <th>Qty</th>
+            <th>P. Rate</th>
+            <th>S. Rate</th>
             <th>Action</th>
           </tr>
         </thead>
-        <tbody id="tableBody"></tbody>
+        <tbody id="tableBody">
+          <tr class="no-data">
+            <td colspan="9">No products added yet</td>
+          </tr>
+        </tbody>
       </table>
     </div>
 
     <button class="submit-btn">Submit & Save</button>
-    <div id="db-data-provider" data-definitions="<%= JSON.stringify(definitions) %>" style="display: none;"></div>
+
+    <!-- DB Data -->
+    <div
+      id="db-data-provider"
+      data-definitions="<%= JSON.stringify(definitions) %>"
+      style="display:none;"
+    ></div>
+
   </main>
 
+  <div id="print-container"></div>
 
   <script src="/javascripts/addProduct.js"></script>
 </body>

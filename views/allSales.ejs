@@ -54,26 +54,53 @@
       <button type="submit" id="apply" style="display:none;">Apply Range</button>
     </form>
 
+       <div id="download">
+      
+      <% if(role == 'admin'){ %>
+        <button id="bulkDeleteBtn" >🗑️ Delete Bulk</button>
+  
+      <% } %>
+    </div>
+
     <div class="stats">
       <div class="stat-box">
-        <h3>🛍️ Total Sold</h3>
-        <p><%= stats.totalSold || 0 %></p>
-      </div>
-      <div class="stat-box">
-        <h3>📈 Total Sales</h3>
+        <h3>📈 Sales Stock</h3>
         <p>Rs <%= stats.totalRevenue ? stats.totalRevenue.toLocaleString() : '0.00' %></p>
       </div>
       <div class="stat-box">
-        <h3>💰 Total Profit</h3>
+        <h3>💰 Sales Profit</h3>
         <p id="total-profit">Rs <%= stats.totalProfit ? stats.totalProfit.toLocaleString() : '0.00' %></p>
       </div>
       <div class="stat-box">
-        <h3>📉 Total Loss</h3>
+        <h3>📉 Sales Loss</h3>
         <p id="total-loss">Rs <%= stats.totalLoss ? stats.totalLoss.toLocaleString() : '0.00' %></p>
       </div>
       <div class="stat-box">
-        <h3>↩️ Refund Sales</h3>
-        <p id="refund-sales">Rs <%= stats.totalRefunded ? stats.totalRefunded.toLocaleString() : '0.00' %></p>
+        <h3>↩️ Refund Stock</h3>
+        <p id="refund-stock">Rs <%= stats.totalRefunded ? stats.totalRefunded.toLocaleString() : '0.00' %></p>
+      </div>
+      <div class="stat-box">
+        <h3>↩️ Refund Profit</h3>
+        <p id="refund-profit">Rs <%= stats.totalRefundedprofit ? stats.totalRefundedprofit.toLocaleString() : '0.00' %></p>
+      </div>
+    </div>
+
+    <div class="pagination-container">
+      <div class="pagination-info">
+        Showing <strong id="showingFrom">0</strong> -
+        <strong id="showingTo">0</strong>
+        of <strong id="totalCount">0</strong> Rows
+      </div>
+      <div class="pagination-controls">
+        <select id="limitSelect">
+          <option value="25">25 row / page</option>
+          <option value="50">50 row / page</option>
+          <option value="100">100 row / page</option>
+          <option value="200">200 row / page</option>
+        </select>
+        <button id="prevPage">← Prev</button>
+        <span id="pageInfo">Page 1 of 1</span>
+        <button id="nextPage">Next →</button>
       </div>
     </div>
 
@@ -86,21 +113,24 @@
       <table>
         <thead>
           <tr>
+            <th><input type="checkbox" id="selectAll"></th>
             <th>Brand</th>
             <th>Item</th>
             <th>Color</th>
             <th>Unit</th>
             <th>Qty Sold</th>
             <th>Rate</th>
-            <th>Total Amount</th>
-            <th>Profit/Loss</th>
-            <th>Status</th>
-            <th>Refund (Qty)</th>
+            <th>T.Amt</th>
+            <th>Profit/Los</th>
+            <th>Rf.Status</th>
+            <th>Rf.Qty</th>
             <th>Date</th>
+               <% if(role == 'admin'){ %>
             <th>Action</th>
+                  <% } %>
           </tr>
         </thead>
-        <tbody>
+        <tbody id="saleTableBody">
           <% if (sales.length === 0) { %>
             <tr>
               <td colspan="12" class="no-data">No sales found for the selected filter.</td>
@@ -108,6 +138,7 @@
           <% } else { %>
             <% sales.forEach(s => { %>
               <tr>
+                <td><input type="checkbox" class="row-checkbox" value="<%= s._id %>"></td>
                 <td><%= s.brandName %></td>
                 <td><%= s.itemName %></td>
                 <td><%= s.colourName %></td>
@@ -127,9 +158,13 @@
                     <%= new Date(s.createdAt).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' }) %>
                   </small>
                 </td>
+                <% if(role == 'admin'){ %>
                 <td>
-                  <button class="delete-sale delete-btn" data-id="<%= s._id %>" id="delete">Delete</button>
+                    
+                  <button class="delete-sale delete-btn" data-id="<%= s._id %>" id="delete" >Delete</button>
+                      
                 </td>
+                <% } %>
               </tr>
             <% }) %>
           <% } %>
@@ -137,8 +172,19 @@
       </table>
     </div>
 
-    <div id="db-data-provider" data-definitions='<%= JSON.stringify(definitions) %>' style="display: none;"></div>
+    <div id="db-data-provider"
+      data-definitions='<%= JSON.stringify(definitions) %>'
+      data-page="<%= pagination.page %>"
+      data-limit="<%= pagination.limit %>"
+      data-total-pages="<%= pagination.totalPages %>"
+      data-total-count="<%= pagination.totalCount %>"
+      style="display: none;">
+    </div>
+
     <script src="/javascripts/allSales.js"></script>
+    <script>
+    window.role = "<%= role %>";
+</script>
   </main>
 </body>
 </html>

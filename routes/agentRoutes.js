@@ -1,12 +1,14 @@
 import express from 'express';
 const router = express.Router();
 import Agent from '../models/Agent.js';
-import Item from '../models/Item.js';
+import AgentItem from '../models/AgentItem.js';
+import AgentPaymentHistory from '../models/AgentPaymentHistory.js'
 import { isLoggedIn } from "../middleware/isLoggedIn.js";
 import { allowRoles } from "../middleware/allowRoles.js";
 import moment from 'moment-timezone';
+import { deleteAndSync } from "../app.js";
 
-router.get('/add',isLoggedIn,allowRoles("admin", "worker"),(req,res)=>{
+router.get("/add",isLoggedIn,allowRoles("admin", "worker"),(req,res)=>{
 const role=req.user.role;
 res.render('addAgent',{role});
 });
@@ -54,19 +56,127 @@ router.post("/add",isLoggedIn,allowRoles("admin", "worker"), async (req, res) =>
 
 
 
-
-
 const PKT_TIMEZONE = "Asia/Karachi";
 
 router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     const role = req.user.role;
     try {
-        let { filter = 'all', from, to } = req.query; // Default 'all' hi rakha hai
-        let query = {};
+        let { filter = 'month', from, to } = req.query;
+
+        const page  = parseInt(req.query.page)  || 1;
+        const limit = parseInt(req.query.limit) || 25;
+        const skip  = (page - 1) * limit;
+
         const nowPKT = moment.tz(PKT_TIMEZONE);
         let start, end;
 
-        // Date Logic (Keep as is)
+        if (filter === "today") {
+            start = nowPKT.clone().startOf('day').toDate();
+            end   = nowPKT.clone().endOf('day').toDate();
+        } else if (filter === "yesterday") {
+            start = nowPKT.clone().subtract(1, 'days').startOf('day').toDate();
+            end   = nowPKT.clone().subtract(1, 'days').endOf('day').toDate();
+        } else if (filter === "month") {
+            start = nowPKT.clone().startOf('month').toDate();
+            end   = nowPKT.clone().endOf('day').toDate();
+        } else if (filter === "lastMonth") {
+            start = nowPKT.clone().subtract(1, 'months').startOf('month').toDate();
+            end   = nowPKT.clone().subtract(1, 'months').endOf('month').toDate();
+        } else if (filter === "custom" && from) {
+            start = moment.tz(from, PKT_TIMEZONE).startOf('day').toDate();
+            end   = to ? moment.tz(to, PKT_TIMEZONE).endOf('day').toDate() : moment.tz(from, PKT_TIMEZONE).endOf('day').toDate();
+        }
+
+        const agents      = await Agent.find().populate("items").sort({ createdAt: -1 }).lean();
+        const allPayments = await AgentPaymentHistory.find().lean();
+
+        let filteredTotalComm = 0;
+        let filteredPaidComm  = 0;
+        let grandTotalLeft    = 0;
+
+        const agentsWithStats = agents.map(agent => {
+            const lifeTimeComm = (agent.items || []).reduce((sum, i) => sum + Number(i.percentageAmount || 0), 0);
+            const lifeTimePaid = allPayments
+                .filter(p => p.agentId.toString() === agent._id.toString())
+                .reduce((sum, p) => sum + Number(p.amountPaid || 0), 0);
+
+            const agentLeft = lifeTimeComm - lifeTimePaid;
+            grandTotalLeft += agentLeft;
+
+            if (start && end) {
+                const filteredItems = (agent.items || []).filter(i => i.createdAt >= start && i.createdAt <= end);
+                filteredTotalComm += filteredItems.reduce((sum, i) => sum + Number(i.percentageAmount || 0), 0);
+
+                const filteredHistory = allPayments.filter(p =>
+                    p.agentId.toString() === agent._id.toString() &&
+                    p.createdAt >= start && p.createdAt <= end
+                );
+                filteredPaidComm += filteredHistory.reduce((sum, p) => sum + Number(p.amountPaid || 0), 0);
+            }
+
+            return { ...agent, calculatedLeft: agentLeft };
+        });
+
+        if (filter === 'all') {
+            filteredTotalComm = agents.reduce((acc, a) => acc + (a.items || []).reduce((s, i) => s + Number(i.percentageAmount || 0), 0), 0);
+            filteredPaidComm  = allPayments.reduce((acc, p) => acc + Number(p.amountPaid || 0), 0);
+        }
+
+        const stats = {
+            totalAgents:               agentsWithStats.length,
+            totalPercentageAmount:     filteredTotalComm,
+            totalPercentageAmountGiven: filteredPaidComm,
+            totalPercentageAmountLeft: grandTotalLeft
+        };
+
+        const totalCount      = agentsWithStats.length;
+        const totalPages      = Math.ceil(totalCount / limit);
+        const paginatedAgents = agentsWithStats.slice(skip, skip + limit);
+
+        const pagination = {
+            page, limit, totalCount, totalPages,
+            hasNext: page < totalPages,
+            hasPrev: page > 1
+        };
+
+        const responseData = {
+            role,
+            agents: paginatedAgents,
+            filter, from, to,
+            stats,
+            pagination
+        };
+
+        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+            return res.json({ success: true, ...responseData });
+        }
+        res.render("allAgents", responseData);
+
+    } catch (err) {
+        console.error("❌ Error:", err);
+        res.status(500).send("Server Error");
+    }
+});
+
+
+router.get("/find", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+    const role = req.user.role;
+    try {
+        let { filter = 'all', from, to, search } = req.query;
+        const nowPKT = moment.tz("Asia/Karachi");
+        let start, end;
+
+        // 1. Base Query for Search
+        let dbQuery = {};
+        if (search) {
+            const searchTerm = search.trim();
+            dbQuery.$or = [
+                { name: { $regex: searchTerm, $options: "i" } },
+                { phone: { $regex: searchTerm, $options: "i" } }
+            ];
+        }
+
+        // 2. Date Logic (Start aur End define karna)
         if (filter === "today") {
             start = nowPKT.clone().startOf('day').toDate();
             end = nowPKT.clone().endOf('day').toDate();
@@ -80,61 +190,91 @@ router.get("/all", isLoggedIn, allowRoles("admin", "worker"), async (req, res) =
             start = nowPKT.clone().subtract(1, 'months').startOf('month').toDate();
             end = nowPKT.clone().subtract(1, 'months').endOf('month').toDate();
         } else if (filter === "custom" && from) {
-            start = moment.tz(from, PKT_TIMEZONE).startOf('day').toDate();
-            end = to ? moment.tz(to, PKT_TIMEZONE).endOf('day').toDate() : moment.tz(from, PKT_TIMEZONE).endOf('day').toDate();
+            start = moment.tz(from, "Asia/Karachi").startOf('day').toDate();
+            end = to ? moment.tz(to, "Asia/Karachi").endOf('day').toDate() : moment.tz(from, "Asia/Karachi").endOf('day').toDate();
         }
 
+        // --- IMPORTANT FIX: Date query ko dbQuery mein shamil karna ---
+        // Agar aap chahte hain ke search ke sath date filter bhi database level par apply ho
         if (start && end) {
-            query.createdAt = { $gte: start, $lte: end };
+            dbQuery.createdAt = { $gte: start, $lte: end };
         }
 
-        // Fetching Agents with Populated Items
-        const agents = await Agent.find(query).populate("items").sort({ createdAt: -1 }).lean();
+        // 3. Data Fetching
+        const agents = await Agent.find(dbQuery).populate("items").sort({ createdAt: -1 }).lean();
+        const allPayments = await AgentPaymentHistory.find().lean();
 
-        // Stats Calculation
-        let totalPercentageAmount = 0, totalPercentageAmountGiven = 0;
-        agents.forEach(agent => {
-            (agent.items || []).forEach(item => {
-                totalPercentageAmount += Number(item.percentageAmount || 0);
-                totalPercentageAmountGiven += Number(item.paidAmount || 0);
-            });
+        let filteredTotalComm = 0;
+        let filteredPaidComm = 0;
+        let grandTotalLeft = 0;
+
+        const agentsWithStats = agents.map(agent => {
+            // Lifetime Balance (Hamesha poora dikhana hai)
+            const lifeTimeComm = (agent.items || []).reduce((sum, i) => sum + Number(i.percentageAmount || 0), 0);
+            const lifeTimePaid = allPayments
+                .filter(p => p.agentId.toString() === agent._id.toString())
+                .reduce((sum, p) => sum + Number(p.amountPaid || 0), 0);
+            
+            const agentLeft = lifeTimeComm - lifeTimePaid;
+            grandTotalLeft += agentLeft;
+
+            // Stats Cards ke liye calculation
+            if (start && end) {
+                const filteredItems = (agent.items || []).filter(i => i.createdAt >= start && i.createdAt <= end);
+                filteredTotalComm += filteredItems.reduce((sum, i) => sum + Number(i.percentageAmount || 0), 0);
+
+                const filteredHistory = allPayments.filter(p => 
+                    p.agentId.toString() === agent._id.toString() && 
+                    p.createdAt >= start && p.createdAt <= end
+                );
+                filteredPaidComm += filteredHistory.reduce((sum, p) => sum + Number(p.amountPaid || 0), 0);
+            } else {
+                // Agar 'all' filter hai
+                filteredTotalComm += lifeTimeComm;
+                filteredPaidComm += lifeTimePaid;
+            }
+
+            return { ...agent, calculatedLeft: agentLeft };
         });
 
         const stats = {
-            totalAgents: agents.length,
-            totalPercentageAmount: totalPercentageAmount,
-            totalPercentageAmountGiven: totalPercentageAmountGiven,
-            totalPercentageAmountLeft: (totalPercentageAmount - totalPercentageAmountGiven)
+            totalAgents: agentsWithStats.length,
+            totalPercentageAmount: filteredTotalComm,
+            totalPercentageAmountGiven: filteredPaidComm,
+            totalPercentageAmountLeft: grandTotalLeft 
         };
 
-        const responseData = { role, agents, filter, from, to, stats };
+        const responseData = { role, agents: agentsWithStats, filter, from, to, stats };
 
-        // 🟢 AJAX Request Handling
+        // 4. AJAX / JSON Response
         if (req.xhr || req.headers.accept.indexOf('json') > -1) {
             return res.json({ success: true, ...responseData });
         }
-
         res.render("allAgents", responseData);
+
     } catch (err) {
-        console.error("❌ Error:", err);
+        console.error("❌ Find Error:", err);
         res.status(500).send("Server Error");
     }
 });
 
 
-
-
-
-router.delete("/delete-agent/:id",isLoggedIn,allowRoles("admin"), async (req, res) => {
+router.delete("/delete-agent/:id", isLoggedIn, allowRoles("admin"), async (req, res) => {
   try {
     const agentId = req.params.id;
-    const deletedAgent = await Agent.findByIdAndDelete(agentId);
-    if (!deletedAgent) {
+
+    // 1. Pehle check karo ke agent database mein hai ya nahi
+    const agent = await Agent.findById(agentId);
+    if (!agent) {
       return res.status(404).json({ success: false, message: "Agent not found" });
     }
-    res.json({ success: true, message: "Agent deleted successfully!" });
+
+    // 2. deleteAndSync helper ka use karo (Local se delete + Sync logging)
+    await deleteAndSync(Agent, agentId);
+
+    res.json({ success: true, message: "Agent deleted successfully! 🗑️" });
   } catch (err) {
-    console.error(err);
+    console.error("🔴 Error deleting agent:", err);
     res.status(500).json({ success: false, message: "Error deleting agent" });
   }
 });
@@ -145,12 +285,16 @@ router.delete("/delete-agent/:id",isLoggedIn,allowRoles("admin"), async (req, re
 router.get('/view/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     const role = req.user.role;
     try {
+        // 1. DEFAULT FILTER LOGIC: Agar filter nahi hai to 'month' set karein
         let { filter, from, to } = req.query;
-        let query = {};
+        if (!filter) {
+            filter = "month"; 
+        }
+
         const nowPKT = moment.tz(PKT_TIMEZONE);
         let start, end;
 
-        // Date Logic (Keep as is)
+        // --- Date Logic for Stats ---
         if (filter === "today") {
             start = nowPKT.clone().startOf('day').toDate();
             end = nowPKT.clone().endOf('day').toDate();
@@ -170,42 +314,60 @@ router.get('/view/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, r
             end = to ? moment.tz(to, PKT_TIMEZONE).endOf('day').toDate() : moment.tz(from, PKT_TIMEZONE).endOf('day').toDate();
         }
 
-        if (start && end) query.createdAt = { $gte: start, $lte: end };
-
-        // 🟢 NESTED POPULATE: Items ke andar Bill ka data bhi mangwa rahe hain
+        // 2. Fetch Agent & ALL Items (Table hamesha poora rahega)
         const agent = await Agent.findById(req.params.id).populate({
             path: "items",
-            match: query,
             options: { sort: { createdAt: -1 } },
-            populate: {
-                path: "billId", // AgentItem model mein jo field hai
-                select: "customerName createdAt" // Bill model se jo fields chahiye (Optional)
-            }
+            populate: { path: "billId", select: "customerName createdAt" }
         }).lean();
 
         if (!agent) return res.status(404).send("Agent not found");
 
-        let totalPercentageAmount = 0, totalPercentageAmountGiven = 0;
+        // 3. Fetch Payment History (Is mahine/period mein kitna cash diya)
+        let historyQuery = { agentId: agent._id };
+        if (filter !== 'all' && start && end) {
+            historyQuery.createdAt = { $gte: start, $lte: end };
+        }
+        const payments = await AgentPaymentHistory.find(historyQuery).lean();
+
+        // 4. Stats Calculation
+        let totalCommissionInPeriod = 0; // Is period mein kitne ka commission 'Bana'
+        let totalPaidInPeriod = payments.reduce((sum, p) => sum + Number(p.amountPaid || 0), 0);
+
+        // Commission calculation (Filter ke mutabiq items check karein)
         (agent.items || []).forEach(item => {
-            totalPercentageAmount += Number(item.percentageAmount || 0);
-            totalPercentageAmountGiven += Number(item.paidAmount || 0);
+            const itemDate = new Date(item.createdAt);
+            // Agar filter 'all' hai ya item date range mein hai
+            if (filter === 'all' || (!start || (itemDate >= start && itemDate <= end))) {
+                totalCommissionInPeriod += Number(item.percentageAmount || 0);
+            }
+        });
+
+        // 5. Lifetime Outstanding (Fixed: Total Kitna Dena Baaki Hai)
+        let lifetimeLeft = 0;
+        const allItemsForBalance = await AgentItem.find({ agent: agent._id }).lean();
+        allItemsForBalance.forEach(i => {
+            lifetimeLeft += (Number(i.percentageAmount || 0) - Number(i.paidAmount || 0));
         });
 
         const stats = {
-            totalPercentageAmount,
-            totalPercentageAmountGiven,
-            totalPercentageAmountLeft: totalPercentageAmount - totalPercentageAmountGiven
+            totalPercentageAmount: totalCommissionInPeriod, 
+            totalPercentageAmountGiven: totalPaidInPeriod,   
+            totalPercentageAmountLeft: lifetimeLeft         
         };
 
-        const responseData = { role, agent, stats, filter: filter || 'all', from, to };
+        const responseData = { role, agent, stats, filter, from, to };
 
-        if (req.xhr || req.headers.accept.indexOf('json') > -1) {
+        // 6. XHR (AJAX) Response
+        if (req.xhr || (req.headers.accept && req.headers.accept.indexOf('json') > -1)) {
             return res.json({ success: true, ...responseData });
         }
 
+        // 7. Regular Page Render
         res.render("viewAgent", responseData);
+
     } catch (err) {
-        console.error("❌ Populate Error:", err);
+        console.error("❌ Stats Error:", err);
         res.status(500).send("Error loading agent page");
     }
 });
@@ -213,40 +375,78 @@ router.get('/view/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, r
 
 
 
-router.delete("/delete-item/:id",isLoggedIn,allowRoles("admin"), async (req, res) => {
-  try {
-    const itemId = req.params.id;
-    const deletedItem = await Item.findByIdAndDelete(itemId);
-    if (!deletedItem) {
-      return res.status(404).json({ success: false, message: "Item not found" });
+//  UPDATE AGENT PROFILE (Name & Phone)
+router.post('/update/:id', isLoggedIn, allowRoles("admin"), async (req, res) => {
+    try {
+        const { name, phone } = req.body;
+        const agent = await Agent.findByIdAndUpdate(
+            req.params.id, 
+            { $set: { name, phone, syncedToAtlas: false } }, // ✅ bas yahi badla 
+            { new: true }
+        );
+
+        if (!agent) {
+            return res.status(404).json({ success: false, message: "Agent not found" });
+        }
+
+        res.json({ success: true, message: "Profile updated successfully", agent });
+    } catch (err) {
+        console.error("❌ Update Error:", err);
+        res.status(500).json({ success: false, message: "Server error" });
     }
-    res.json({ success: true, message: "Item deleted successfully!" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ success: false, message: "Error deleting Item" });
-  }
 });
 
 
+// 2. GET PAYMENT HISTORY (For Modal)
+router.get('/payment-history/:id', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+    try {
+        // Agent ki saari payment history fetch karein, latest upar
+        const history = await AgentPaymentHistory.find({ agentId: req.params.id })
+            .sort({ createdAt: -1 })
+            .lean();
+
+        res.json({ success: true, history });
+    } catch (err) {
+        console.error("❌ History Error:", err);
+        res.status(500).json({ success: false, message: "Error fetching history" });
+    }
+});
 
 
-router.post("/pay-item/:id",isLoggedIn,allowRoles("admin", "worker"), async (req, res) => {
+router.post("/pay-item/:id", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
   try {
-    const item = await Item.findById(req.params.id);
+    // 1. Item ko find karein (Reference model 'Item')
+    const item = await AgentItem.findById(req.params.id);
 
-    if (!item) return res.json({ success: false });
+    if (!item) return res.json({ success: false, message: "Item not found" });
 
     const amount = Number(req.body.amount);
+
+    // Basic validation
+    if (isNaN(amount) || amount <= 0) {
+      return res.json({ success: false, message: "Invalid amount" });
+    }
 
     // Prevent overpayment
     if (item.paidAmount + amount > item.percentageAmount) {
       return res.json({ success: false, message: "Over payment not allowed" });
     }
-    
-    // Update payment
+
+    // --- 🟢 Naya History Logic Start ---
+    // Jab bhi payment hogi, history mein record save hoga
+    // Isse 'This Month' filter mein exact amount show hoga
+    const paymentRecord = new AgentPaymentHistory({
+      agentId: item.agent,        // Agent ka reference (Ref from Item model)
+      agentItemId: item._id,      // Item ka reference
+      amountPaid: amount          // Jitni payment abhi ki gayi
+    });
+    await paymentRecord.save();
+    // --- 🟢 Naya History Logic End ---
+
+    // 2. Main item ki payment update karein
     item.paidAmount += amount;
 
-    // Update status
+    // Status update logic
     if (item.paidAmount >= item.percentageAmount) {
       item.paidStatus = "Paid";
     } else if (item.paidAmount > 0) {
@@ -254,14 +454,52 @@ router.post("/pay-item/:id",isLoggedIn,allowRoles("admin", "worker"), async (req
     } else {
       item.paidStatus = "Unpaid";
     }
-
+    item.syncedToAtlas = false; // ✅ yeh add karo
     await item.save();
 
-    res.json({ success: true });
+    res.json({ 
+      success: true, 
+      message: "Payment saved in history and balance updated!" 
+    });
 
   } catch (err) {
-    console.log(err);
-    res.json({ success: false });
+    console.error("❌ Pay Item Error:", err);
+    res.json({ success: false, message: "Server error" });
+  }
+});
+
+
+
+
+router.delete("/delete-item/:id", isLoggedIn, allowRoles("admin"), async (req, res) => {
+  try {
+    const itemId = req.params.id;
+
+    // 1. Pehle check karein ke item exist karta hai ya nahi
+    const item = await AgentItem.findById(itemId);
+    if (!item) {
+      return res.status(404).json({ success: false, message: "Item not found" });
+    }
+
+    // 2. Main Item ko deleteAndSync se delete karein (Local delete + Sync track)
+    await deleteAndSync(AgentItem, itemId);
+
+    // 3. 🟢 History Cleanup: Is item se judi saari payments dhoondhein aur unhein bhi deleteAndSync se urayein
+    const associatedPayments = await AgentPaymentHistory.find({ agentItemId: itemId });
+    
+    // Har payment record ko loop chala kar deleteAndSync se delete karein taake sync track kharab na ho
+    for (const payment of associatedPayments) {
+      await deleteAndSync(AgentPaymentHistory, payment._id);
+    }
+
+    res.json({ 
+      success: true, 
+      message: "Item and associated payment history deleted successfully! 🗑️" 
+    });
+
+  } catch (err) {
+    console.error("❌ Delete Error:", err);
+    res.status(500).json({ success: false, message: "Error deleting Item and history" });
   }
 });
 
@@ -270,4 +508,11 @@ router.post("/pay-item/:id",isLoggedIn,allowRoles("admin", "worker"), async (req
 
 
 
+
 export default router;
+
+
+
+
+
+

@@ -1,3 +1,4 @@
+/* ===== Base Reset ===== */
 * {
   margin: 0;
   padding: 0;
@@ -7,75 +8,45 @@
 body,
 html {
   height: 100%;
-  font-family: 'Segoe UI', sans-serif;
-  overflow: hidden;
-}
-
-/* ===== Gradient Background ===== */
-body {
-  background: linear-gradient(-45deg, #06A56C, #00B087, #a6e7d8, #00f0d0);
-  background-size: 400% 400%;
-  animation: gradientBG 15s ease infinite;
+  font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+  background-color: #f4f6f9; /* Saaf aur light background */
   display: flex;
   justify-content: center;
   align-items: center;
-  position: relative;
 }
 
-@keyframes gradientBG {
-  0% {
-    background-position: 0% 50%;
-  }
-
-  50% {
-    background-position: 100% 50%;
-  }
-
-  100% {
-    background-position: 0% 50%;
-  }
-}
-
-/* ===== Particles ===== */
+/* ===== Particles Hata Diye Gaye Hain ===== */
 .particle {
-  position: absolute;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.5);
-  pointer-events: none;
-  animation: float 20s linear infinite;
+  display: none !important;
 }
 
-@keyframes float {
-  0% {
-    transform: translateY(100vh) translateX(0);
-  }
-
-  100% {
-    transform: translateY(-10vh) translateX(50vw);
-  }
-}
-
-/* ===== Login Wrapper ===== */
+/* ===== Simple Login/2FA Card ===== */
 .login-wrapper {
-  z-index: 10;
   width: 100%;
   max-width: 400px;
-  padding: 30px 25px;
-  background: rgba(255, 255, 255, 0.15);
-  border-radius: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.25);
-  backdrop-filter: blur(10px);
+  padding: 40px 30px;
+  background: #ffffff; /* Pure white card */
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* Halka premium shadow */
   display: flex;
   flex-direction: column;
   align-items: center;
 }
 
+/* ===== Typography ===== */
 h1 {
-  font-size: 28px;
-  color: #fff;
-  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-  margin-bottom: 25px;
+  font-size: 26px;
+  color: #1a1a1a; /* Dark text */
+  margin-bottom: 30px;
   text-align: center;
+  font-weight: 600;
+}
+
+/* ===== Form Container ===== */
+.form-container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ===== OTP Inputs ===== */
@@ -83,94 +54,100 @@ h1 {
   display: flex;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 20px;
+  margin-bottom: 25px;
+  width: 100%;
 }
 
 .otp-container input {
-  width: 45px;
-  padding: 12px;
+  width: 50px;
+  height: 50px;
   font-size: 20px;
   text-align: center;
   border-radius: 8px;
-  border: none;
+  border: 1px solid #cccccc; /* Simple border */
   outline: none;
-  background: rgba(255, 255, 255, 0.8);
-  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.1);
-  transition: all 0.3s ease;
+  background: #ffffff;
+  color: #333333;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
 
 .otp-container input:focus {
-  box-shadow: 0 0 10px rgba(6, 165, 108, 0.6);
-  background: rgba(255, 255, 255, 0.95);
+  border-color: #06A56C; /* Active hone par brand green color */
+  box-shadow: 0 0 0 3px rgba(6, 165, 108, 0.15); /* Soft focus ring */
 }
 
 /* ===== Buttons Container ===== */
 .button-container {
   display: flex;
-  gap: 10px;
-  /* Gap between Submit and Logout */
+  gap: 12px;
   margin-top: 10px;
+  width: 100%;
 }
 
-/* ===== Submit Button ===== */
+/* ===== Submit Button (Solid Simple Green) ===== */
 button#login {
-  padding: 15px;
-  font-size: 16px;
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(45deg, #06A56C, #00B087);
+  border-radius: 8px;
+  background-color: #06A56C; /* Solid Green */
   color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
 }
 
 button#login:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  background-color: #058f5e; /* Hover par thoda dark green */
 }
 
-/* ===== Logout Button ===== */
+/* ===== Logout Button (Solid Simple Red) ===== */
 button#logout {
-  padding: 15px;
-  font-size: 16px;
+  flex: 1;
+  padding: 14px;
+  font-size: 15px;
+  font-weight: 600;
   border: none;
-  border-radius: 12px;
-  background: linear-gradient(45deg, #ff4d4f, #ff7875);
+  border-radius: 8px;
+  background-color: #ff4d4f; /* Solid Red */
   color: #fff;
   cursor: pointer;
-  transition: all 0.3s ease;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease;
 }
 
 button#logout:hover {
-  transform: scale(1.05);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+  background-color: #e03e41; /* Hover par thoda dark red */
 }
 
 /* ===== Message ===== */
 #message {
   text-align: center;
-  margin-top: 15px;
-  font-size: 15px;
-  color: #fff;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  margin-top: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 20px;
 }
 
-/* ===== Media Queries ===== */
-@media (max-width: 600px) {
+/* ===== Media Queries (Responsive) ===== */
+@media (max-width: 480px) {
+  body {
+    padding: 20px;
+    background-color: #ffffff;
+  }
+
+  .login-wrapper {
+    box-shadow: none;
+    padding: 20px 10px;
+  }
+
   h1 {
     font-size: 24px;
   }
 
-  .login-wrapper {
-    padding: 20px;
-    border-radius: 15px;
-  }
-
   .otp-container input {
-    width: 35px;
-    padding: 10px;
+    width: 45px;
+    height: 45px;
     font-size: 18px;
   }
 
@@ -178,21 +155,5 @@ button#logout:hover {
   button#logout {
     padding: 12px;
     font-size: 14px;
-  }
-}
-
-@media (max-width: 400px) {
-  .login-wrapper {
-    padding: 15px;
-  }
-
-  h1 {
-    font-size: 22px;
-  }
-
-  .otp-container input {
-    width: 30px;
-    padding: 8px;
-    font-size: 16px;
   }
 }

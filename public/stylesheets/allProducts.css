@@ -7,7 +7,7 @@
 
 /* ================= SCROLLBAR ================= */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 1px;
 }
 
 ::-webkit-scrollbar-thumb {
@@ -53,7 +53,7 @@ input[type="date"],
 button {
   padding: 9px 12px;
   border-radius: 5px;
-  border: 1px solid #363636bb;
+  border: 1px solid #06a56c;
   font-size: 13px;
   /* width:100%; */
   background: #fff;
@@ -65,7 +65,7 @@ button {
 select{  
   padding: 9px 12px;
   border-radius: 5px;
-  border: 1px solid #363636bb;
+  border: 1px solid #06a56c;
   font-size: 13px;
   width:100%;
   background: #fff;
@@ -83,12 +83,12 @@ select:focus{
 /* Apply Button */
 button#apply {
   background-color: #a6e7d8;
-  color: #008767;
+  color: #f11414;
   border: 2px solid #00b087;
   cursor: pointer;
   transition: background-color 0.3s ease, color 0.3s ease, transform 0.2s ease;
   font-weight: 600;
-  padding: 8px 10px;
+  padding: 2px 10px;
 }
 
 button#apply:hover {
@@ -111,7 +111,7 @@ button#apply:hover {
 .stat-box {
   background: #fff;
   border-radius: 10px;
-  border: #06A56C 2px solid;
+  border: #06a56c 2px solid;
   padding: 7px;
   box-shadow: 0 3px 8px rgba(0, 0, 0, .1);
   text-align: center;
@@ -139,6 +139,22 @@ button#apply:hover {
   /* border-color:#ff4d4d 2px solid;  */
 }
 
+ input {
+   padding: 12px 20px;
+   border: 1px solid #6e6c6c;
+   border-radius: 8px;
+   width: 100%;
+   font-size: 15px;
+   margin-bottom: 12px;
+   transition: border-color 0.3s ease-in-out;
+ }
+
+ input:focus {
+   border-color: #06a56c;
+   outline: none;
+   box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
+ }
+
 /* ================= TABLE ================= */
 .table-container {
   max-width: 1200px;
@@ -146,12 +162,12 @@ button#apply:hover {
   overflow-x: auto;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  background: white;
+  background: #06a56c;
 }
 
 table {
   width: 100%;
-  min-width: 900px;
+  min-width: 1500px;
   /* ensures horizontal scroll on small screens */
   border-collapse: collapse;
   table-layout: fixed;
@@ -171,8 +187,8 @@ th {
 }
 
 td {
-  padding: 2px 1px;
-  font-size: 14px;
+  padding: 1px 2px;
+  font-size: 13px;
   font-weight: 400;
   text-align: center;
   border-bottom: 1px solid #13a354;
@@ -206,17 +222,21 @@ tbody tr {
 }
 
 /* ================= BUTTON ================= */
-#delete {
+
+
+
+#bulkDeleteBtn{
   background: #FFC5C5;
   color: #DF0404;
   border: 2px solid #DF0404;
-  padding: 5px 10px;
+  padding: 5px 6px;
   border-radius: 8px;
   font-size: 12px;
   cursor: pointer;
 }
 
-#delete:hover {
+
+#bulkDeleteBtn:hover {
   background: #FF4D4D;
   color: #fff;
 }
@@ -370,4 +390,354 @@ td.loss,
 .stock-green {
   color: green;
   font-weight: bold;
+}
+
+
+/* VS Code error fix karne ke liye classes */
+.stock-status {
+    font-weight: bold;
+}
+
+.stock-out {
+    color: #d9534f !important; /* Red color */
+}
+
+.stock-in {
+    color: #28a745 !important; /* Green color */
+}
+
+
+
+
+.qr-wrapper{
+    position:relative;
+    display:inline-block;
+    overflow:hidden;
+    border-radius:10px;
+}
+
+/* QR IMAGE SIZE FIX */
+.qr-image{
+    width:40px;
+    height:40px;
+    object-fit:contain;
+    display:block;
+    border-radius:10px;
+    border:1px solid #ddd;
+    background:white;
+    padding:4px;
+    transition:0.3s;
+}
+
+.qr-wrapper:hover .qr-image{
+    filter:brightness(0.7);
+    transform:scale(1.03);
+}
+
+.print-btn{
+    position:absolute;
+
+    top:50%;
+    left:50%;
+
+    transform:translate(-50%, -50%);
+
+    background:rgba(0,0,0,0.75);
+    color:white;
+
+    border:none;
+
+    padding:7px 14px;
+
+    border-radius:30px;
+
+    cursor:pointer;
+
+    font-size:11px;
+    font-weight:600;
+
+    opacity:0;
+
+    transition:0.25s;
+}
+
+.qr-wrapper:hover .print-btn{
+    opacity:1;
+}
+
+#print-container{
+    display:none;
+}
+
+#print-image{
+    width:200px;
+    height:200px;
+    object-fit:contain;
+}
+
+@media print {
+
+    body *{
+        visibility:hidden;
+    }
+
+    #print-container,
+    #print-container *{
+        visibility:visible;
+    }
+
+    #print-container{
+
+        display:flex;
+
+        justify-content:center;
+        align-items:center;
+
+        position:absolute;
+
+        left:0;
+        top:0;
+
+        width:100%;
+        height:100%;
+
+        background:white;
+    }
+}
+
+
+#download{
+    display:flex;
+    justify-content:flex-start;
+    max-width:1200px;
+    margin:0 auto 20px;
+    gap: 5px;
+}
+
+/* ================= PREMIUM ACTION BUTTONS ================= */
+.generatePDFbtn {
+    background: #e67e22; /* Aapka original orange color */
+    color: #ffffff; 
+    border: none; 
+    padding: 7px 14px; /* Balanced padding (na bohat barha, na bohat chota) */
+    border-radius: 5px; 
+    cursor: pointer;
+    font-weight: 600; 
+    font-size: 13px;
+    display: inline-flex; /* Inline flex taake jitni jagah chahiye utni le aur line block na kare */
+    align-items: center; 
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(230, 126, 34, 0.2); /* Soft matching orange shadow */
+    transition: all 0.2s ease-in-out; /* Smooth hover effect */
+}
+
+.generatePDFbtn:hover {
+    background: #d35400; /* Darker orange on hover */
+    box-shadow: 0 4px 8px rgba(211, 84, 0, 0.3); /* Smooth elevation */
+    transform: translateY(-1px); /* Halki si movement */
+}
+
+.generatePDFbtn:active {
+    transform: translateY(1px); /* Click karne par push effect */
+    box-shadow: 0 1px 2px rgba(211, 84, 0, 0.2);
+}
+
+#archiveBtn {
+    background: #34495e; /* Aapka original slate gray color */
+    color: #ffffff; 
+    border: none; 
+    padding: 7px 14px; 
+    border-radius: 5px; 
+    cursor: pointer; 
+    font-weight: 600; 
+    font-size: 13px;
+    display: inline-flex; 
+    align-items: center; 
+    gap: 6px;
+    box-shadow: 0 2px 4px rgba(52, 73, 94, 0.2); /* Soft matching gray shadow */
+    transition: all 0.2s ease-in-out;
+}
+
+#archiveBtn:hover {
+    background: #2c3e50; /* Darker slate on hover */
+    box-shadow: 0 4px 8px rgba(44, 62, 80, 0.3);
+    transform: translateY(-1px);
+}
+
+#archiveBtn:active {
+    transform: translateY(1px);
+    box-shadow: 0 1px 2px rgba(44, 62, 80, 0.2);
+}
+
+
+.pagination-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0px 2px;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.pagination-info {
+  color: #555;
+  font-size: 14px;
+}
+
+.pagination-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.pagination-controls button {
+  padding: 2px 19px;
+  background: #06A56C;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+.pagination-controls button:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+}
+
+.pagination-controls select {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+#pageInfo {
+  font-size: 15px;
+  font-weight: bold;
+  color: #333;
+}
+
+
+/* =====================
+   EDIT / ACTION BUTTONS
+   ===================== */
+
+.edit-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: 0.5px solid var(--color-border-secondary, #ccc);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+  font-size: 15px;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+  padding: 0;
+}
+.edit-icon-btn:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+.edit-icon-btn:active { transform: scale(0.96); }
+
+/* Cancel mode (jab row edit mode mein ho) */
+.edit-icon-btn.cancel-mode {
+  border-color: #f09595;
+  background: #fff5f5;
+}
+.edit-icon-btn.cancel-mode:hover { background: #ffe0e0; }
+
+/* Save button */
+.save-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  height: 32px;
+  background: #06a56c;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+}
+.save-edit-btn:hover { background: #058f5d; }
+.save-edit-btn:active { transform: scale(0.97); }
+.save-edit-btn:disabled {
+  background: #e0e0e0;
+  color: #999;
+  cursor: not-allowed;
+}
+
+/* Edit Button */
+#edit {
+  width: 32px;
+  height: 32px;
+  background: #e3f2fd;
+  color: #1976d2;
+  border: 1px solid #2196F3;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+#edit:hover,
+#edit:focus {
+  background: #1565C0;
+  color: #fff;
+  outline: none;
+}
+
+
+/* Delete Button */
+#delete {
+  width: 32px;
+  height: 32px;
+  background: #FFC5C5;
+  color: #DF0404;
+  border: 1px solid #DF0404;
+  border-radius: 8px;
+  font-size: 12px;
+  cursor: pointer;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+#delete:hover {
+  background: #FF4D4D;
+  color: #fff;
+}
+
+
+
+@media print {
+    body > *:not(#print-container) {
+        display: none !important;
+    }
+    #print-container {
+        display: flex !important;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+    }
+}
+
+#print-container {
+    display: none;
 }

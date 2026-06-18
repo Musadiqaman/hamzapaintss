@@ -3,17 +3,32 @@ const hamburger = document.getElementById("hamburger");
 const overlay = document.getElementById("overlay");
 const globalLoader = document.getElementById('global-page-loader');
 
-/* HAMBURGER & SIDEBAR LOGIC */
+/* 🔄 SMART SIDEBAR TOGGLE (MOBILE & DESKTOP) */
 function toggleSidebar(e) {
     if (e) {
         e.preventDefault();
         e.stopPropagation();
     }
-    sidebar.classList.toggle("mobile-open");
-    if (overlay) overlay.classList.toggle("show");
+    
+    // Screen width check karein
+    if (window.innerWidth <= 768) {
+        // 📱 Mobile Logic: Drawer style toggle with background overlay shadow
+        sidebar.classList.toggle("mobile-open");
+        if (overlay) overlay.classList.toggle("show");
+        // Safe check taake desktop structure conflict na kare
+        sidebar.classList.remove("desktop-closed");
+        document.body.classList.remove("sidebar-hidden");
+    } else {
+        // 💻 Desktop Logic: Main content layout expand or collapse layout smoothly
+        sidebar.classList.toggle("desktop-closed");
+        document.body.classList.toggle("sidebar-hidden");
+        // Safe check for mobile elements
+        sidebar.classList.remove("mobile-open");
+        if (overlay) overlay.classList.remove("show");
+    }
 }
 
-// Mobile par instant response ke liye 'pointerdown' behtar hai
+// Click and Touch friendly response handling
 if (hamburger) {
     hamburger.addEventListener("pointerdown", toggleSidebar);
 }
@@ -22,7 +37,7 @@ if (overlay) {
     overlay.addEventListener("click", toggleSidebar);
 }
 
-/* SUBMENU */
+/* 📦 SUBMENU ACCORDION TOGGLE */
 document.querySelectorAll(".menu-group").forEach(group => {
     const dropdown = group.querySelector(".dropdown");
     const submenu = group.querySelector(".submenu");
@@ -30,7 +45,6 @@ document.querySelectorAll(".menu-group").forEach(group => {
 
     if (dropdown && submenu) {
         dropdown.addEventListener("click", (e) => {
-            // Agar link hai to navigate karein, agar dropdown hai to toggle
             if (dropdown.getAttribute('href') === '#') e.preventDefault();
             
             submenu.classList.toggle("open");
@@ -41,26 +55,18 @@ document.querySelectorAll(".menu-group").forEach(group => {
     }
 });
 
-
-
-
-
-
-/* LOGOUT CONFIRMATION */
+/* 🔓 LOGOUT CONFIRMATION */
 const logoutBtn = document.querySelector(".logout");
 
 if (logoutBtn) {
     logoutBtn.addEventListener("click", (e) => {
-        // Confirmation box dikhayein
         const confirmLogout = confirm("Are you sure you want to logout?");
         
         if (!confirmLogout) {
-            // Agar user 'Cancel' karde to click ko rok dein
             e.preventDefault();
-            
-            // Agar aapka loader chal gaya ho to usay wapis band kar dein
             if (globalLoader) globalLoader.style.display = 'none';
         }
     });
 }
+
 

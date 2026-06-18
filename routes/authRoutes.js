@@ -64,7 +64,8 @@ router.get("/login",isAlreadyLoggedIn, (req, res) => {
 //     const admin = await Admin.create({
 //       username,
 //       role: "admin",
-//       password: hashed
+//       password: hashed,
+//       syncedToAtlas: false // ✅ yeh add karo
 //     });
 
 //     return res.json({
@@ -126,7 +127,8 @@ router.get("/login",isAlreadyLoggedIn, (req, res) => {
 //     const worker = await Admin.create({
 //       username,
 //       role: "worker",
-//       password: hashed
+//       password: hashed, 
+//       syncedToAtlas: false // ✅ yeh add karo
 //     });
 
 //     return res.json({
@@ -152,9 +154,19 @@ router.get("/login",isAlreadyLoggedIn, (req, res) => {
 
 const loginLimiter = rateLimit({
   windowMs: 2 * 60 * 1000, // 2 minute
-  max: 5,
+  max: 10,
   handler: async (req, res) => {
     const ip = req.ip;
+
+    // Localhost IPs ko kabhi block nahi karna
+    const localhostIPs = ["127.0.0.1", "::1", "::ffff:127.0.0.1"];
+    
+    if (localhostIPs.includes(ip)) {
+      return res.status(429).json({
+        success: false,
+        message: "Too many attempts! Please wait 2 minutes before trying again."
+      });
+    }
 
     console.log("⚠️ Blocking IP permanently:", ip);
 
@@ -170,7 +182,6 @@ const loginLimiter = rateLimit({
 
 
 
-// LOGIN POST
 router.post("/login", checkIPBlocked, loginLimiter, isAlreadyLoggedIn, async (req, res) => {
   try {
     const { username, password } = req.body;
@@ -193,10 +204,11 @@ router.post("/login", checkIPBlocked, loginLimiter, isAlreadyLoggedIn, async (re
     const otp = Math.floor(100000 + Math.random() * 900000);
     user.otp = otp;
     user.otpExpires = Date.now() + 5 * 60 * 1000; // 5 mins
+    user.syncedToAtlas = false; // ✅ yeh add karo
     await user.save();
 
     // ✅ TEMPORARY SESSION FOR 2FA ACCESS
-    req.session.otpUserId = user._id;  // <-- yahi line OTP generate hone ke turant baad dalni hai
+    req.session.otpUserId = user._id;
 
     // ===== SELECT EMAIL ACCOUNT BASED ON ROLE =====
     let emailUser, emailPass, sendTo;
@@ -204,7 +216,7 @@ router.post("/login", checkIPBlocked, loginLimiter, isAlreadyLoggedIn, async (re
     if (user.role === "admin") {
       emailUser = process.env.ADMIN_EMAIL_USER;
       emailPass = process.env.ADMIN_EMAIL_PASS;
-      sendTo = process.env.ADMIN_RECEIVE_EMAIL; // jisko OTP milega
+      sendTo = process.env.ADMIN_RECEIVE_EMAIL;
     } else {
       emailUser = process.env.WORKER_EMAIL_USER;
       emailPass = process.env.WORKER_EMAIL_PASS;
@@ -220,7 +232,7 @@ router.post("/login", checkIPBlocked, loginLimiter, isAlreadyLoggedIn, async (re
       }
     });
 
-    // Send OTP
+    // ===== SEND OTP =====
     await transporter.sendMail({
       from: `"Secure Login" <${emailUser}>`,
       to: sendTo,
@@ -228,7 +240,6 @@ router.post("/login", checkIPBlocked, loginLimiter, isAlreadyLoggedIn, async (re
       text: `Hello ${user.username},\nYour OTP is: ${otp}\nIt expires in 5 minutes.`
     });
 
-    // RESPONSE
     return res.json({
       success: true,
       message: "OTP sent successfully! Redirecting...",
@@ -236,7 +247,22 @@ router.post("/login", checkIPBlocked, loginLimiter, isAlreadyLoggedIn, async (re
     });
 
   } catch (err) {
-    console.error(err);
+    console.error("Login API Error:", err);
+
+    // ✅ Internet / DNS error — smtp.gmail.com reach nahi hua
+    if (
+      err.code === "EDNS" ||
+      err.code === "ENOTFOUND" ||
+      err.code === "ECONNREFUSED" ||
+      err.syscall === "getaddrinfo"
+    ) {
+      console.error("❌ No internet connection — cannot reach smtp.gmail.com");
+      return res.status(503).json({
+        success: false,
+        message: "No internet connection. Please check your network and try again."
+      });
+    }
+
     return res.status(500).json({
       success: false,
       message: "Server error! Please try again."
@@ -255,66 +281,74 @@ res.render("2FA");
 
 // VERIFY OTP
 router.post("/verify-otp", ensure2FA, async (req, res) => {
+
   try {
     const { otp } = req.body;
 
-    // 1. Validation: OTP khali na ho
     if (!otp) {
       return res.status(400).json({ success: false, message: "OTP is required!" });
     }
 
-    // 2. CastError Fix: Check karein ke OTP sirf numbers hain
     const otpNumber = Number(otp);
     if (isNaN(otpNumber)) {
-      return res.status(400).json({ 
-        success: false, 
-        message: "Invalid OTP format! Please enter numbers only." 
+      return res.status(400).json({
+        success: false,
+        message: "Invalid OTP format! Please enter numbers only."
       });
     }
 
-    // 3. Find user with matching OTP and valid expiry
-    // Hum otpNumber use kar rahe hain taake database crash na ho
     const user = await Admin.findOne({
-      otp: otpNumber, 
-      otpExpires: { $gt: Date.now() } // OTP expired na ho
+      otp: otpNumber,
+      otpExpires: { $gt: Date.now() }
     });
 
     if (!user) {
       return res.status(400).json({ success: false, message: "Invalid or expired OTP!" });
     }
 
-    // 4. Success: OTP correct hai → Clear OTP fields
     user.otp = null;
     user.otpExpires = null;
+    user.syncedToAtlas = false; // ✅ yeh add karo
     await user.save();
-    
-    // 5. 🔥 Destroy Temporary Session (Security)
+
     req.session.destroy(err => {
       if (err) console.error("Session destroy error:", err);
     });
 
-    // 6. 🔥 Remove temporary session cookie
     res.clearCookie("connect.sid");
 
-    // 7. CREATE JWT TOKEN (Final Auth)
     const token = jwt.sign(
       { id: user._id, username: user.username, role: user.role },
       process.env.SECRET_KEY,
       { expiresIn: "365d" }
     );
 
-    // 8. Set Cookie with Production/Live checks
     res.cookie("token", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Live (Railway/Vercel) par true hoga
+      secure: process.env.NODE_ENV === "production",
       sameSite: "strict",
-      maxAge: 365 * 24 * 60 * 60 * 1000 // 1 year
+      maxAge: 365 * 24 * 60 * 60 * 1000
     });
 
     return res.json({ success: true, message: "OTP verified successfully!" });
 
   } catch (err) {
     console.error("Verification API Error:", err);
+
+    // ✅ Agar kabhi verify-otp mein bhi network error aaye
+    if (
+      err.code === "EDNS" ||
+      err.code === "ENOTFOUND" ||
+      err.code === "ECONNREFUSED" ||
+      err.syscall === "getaddrinfo"
+    ) {
+      console.error("❌ No internet connection detected in verify-otp");
+      return res.status(503).json({
+        success: false,
+        message: "No internet connection. Please check your network and try again."
+      });
+    }
+
     return res.status(500).json({ success: false, message: "Server error. Try again!" });
   }
 });

@@ -1,19 +1,22 @@
-import mongoose from 'mongoose';  // Correct way to import in ES Modules
+import mongoose from 'mongoose';
 
-// Define the product schema
 const productSchema = new mongoose.Schema({
   brandName:{ 
-    type: String 
+    type: String,
+    index: true
   },
   itemName: { 
     type: String, 
-    required: true 
+    required: true,
+    index: true
   },
   colourName:{ 
-    type: String 
+    type: String,
+    index: true
   },
   qty: { 
-    type: String 
+    type: String,
+    index: true
   },
   totalProduct: { 
     type: Number, 
@@ -21,32 +24,64 @@ const productSchema = new mongoose.Schema({
   },
   remaining: { 
     type: Number, 
-    default: 0 
+    default: 0,
+    index: true
   },
   rate: { 
     type: Number, 
     required: true 
   },
-  stockID: {  // Unique identifier for each batch of product
+  saleRate: {
+    type: Number,
+    required: true
+  },
+  stockID: {
     type: String,
     required: true,
-    unique: true,  // Make stockID unique for each batch
+    unique: true,
+  },
+  qrCode: {
+    type: String 
   },
   refundQuantity:{ 
     type: Number, 
     default: 0 
   }, 
   refundStatus:{ 
-  type: String, 
-  default: "none" 
-  }
+    type: String, 
+    default: "none" 
+  },
+  stockStatus: { 
+    type: String, 
+    enum: ['Available', 'Out of Stock', 'Archived'], 
+    default: 'Available' 
+  },
+  billId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "PrintProduct" 
+  },
+  companyItemId: { 
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: "CompanyItem",
+    default: null 
+  },
+  companyId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Company",
+    default: null
+  },
+  companyName: {
+    type: String,
+    default: null
+  },
+  companyPhone: {
+    type: String,
+    default: null
+  },
+  syncedToAtlas: { type: Boolean, default: false }
 }, { timestamps: true });
 
+// ✅ createdAt index
+productSchema.index({ createdAt: -1 });
 
-
-
-// Create and export the Product model
 export default mongoose.model("Product", productSchema);
-
-
-

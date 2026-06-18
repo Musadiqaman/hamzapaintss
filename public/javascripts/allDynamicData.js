@@ -112,6 +112,36 @@ document.addEventListener('click', async function(e) {
             }
         } catch (err) { alert("Error deleting color"); }
     }
+
+
+   // D. Delete Unit
+if (target.classList.contains('del-unit')) {
+    const brandId = target.getAttribute('data-brand-id');
+    const unitId = target.getAttribute('data-unit-id');
+    const unitName = target.parentElement.textContent.replace('×', '').trim();
+    
+    if (!confirm(`⚠️ Kya aap Unit "${unitName}" ko delete karna chahte hain?`)) return;
+    
+    try {
+        const res = await fetch('/dynamic/delete-unit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ brandId, unitId })
+        });
+        const data = await res.json();
+        
+        if (data.success) {
+            target.closest('.unit-tag').remove();
+            alert("✅ " + data.message);
+        } else {
+            alert("❌ " + data.message);
+        }
+    } catch (err) { 
+        alert("Error deleting unit"); 
+    }
+}
+
+
 });
 
 // INITIALIZATION

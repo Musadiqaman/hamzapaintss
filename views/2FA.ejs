@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Two Factor Authentication | Hamza Paints</title>
   <link rel="stylesheet" href="/stylesheets/2FA.css">
-   <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+  <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
 </head>
 
 <body>
@@ -15,12 +15,12 @@
 
     <form id="loginForm" class="form-container">
       <div class="otp-container">
-        <input type="text" name="otp1" maxlength="1" required />
-        <input type="text" name="otp2" maxlength="1" required />
-        <input type="text" name="otp3" maxlength="1" required />
-        <input type="text" name="otp4" maxlength="1" required />
-        <input type="text" name="otp5" maxlength="1" required />
-        <input type="text" name="otp6" maxlength="1" required />
+        <input type="text" name="otp1" maxlength="1" inputmode="numeric" pattern="[0-9]*" required />
+        <input type="text" name="otp2" maxlength="1" inputmode="numeric" pattern="[0-9]*" required />
+        <input type="text" name="otp3" maxlength="1" inputmode="numeric" pattern="[0-9]*" required />
+        <input type="text" name="otp4" maxlength="1" inputmode="numeric" pattern="[0-9]*" required />
+        <input type="text" name="otp5" maxlength="1" inputmode="numeric" pattern="[0-9]*" required />
+        <input type="text" name="otp6" maxlength="1" inputmode="numeric" pattern="[0-9]*" required />
       </div>
 
       <div class="button-container">
@@ -28,14 +28,15 @@
         <button id="logout" type="button">Logout</button>
       </div>
     </form>
-    <p id="message"></p>
 
+    <div id="loader" style="display:none; justify-content:center; align-items:center; margin-top:18px;">
+      <div class="spin"></div>
+    </div>
+
+    <p id="message"></p>
   </div>
 
   <script src="/javascripts/2FA.js"></script>
-  <script>
-
-  </script>
 </body>
 
 </html>

@@ -4,7 +4,7 @@ const adminSchema = new mongoose.Schema({
   username: {
     type: String,
     required: true, 
-    unique: true 
+    unique: true
   },
   password: {
     type: String,
@@ -12,18 +12,22 @@ const adminSchema = new mongoose.Schema({
   },
   role: {
     type: String,
-    enum: ["admin", "worker"],  // allowed roles
+    enum: ["admin", "worker"],
     required: true
   },
-  // ===== 2FA OTP FIELDS =====
   otp: {
-    type: Number,       // 6-digit OTP
-    default: null
+    type: Number,
+    default: null,
+    index: true
   },
   otpExpires: {
-    type: Date,         // OTP expiration time
+    type: Date,
     default: null
-  }
+  },
+  syncedToAtlas: { type: Boolean, default: false }
 }, { timestamps: true });
+
+// ✅ createdAt index
+adminSchema.index({ createdAt: -1 });
 
 export default mongoose.model("Admin", adminSchema);

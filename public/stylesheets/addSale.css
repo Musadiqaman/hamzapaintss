@@ -1,99 +1,271 @@
+/* ============================================
+   RESET & BASE
+   ============================================ */
 * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-::-webkit-scrollbar {
-  width: 8px;
+:root {
+  --green: #06a56c;
+  --green-dark: #047a50;
+  --green-light: #a6e7d8;
+  --green-border: #4ecda4;
+  --green-shadow: rgba(6, 165, 108, 0.2);
+  --red-bg: #ffebee;
+  --red-text: #d32f2f;
+  --red-border: #ef9a9a;
+  --blue: #2563eb;
+  --blue-dark: #1d4ed8;
+  --radius: 7px;
+  --shadow: 0 2px 7px rgba(0,0,0,0.08);
 }
 
-::-webkit-scrollbar-thumb {
-  background-color: #06A56C;
-}
 
-::-webkit-scrollbar-track {
-  background-color: #f1f1f1;
-}
+::-webkit-scrollbar { width: 7px; }
+::-webkit-scrollbar-thumb { background: var(--green); border-radius: 4px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+
+/* ============================================
+   MAIN
+   ============================================ */
+/* main {
+  padding: 14px 12px 30px;
+} */
 
 h1 {
-  color: #06a56c;
+  color: var(--green);
   text-align: center;
-  margin-bottom: 5px;
-  font-size: 25px;
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 12px;
 }
 
-.form-container {
+/* ============================================
+   CARDS
+   ============================================ */
+div.qr,
+div.manual,
+div.selectcustomeragent {
+  background: #fff;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  margin-bottom: 10px;
+  width: 100%;
+}
+
+/* ============================================
+   HIDE BUTTONS
+   ============================================ */
+button.hidden-qr,
+button.hidden-manual {
+  background: var(--red-bg);
+  color: var(--red-text);
+  border: 1px solid var(--red-border);
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 8px;
+  transition: all 0.2s;
+}
+button.hidden-qr:hover,
+button.hidden-manual:hover {
+  background: var(--red-text);
+  color: #fff;
+}
+
+/* ============================================
+   SELECT CUSTOMER / AGENT ROW
+   ============================================ */
+div.selectcustomeragent {
   display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-bottom: 3px;
+  flex-direction: row;
   flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
 }
 
+/* ============================================
+   QR ROW
+   ============================================ */
+div.qr > div {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* ============================================
+   MANUAL FORM ROW
+   ============================================ */
+div.manual .form-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 7px;
+  align-items: center;
+}
+
+/* ============================================
+   INPUTS & SELECTS
+   ============================================ */
 select,
-input {
-  padding: 10px;
+input[type="text"],
+input[type="number"] {
+  padding: 8px 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  width: 130px;
-  font-size: 13px;
-  margin-bottom: 8px;
-  transition: border-color 0.3s ease-in-out;
-}
-
-#rate,
-.totalproduct {
-  width: 130px;
+  font-size: 12px;
+  background: #fff;
+  height: 36px;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
 select:focus,
-input:focus {
-  border-color: #06a56c;
+input[type="text"]:focus,
+input[type="number"]:focus {
+  border-color: var(--green);
   outline: none;
-  box-shadow: 0 0 5px rgba(6, 165, 108, 0.5);
+  box-shadow: 0 0 0 3px var(--green-shadow);
 }
 
-button#add {
-  background-color: #a6e7d8;
-  color: #008767;
-  border: 2px solid #00B087;
-  padding: 5px;
-  border-radius: 5px;
-  width: 120px;
-  font-size: 13px;
-  margin-bottom: 9px;
-  transition: all 0.3s ease;
+/* Individual widths — desktop */
+#customerName    { width: 150px; }
+#customerSelect  { width: 220px; }
+#agentSelect     { width: 210px; }
+#agentPercentage { width: 85px; }
+#brandSelect     { width: 120px; }
+#itemSelect      { width: 130px; }
+#unitSelect      { width: 95px; }
+#allColours      { width: 115px; }
+#colourSelect    { width: 115px; }
+#quantitySold    { width: 105px; }
+#rate            { width: 115px; }
+
+/* ============================================
+   QR BUTTONS
+   ============================================ */
+#scanQRBtn {
+  padding: 0 16px;
+  background: var(--blue);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius);
   cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  height: 36px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+#scanQRBtn:hover { background: var(--blue-dark); }
+
+.custom-file-upload {
+  display: inline-flex;
+  align-items: center;
+  padding: 0 16px;
+  background: var(--green);
+  color: #fff;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 600;
+  height: 36px;
+  white-space: nowrap;
+  transition: background 0.2s;
+}
+.custom-file-upload:hover { background: var(--green-dark); }
+
+#qrImageInput { display: none !important; }
+
+#qrScannerInput {
+  padding: 0 12px;
+  border: 2px solid #d1d5db;
+  border-radius: var(--radius);
+  font-size: 13px;
+  height: 36px;
+  min-width: 220px;
+  background: #fff;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+#qrScannerInput:focus {
+  border-color: var(--blue);
+  box-shadow: 0 0 0 3px rgba(37,99,235,0.12);
+  outline: none;
+}
+#qrScannerInput::placeholder { color: #9ca3af; }
+
+/* ============================================
+   ADD BUTTON
+   ============================================ */
+button#add {
+  background: var(--green-light);
+  color: #008767;
+  border: 2px solid var(--green-border);
+  padding: 0 14px;
+  border-radius: 5px;
+  height: 36px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s;
+}
+button#add:hover {
+  background: var(--green);
+  color: #fff;
+  border-color: var(--green-dark);
+}
+
+/* ============================================
+   TABLE
+   ============================================ */
+.table-container {
+  width: 100%;
+  overflow-x: auto;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  background: #fff;
+  -webkit-overflow-scrolling: touch;
+  margin-top: 6px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  background-color: white;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-}
-
-th,
-td {
-  border-bottom: 1px solid #4ecda4;
-  padding: 5px;
-  text-align: center;
-  font-size: 15px;
+  min-width: 580px;
 }
 
 th {
-  background-color: #06a56c;
-  color: white;
-  padding: 12px;
+  background: var(--green);
+  color: #fff;
+  padding: 10px 6px;
+  text-align: center;
+  font-size: 13px;
+  white-space: nowrap;
 }
 
+td {
+  padding: 7px 5px;
+  text-align: center;
+  font-size: 13px;
+  border-bottom: 1px solid #e0f5ec;
+  white-space: nowrap;
+}
+
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: #f0fdf8; }
+
 tbody {
+  display: block;
   max-height: 260px;
   overflow-y: auto;
-  display: block;
 }
 
 thead,
@@ -103,166 +275,149 @@ tbody tr {
   table-layout: fixed;
 }
 
-.submit-btn {
-  display: block;
-  margin: 20px auto;
-  background-color: #06a56c;
-  padding: 10px 20px;
-  border: none;
-  color: white;
-  border-radius: 6px;
-  cursor: pointer;
+tr.no-data td {
+  color: #999;
+  padding: 18px;
+  font-style: italic;
 }
 
-/* Delete Button Styling */
+/* ============================================
+   DELETE BUTTON
+   ============================================ */
 button#delete {
-  background-color: #ffebee;
-  /* Light red background */
-  color: #d32f2f;
-  /* Dark red text */
-  border: 1px solid #ef9a9a;
-  /* Soft red border */
-  padding: 6px 12px;
+  background: var(--red-bg);
+  color: var(--red-text);
+  border: 1px solid var(--red-border);
+  padding: 4px 10px;
   border-radius: 4px;
   font-size: 11px;
-  /* Mobile ke hisab se chota text */
   font-weight: 600;
   cursor: pointer;
-  transition: all 0.2s ease;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  transition: all 0.2s;
 }
-
-/* Hover effect for better UX */
 button#delete:hover {
-  background-color: #d32f2f;
-  color: white;
-  border-color: #b71c1c;
+  background: var(--red-text);
+  color: #fff;
 }
 
-/* Mobile par table ke andar button ki alignment */
-td button#delete {
-  margin: 2px 0;
-  width: auto;
-  min-width: 60px;
+/* ============================================
+   SUBMIT BUTTON
+   ============================================ */
+.submit-btn {
+  display: block;
+  margin: 14px auto 0;
+  background: var(--green);
+  padding: 10px 32px;
+  border: none;
+  color: #fff;
+  border-radius: var(--radius);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.submit-btn:hover { background: var(--green-dark); }
+.submit-btn:disabled {
+  background: var(--green-dark);
+  cursor: not-allowed;
+  opacity: 0.7;
 }
 
-/* --- MOBILE RESPONSIVE (Advanced Fixes for Text & Alignment) --- */
+/* ============================================
+   SPINNER
+   ============================================ */
+.spinner {
+  width: 15px;
+  height: 15px;
+  border: 2px solid #fff;
+  border-bottom-color: transparent;
+  border-radius: 50%;
+  display: inline-block;
+  animation: spin 0.9s linear infinite;
+  vertical-align: middle;
+  margin-right: 6px;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ============================================
+   MOBILE — max-width: 768px
+   ============================================ */
 @media screen and (max-width: 768px) {
+
   main {
-    padding: 5px;
-    padding-top: 10px;
-    /* Hamburger space */
+    padding: 8px 6px 20px;
     margin-left: 0 !important;
   }
 
-  h1 {
-    font-size: 18px;
-    margin-bottom: 10px;
+  h1 { font-size: 18px; margin-bottom: 8px; }
+
+  div.qr,
+  div.manual,
+  div.selectcustomeragent {
+    padding: 8px;
+    margin-bottom: 8px;
   }
 
-  /* Compact Input Gaps */
-  .form-container {
-    gap: 3px;
-    padding: 5px;
-    justify-content: space-between;
+  /* All rows → column on mobile */
+  div.selectcustomeragent,
+  div.qr > div,
+  div.manual .form-container {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 6px;
   }
 
-  select,
-  input {
-    width: calc(50% - 3px) !important;
-    font-size: 16px;
-    /* Text chota kiya taake fit aaye */
-    padding: 9px 14px;
-    border: 1px solid #565656;
-    margin-bottom: 5px;
+  /* All inputs/selects → full width */
+  div.selectcustomeragent select,
+  div.selectcustomeragent input,
+  div.manual .form-container select,
+  div.manual .form-container input {
+    width: 100% !important;
+    font-size: 15px;
+    height: 42px;
+  }
+
+  #qrScannerInput {
+    width: 100% !important;
+    min-width: unset;
+    font-size: 15px;
+    height: 42px;
+  }
+
+  #scanQRBtn,
+  .custom-file-upload {
+    width: 100%;
+    height: 42px;
+    font-size: 14px;
+    justify-content: center;
+    text-align: center;
   }
 
   button#add {
     width: 100%;
-    padding: 10px;
-    font-size: 13px;
-    margin-top: 2px;
+    height: 42px;
+    font-size: 14px;
   }
 
-  /* Table Container Fix */
-  .table-container {
+  .submit-btn {
     width: 100%;
-    overflow-x: auto;
-    /* Side scroll enable */
-    background: white;
-    border-radius: 8px;
-    -webkit-overflow-scrolling: touch;
+    padding: 12px;
+    font-size: 15px;
+    margin-top: 10px;
   }
 
-  table {
-    display: table;
-    /* Block reset kiya alignment ke liye */
-    min-width: 700px;
-    /* Isse table pichkegi nahi aur align rahegi */
-    table-layout: auto !important;
-    /* PC ka fixed layout override kiya */
-  }
-
-  thead {
-    display: table-header-group;
-    /* Standard header behavior */
-  }
-
+  /* Table fix for mobile */
+  thead { display: table-header-group; }
   tbody {
     display: table-row-group;
-    /* Standard row behavior */
     max-height: none;
-    /* Mobile par scroll container control karega */
   }
+  tbody tr { display: table-row; width: auto; }
 
-  tbody tr {
-    display: table-row;
-    width: auto;
-  }
-
-  th,
-  td {
-    padding: 10px 5px;
-    font-size: 10.5px;
-    /* Mazeed chota text mobile alignment ke liye */
-    white-space: nowrap;
-    /* Data ko ek line mein rakhne ke liye */
-    border-bottom: 1px solid #31c697e2;
-  }
-
-  th {
-    padding: 12px 5px;
-  }
-
-  tbody {
-    max-height: 375px;
-  }
+  th { padding: 9px 4px; font-size: 11px; }
+  td { padding: 7px 4px; font-size: 11px; }
 }
 
 
-/* Spinner Animation */
-.spinner {
-  width: 18px;
-  height: 18px;
-  border: 2px solid #ffffff;
-  border-bottom-color: transparent;
-  border-radius: 50%;
-  display: inline-block;
-  animation: rotation 1s linear infinite;
-  vertical-align: middle;
-  margin-right: 8px;
-}
-
-@keyframes rotation {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-/* Button loading state */
-.submit-btn:disabled {
-  background-color: #047a50; /* Thora dark rang jab loading ho */
-  cursor: not-allowed;
-  opacity: 0.8;
-}

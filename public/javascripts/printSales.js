@@ -3,11 +3,13 @@ document.addEventListener("DOMContentLoaded", function () {
       const savedData = localStorage.getItem("lastAddedSales");
       const customerName = localStorage.getItem("lastCustomerName"); // Name fetch kiya
       const billID=localStorage.getItem("lastSalesBillID");
-      
+      const billtype=localStorage.getItem("lastBillType");
+
       const tbody = document.getElementById("billTableBody");
       const totalItemsSpan = document.getElementById("billTotalItems");
       const totalAmountSpan = document.getElementById("billTotalAmount");
       const displayNameSpan = document.getElementById("displayName");
+      const displaybilltype=document.getElementById("displaybilltype");
       const displayBillSpan=document.getElementById("displaybillID");
 
       // 2. Name Display Logic
@@ -16,6 +18,16 @@ document.addEventListener("DOMContentLoaded", function () {
       } else {
         displayNameSpan.innerText = "...................."; // Agar naam na ho
       }
+
+      
+     
+      if(billtype){
+        displaybilltype.innerText=billtype;
+      }
+      else{
+        displaybilltype.innerText="....................";
+      }
+   
 
      if(billID){
       displayBillSpan.innerText = billID;
@@ -35,14 +47,14 @@ document.addEventListener("DOMContentLoaded", function () {
 
           tableHTML += `
             <tr>
-              <td>${s.stockID}</td>
               <td>${s.saleID}</td>
+              <td>${s.brandName.split(' ')[0]}</td>
               <td>${s.itemName}</td>
-              <td>${s.colourName}</td>
+              <td>${s.colourName?.split(' ')[0] || ''}</td>
               <td>${s.qty }</td>
               <td>${s.quantitySold}</td>
-              <td>Rs ${parseFloat(s.rate).toFixed(2)}</td>
-              <td>Rs ${rowTotal.toFixed(2)}</td>
+              <td>${parseFloat(s.rate).toFixed(2)}</td>
+              <td>${rowTotal.toFixed(2)}</td>
             </tr>`;
         });
 

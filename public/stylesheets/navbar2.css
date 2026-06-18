@@ -1,0 +1,239 @@
+/* --- Global Reset & PC Setup --- */
+* { 
+    margin: 0; 
+    padding: 0; 
+    box-sizing: border-box; 
+}
+
+
+body{ 
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background: #f8fafc; 
+    color: #334155;
+    overflow-x: hidden; 
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar styling - Modern thin look */
+::-webkit-scrollbar { width: 3px; }
+::-webkit-scrollbar-thumb { 
+    background-color: #06A56C; 
+    border-radius: 20px;
+}
+::-webkit-scrollbar-track { background-color: #f1f5f9; }
+
+/* ---------------- HAMBURGER (MODERNIZED & DESKTOP READY) ---------------- */
+.hamburger { 
+    position: fixed;
+    top: 15px;
+    left: 265px; /* Sidebar ke bilkul clear pass shuru hoga */
+    z-index: 10001;
+    background: #06A56C;
+    color: white;
+    border: none;
+    padding: 10px 8px;
+    font-size: 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(6, 165, 108, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger:hover {
+    background: #058f5e;
+}
+
+/* ---------------- SIDEBAR ---------------- */
+.sidebar {
+    width: 250px; 
+    height: 100vh;
+    background: #ffffff;
+    position: fixed;
+    left: 0;
+    top: 0;
+    padding: 20px 15px;
+    border-right: 1px solid #e2e8f0;
+    box-shadow: 4px 0 24px rgba(0,0,0,0.03);
+    overflow-y: auto;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 10000;
+}
+
+/* 💻 DESKTOP TOGGLED STATES */
+.sidebar.desktop-closed {
+    left: -250px; /* Sidebar screen se bahar slide ho jayega */
+}
+
+/* Body context dynamic state layout triggers */
+body.sidebar-hidden .hamburger {
+    left: 15px; /* Hamburger button corner par move ho jayegi smooth */
+}
+
+/* ---------------- OVERLAY ---------------- */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(15, 23, 42, 0.5); 
+    z-index: 9998; 
+    display: none;
+    backdrop-filter: blur(4px); 
+    transition: opacity 0.3s ease;
+}
+#overlay.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* Logo Section */
+.logo { 
+    text-align: center; 
+    margin-bottom: 7px; 
+    padding: 0 10px;
+}
+
+.logo img { 
+    width: 55px; 
+    height: auto;
+    border-radius: 15px; 
+    /* box-shadow: 0 4px 10px rgba(0,0,0,0.05); */
+}
+.logo h3 { 
+    margin-top: 12px; 
+    font-size: 15px; 
+    color: #C31F68; 
+    font-weight: 800; 
+    letter-spacing: -0.5px;
+}
+
+/* Menu items */
+ul { list-style: none; }
+
+.dropdown {
+    padding: 10px 14px;
+    font-size: 15px;
+    font-weight: 600;
+    border-radius: 12px;
+    color: #475569; 
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    margin-bottom: 4px;
+    border: 1px solid transparent;
+}
+.dropdown:hover { 
+    background: #f0fdf4; 
+    color: #06A56C;
+}
+.dropdown i { font-size: 18px; } 
+
+/* Submenu Logic */
+.submenu {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    background: #f8fafc;
+    border-radius: 12px;
+    margin: 0 5px;
+}
+.submenu.open { 
+    max-height: 600px;
+    padding: 8px 10px; 
+    margin-bottom: 12px;
+    border: 1px solid #f1f5f9;
+}
+
+.submenu li a {
+    padding: 10px 14px;
+    display: block;
+    font-size: 13.5px;
+    font-weight: 500;
+    color: #64748b;
+    text-decoration: none;
+    border-radius: 8px;
+    margin-bottom: 2px;
+    transition: all 0.2s;
+}
+.submenu li a:hover {
+    background: #e06609;
+    color: white;
+    transform: translateX(5px); 
+}
+
+/* Logout Styling */
+.logout { 
+    margin-top: 20px; 
+    padding: 14px 16px;
+    color: #ef4444; 
+    font-weight: 600;
+    font-size: 15px;
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-radius: 12px;
+    transition: background 0.2s;
+}
+.logout:hover {
+    background: #fef2f2;
+}
+
+/* ---------------- MAIN CONTENT ---------------- */
+main { 
+    margin-left: 250px; 
+    padding: 40px; 
+    padding-top: 80px; /* Layout crash se bachane ke liye gap */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    min-height: 100vh;
+}
+
+/* 💻 When desktop sidebar is hidden, main container scales up smoothly */
+body.sidebar-hidden main {
+    margin-left: 0 !important;
+}
+
+/* ---------------- MOBILE RESPONSIVE ---------------- */
+@media screen and (max-width: 768px) {
+    .hamburger { 
+        left: 15px !important; /* Mobile par automatic corner */
+        top: 15px;
+    }
+
+    .sidebar { 
+        left: -280px; 
+        width: 260px;
+        box-shadow: none;
+    }
+
+    .sidebar.mobile-open { 
+        left: 0; 
+        box-shadow: 20px 0 50px rgba(0,0,0,0.15);
+    }
+
+    main { 
+        margin-left: 0 !important; 
+        padding: 20px; 
+        padding-top: 85px; 
+    }
+    
+    .dropdown {
+        padding: 14px; 
+    }
+}
+
+
+
+

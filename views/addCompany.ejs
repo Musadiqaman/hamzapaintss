@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Add Company | Hamza Paints</title>
+  <link rel="stylesheet" href="/stylesheets/addCompany.css">
+  <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+
+</head>
+
+<body>
+
+  <%- include('partials/navbar') %>
+
+    <main>
+      <div class="content-wrapper">
+        <div class="form-wrapper">
+          <h1>Add New Company</h1>
+
+          <form id="agentForm" class="form-container">
+            <input type="text" name="name" placeholder="Enter Company Name" required />
+            <input type="text" name="phone" placeholder="Enter Phone Number" required />
+            <input type="text" name="cnic" placeholder="Enter CNIC Number (Optional)" />
+            <button id="add" type="submit">Add Company</button>
+          </form>
+
+          <!-- Message area -->
+          <p id="message" style="margin-top:20px; font-size:16px; text-align: center;"></p>
+        </div>
+      </div>
+
+    </main>
+
+    <script src="/javascripts/addCompany.js"></script>
+
+</body>
+
+</html>

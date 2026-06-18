@@ -18,65 +18,74 @@
                     <option value="<%= brand.brandName.trim() %>"><%= brand.brandName %></option>
                 <% }) %>
             </select>
- <div class="table-responsive-wrapper">
-            <table class="data-table" id="itemsTable">
-                <thead>
-                    <tr>
-                        <th>Brand Details</th>
-                        <th>Item Name</th>
-                        <th>Colors</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <% if (allDefinitions && allDefinitions.length > 0) { %>
-                        <% allDefinitions.forEach(brand => { %>
-                            <tr class="brand-row" data-brand="<%= brand.brandName.trim() %>">
-                                <td colspan="4">
-                                    <span class="brand-title">BRAND: <%= brand.brandName %></span>
-                                    <button class="del-brand" data-brand-id="<%= brand._id %>" title="Delete Brand">🗑️</button>
-                                    <span class="units-label">
-                                        Units: <% brand.units.forEach(u => { %> <span class="tag unit-tag"><%= u %></span> <% }) %>
-                                    </span>
-                                </td>
-                            </tr>
-                            
-                            <% brand.products.forEach(product => { %>
-                                <tr class="product-row" data-brand="<%= brand.brandName.trim() %>">
-                                    <td class="desktop-only"></td> 
-                                    <td data-label="Item Name">
-                                        <strong><%= product.itemName %></strong>
-                                    </td>
-                                    <td data-label="Colors">
-                                        <div class="color-scroll-box">
-                                            <% product.colors.forEach(c => { %>
-                                                <span class="tag">
-                                                    <%= c.colour %> (<%= c.code %>)
-                                                    <b  class="del-color" 
-                                                       data-brand-id="<%= brand._id %>" 
-                                                       data-prod-id="<%= product._id %>" 
-                                                       data-color-id="<%= c._id %>" title="Delete Color" >×</b>
-                                                </span>
-                                            <% }) %>
-                                        </div>
-                                    </td>
-                                    <td data-label="Action">
-                                        <button class="del-btn-main del-prod" 
-                                                data-brand-id="<%= brand._id %>" 
-                                                data-prod-id="<%= product._id %>" title="Delete Item">Delete Item</button>
+
+            <div class="table-responsive-wrapper">
+                <table class="data-table" id="itemsTable">
+                    <thead>
+                        <tr>
+                            <th>Brand Details</th>
+                            <th>Item Name</th>
+                            <th>Colors</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <% if (allDefinitions && allDefinitions.length > 0) { %>
+                            <% allDefinitions.forEach(brand => { %>
+                                <tr class="brand-row" data-brand="<%= brand.brandName.trim() %>">
+                                    <td colspan="4">
+                                        <span class="brand-title">BRAND: <%= brand.brandName %></span>
+                                        <button class="del-brand" data-brand-id="<%= brand._id %>" title="Delete Brand">🗑️</button>
+                                        
+                                        <span class="units-label">
+    Units: <% brand.units.forEach(u => { %> 
+        <span class="tag unit-tag">
+            <%= u.unitname %> 
+            <b class="del-unit" 
+               data-brand-id="<%= brand._id %>" 
+               data-unit-id="<%= u._id %>" 
+               title="Delete Unit">×</b>
+        </span> 
+    <% }) %>
+</span>
                                     </td>
                                 </tr>
+                                
+                                <% brand.products.forEach(product => { %>
+                                    <tr class="product-row" data-brand="<%= brand.brandName.trim() %>">
+                                        <td class="desktop-only"></td> 
+                                        <td data-label="Item Name">
+                                            <strong><%= product.itemName %></strong>
+                                        </td>
+                                        <td data-label="Colors">
+                                            <div class="color-scroll-box">
+                                                <% product.colors.forEach(c => { %>
+                                                    <span class="tag">
+                                                        <%= c.colour %> (<%= c.code %>)
+                                                        <b class="del-color" 
+                                                           data-brand-id="<%= brand._id %>" 
+                                                           data-prod-id="<%= product._id %>" 
+                                                           data-color-id="<%= c._id %>" title="Delete Color">×</b>
+                                                    </span>
+                                                <% }) %>
+                                            </div>
+                                        </td>
+                                        <td data-label="Action">
+                                            <button class="del-btn-main del-prod" 
+                                                    data-brand-id="<%= brand._id %>" 
+                                                    data-prod-id="<%= product._id %>" title="Delete Item">Delete Item</button>
+                                        </td>
+                                    </tr>
+                                <% }) %>
                             <% }) %>
-                        <% }) %>
-                    <% } else { %>
-                        <tr>
-                            <td colspan="4" class="no-data">Maafi! Koi data nahi mila.</td>
-                        </tr>
-                    <% } %>
-                </tbody>
-            </table>
-            </div>
-        </div>
+                        <% } else { %>
+                            <tr>
+                                <td colspan="4" class="no-data">Maafi! Koi data nahi mila.</td>
+                            </tr>
+                        <% } %>
+                    </tbody>
+                </table>
+            </div> </div>
     </main>
     <script src="/javascripts/allDynamicData.js"></script>  
 </body>

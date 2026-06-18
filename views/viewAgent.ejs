@@ -16,6 +16,51 @@
 
     <h1>View Agent - <span style="color: #2196F3;"><%= agent.name %></span></h1>
 
+    <div class="top-actions" >
+    <button id="editAgentBtn" >✏️ Edit Profile</button>
+    <button id="viewHistoryBtn">📜 Payment History</button>
+</div>
+
+<div id="editModal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-header blue-header">Edit Agent Profile</div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label>Agent Name</label>
+                <input type="text" id="editName" value="<%= agent.name %>">
+            </div>
+            <div class="form-group">
+                <label>Phone Number</label>
+                <input type="text" id="editPhone" value="<%= agent.phone || '' %>">
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button id="saveAgentBtn" class="btn-m btn-save" style="background: #06a56c; color: white; border: none; padding: 8px 15px; border-radius: 5px;" >Save Changes</button>
+            <button id="closeEditModal" class="btn-m btn-cancel" style="background: #ccc; border: none; padding: 8px 15px; border-radius: 5px;">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<div id="historyModal" class="custom-modal">
+    <div class="modal-content">
+        <div class="modal-header orange-header">Payment History 📜</div>
+        <div class="modal-body scroll-body">
+            <table class="history-table">
+                <thead>
+                    <tr style="background:#f4f4f4; color:#333;">
+                        <th>Date</th>
+                        <th>Amount</th>
+                    </tr>
+                </thead>
+                <tbody id="historyTableBody">
+                    </tbody>
+            </table>
+        </div>
+        <div class="modal-footer">
+            <button id="closeHistoryModal" class="btn-m btn-cancel" class="close-modal" style="margin-top: 15px; background: #666; color: white; border: none; padding: 8px 20px; border-radius: 5px;">Close</button>
+        </div>
+    </div>
+</div>
     <div class="filter-container">
       <select id="filter">
         <option value="all" <%= filter === 'all' ? 'selected' : '' %>>All Times</option>
@@ -38,7 +83,7 @@
       </div>
       <div class="stat-box">
         <h3>Paid Commission ✅</h3>
-        <p id="stat-paid">Rs <%= Number(stats.totalPercentageAmountGiven).toFixed(2) %></p>
+        <p id="stat-paid" style="color: #8B5CF6 ; font-weight:bold;" >Rs <%= Number(stats.totalPercentageAmountGiven).toFixed(2) %></p>
       </div>
       <div class="stat-box">
         <h3>Left Commission ⏳</h3>
@@ -55,7 +100,7 @@
       <table>
         <thead>
           <tr>
-            <th>Product Sold</th>
+            <th>Quantity Sold</th>
             <th>Total Amount</th>
             <th>%</th>
             <th>% Amount</th>
@@ -83,8 +128,8 @@
             <%= i.paidAmount >= i.percentageAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid') %>
           </span>
         </td>
-        <td>Rs <%= Number(i.paidAmount || 0).toFixed(2) %></td>
-        <td>Rs <%= (Number(i.percentageAmount) - Number(i.paidAmount)).toFixed(2) %></td>
+        <td style="color: #8B5CF6 ; font-weight:bold;" >Rs <%= Number(i.paidAmount || 0).toFixed(2) %></td>
+        <td style="color:red; font-weight:bold;" >Rs <%= (Number(i.percentageAmount) - Number(i.paidAmount)).toFixed(2) %></td>
         <td>
           <div>
             <% 
@@ -100,18 +145,22 @@
             %>
             <%= pkrDate %>
           </div>
-          <small style="color: #666; font-weight: bold;">
+          <small style="color: #2196F3; font-weight: bold;">
             <%= pkrTime %>
           </small>
 
           <% if (i.billId) { %>
-            <div style="margin-top: 5px;">
-              <a href="/sales/bill/<%= i.billId._id %>"  
-                 style="color: #2196F3; text-decoration: none; font-size: 11px; font-weight: bold;">
-                 📄 View Bill
-              </a>
-            </div>
-          <% } %>
+    <div style="margin-top: 5px;">
+      <a href="/sales/bill/<%= i.billId._id %>"  
+         style="color: #2196F3; text-decoration: none; font-size: 11px; font-weight: bold;">
+         📄 View Bill
+      </a>
+    </div>
+  <% } else { %>
+    <div style="margin-top: 5px;">
+      <small style="color: #999; font-size: 11px; font-weight: bold;">No Bill</small>
+    </div>
+  <% } %>
         </td>
         <td class="actions">
           <button class="pay-btn" data-id="<%= i._id %>"  >Pay %</button>
@@ -123,7 +172,7 @@
           <div class="pay-box" id="paybox-<%= i._id %>" style="display:none; margin-top:5px;">
             <input class="payinput" type="number" id="payInput-<%= i._id %>" 
                    style="width:70px" min="1" placeholder="Pay">
-            <button class="submit-pay-btn" data-id="<%= i._id %>">Submit</button>
+            <button class="submit-pay-btn" data-id="<%= i._id %>" id="submit" >Submit</button>
           </div>
         </td>
       </tr>
@@ -133,6 +182,10 @@
       </table>
     </div>
   </main>
+
+
+
+  
 
   <script src="/javascripts/viewAgent.js"></script>
 </body>

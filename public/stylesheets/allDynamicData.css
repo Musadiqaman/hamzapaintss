@@ -177,3 +177,29 @@ select:focus{
 
 
 
+.unit-tag {
+    background-color: #e8f5e9;
+    color: #2e7d32;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 5px;
+    display: inline-flex;
+    align-items: center;
+    
+}
+
+.del-unit {
+    margin-left: 8px;
+    cursor: pointer;
+    color: #d32f2f;
+    font-weight: bold;
+    transition: 0.2s;
+    font-size: 18px;
+}
+
+.del-unit:hover {
+    color: #ff0000;
+    transform: scale(1.2);
+    font-size: 18px;
+}
+

@@ -2,104 +2,268 @@
 <html lang="en">
 
 <head>
-  <meta charset="UTF-8">
-  <title>Add Sale | Hamza Paints</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
-  <link rel="stylesheet" href="/stylesheets/addSale.css">
+    <meta charset="UTF-8">
+    <title>Add Sale | Hamza Paints</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="icon" href="/images/weldon-paints-logo.png" type="image/png">
+
+    <link rel="stylesheet" href="/stylesheets/addSale.css">
+
+    <script src="/javascripts/html5-qrcode.min.js"></script>
+
 </head>
 
 <body>
 
-  <%- include('partials/navbar') %>
+    <%- include('partials/navbar') %>
 
     <main>
-      <h1>Add New Sales</h1>
 
-      <div class="form-container">
+        <h1>Add New Sales</h1>
 
-  <input id="customerName" type="text" placeholder="Enter Customer Name" required style="width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px;" />
+        <!-- ========================= -->
+        <!-- QR SECTION -->
+        <!-- ========================= -->
+<div class="qr"  >
+<button class="hidden-qr">Hide</button>
+        <div style="
+            display:flex;
+            gap:10px;
+            flex-wrap:wrap;
+            margin-bottom:20px;
+        ">
+
+            <button id="scanQRBtn" type="button" style="display: none;" >
+                📷 Camera Scan
+            </button>
+
+            <label for="qrImageInput" class="custom-file-upload" style="display: none;"  >
+    🖼 Choose QR Image
+</label>
+
+<input 
+    type="file"
+    id="qrImageInput"
+    accept="image/*"
+/>
 
 
-        <!-- Brand dropdown -->
-        <select id="brandSelect">
-          <option value="">Select Brand</option>
-          <% const brands=[...new Set(products.map(p=> p.brandName).filter(b => b && b.trim() !== ""))]; %>
-            <% brands.forEach(brand=> { %>
-              <option value="<%= brand %>">
-                <%= brand %>
-              </option>
-              <% }) %>
-        </select>
+            <input
+                type="text"
+                id="qrScannerInput"
+                placeholder="Scan QR with Scanner Device"
+                autocomplete="off"
+            />
 
-        <!-- Item dropdown -->
-        <select id="itemSelect" disabled>
-          <option value="">Select Item</option>
-        </select>
+        </div>
 
-        <!-- Unit dropdown -->
-        <select id="unitSelect" disabled>
-          <option value="">Select Unit</option>
-        </select>
+        <div
+            id="qr-reader"
+            style="
+                width:320px;
+                display:none;
+                margin-bottom:20px;
+            "
+        ></div>
 
-        <select id="allColours" disabled>
-          <option value="">Select colour</option>
-        </select>
+        </div>
+        <!-- ========================= -->
+        <!-- FORM -->
+        <!-- ========================= -->
 
-        <!-- yay option ka drop down hai likan iska name galat hai bas aor theak hai-->
-        <select id="colourSelect" disabled>
-          <option value="">Select Option</option>
-        </select>
+        <div class="form-container">
 
-        <!-- Quantity and Rate -->
-        <input id="quantitySold" type="number" placeholder="Quantity Sold" min="1" />
-        <input id="rate" type="number" placeholder="Rate" min="1" max="100000" />
+            <div class="selectcustomeragent">
+            <input
+                id="customerName"
+                type="text"
+                placeholder="Enter Client Name"
+                required
+            />
 
-        <!-- Total Stock (hidden) -->
-        <input id="totalStock" type="number" placeholder="Total Stock" hidden />
+              <!-- CUSTOMER -->
 
-        <!-- Agent dropdown -->
-        <select id="agentSelect">
-          <option value="">Select Agent</option>
-          <% agents.forEach(agent=> { %>
-            <option value="<%= agent.agentID %>">
-              <%= agent.name %> (<%= agent.phone %>)
-            </option>
-            <% }) %>
-        </select>
+            <select id="customerSelect">
 
-        <!-- Agent percentage -->
-        <input id="agentPercentage" type="number" placeholder="Agent %" min="1" max="50" style="display:none;" />
+                <option value="">
+                    Select Existing Customer For Kata
+                </option>
 
-        <button id="add">Add Sale</button>
-      </div>
-      <div class="table-container">
-        <table>
-          <thead>
-            <tr>
-              <th>Brand</th>
-              <th>Item</th>
-              <th>Color</th>
-              <th>Unit</th>
-              <th>Quantity Sold</th>
-              <th>Rate</th>
-              <th>Total</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody id="saleTableBody">
-            <tr class="no-data">
-              <td colspan="10">No sales added yet</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-      <button class="submit-btn" id="submitBtn">Submit & Save</button>
+               <% customers.forEach(customer => { %>
+    <option
+        value="<%= customer._id %>"
+        data-name="<%= customer.name %>"
+        data-phone="<%= customer.phone %>" >
+        <%= customer.name %> (<%= customer.phone %>)
+    </option>
+<% }) %>
+
+            </select>
+
+
+             <!-- AGENT -->
+
+            <select id="agentSelect">
+
+                <option value="">Select Agent</option>
+
+                <% agents.forEach(agent=> { %>
+
+                    <option value="<%= agent._id %>">
+                        <%= agent.name %> (<%= agent.phone %>)
+                    </option>
+
+                <% }) %>
+
+            </select>
+
+            <!-- AGENT % -->
+
+            <input
+                id="agentPercentage"
+                type="number"
+                placeholder="Agent %"
+                min="1"
+                max="50"
+                style="display:none;"
+            />
+
+    </div>
+  <div class="manual"  >
+            <!-- BRAND -->
+<button class="hidden-manual">Hide</button>
+<br>
+            <select id="brandSelect">
+
+                <option value="">Select Brand</option>
+
+                <% const brands=[...new Set(products.map(p=>p.brandName).filter(b => b && b.trim() !== ""))]; %>
+
+                <% brands.forEach(brand=> { %>
+
+                    <option value="<%= brand %>">
+                        <%= brand %>
+                    </option>
+
+                <% }) %>
+
+            </select>
+
+            <!-- ITEM -->
+
+            <select id="itemSelect" disabled>
+                <option value="">Select Item</option>
+            </select>
+
+            <!-- UNIT -->
+
+            <select id="unitSelect" disabled>
+                <option value="">Select Unit</option>
+            </select>
+
+            <!-- COLOUR -->
+
+            <select id="allColours" disabled>
+                <option value="">Select Colour</option>
+            </select>
+
+            <!-- OPTION -->
+
+            <select id="colourSelect" disabled>
+                <option value="">Select Option</option>
+            </select>
+
+            <!-- QTY -->
+
+            <input
+                id="quantitySold"
+                type="number"
+                placeholder="Qty Sold"
+                min="1"
+            />
+
+            <!-- RATE -->
+
+            <input
+                id="rate"
+                type="number"
+                placeholder="Sale Rate"
+                min="1" required
+            />
+
+            <!-- STOCK -->
+
+            <input
+                id="totalStock"
+                type="number"
+                hidden
+            />
+
+           
+
+            <!-- ADD -->
+
+            <button id="add" type="button">
+                Add Sale
+            </button>
+
+        </div>
+</div>
+        <!-- ========================= -->
+        <!-- TABLE -->
+        <!-- ========================= -->
+
+        <div class="table-container">
+
+            <table>
+
+                <thead>
+
+                    <tr>
+                        <th>Brand</th>
+                        <th>Item</th>
+                        <th>Color</th>
+                        <th>Unit</th>
+                        <th>Qty</th>
+                        <th>Sale Rate</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+
+                </thead>
+
+                <tbody id="saleTableBody">
+
+                    <tr class="no-data">
+                        <td colspan="8">
+                            No sales added yet
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+        <!-- SUBMIT -->
+
+        <button
+            class="submit-btn"
+            id="submitBtn"
+        >
+            Submit & Save
+        </button>
+
     </main>
 
+    <!-- PRODUCTS -->
+
     <script id="productData" type="application/json">
-  <%- JSON.stringify(products || []) %>
-</script>
+        <%- JSON.stringify(products || []) %>
+    </script>
 
     <script src="/javascripts/addSale.js"></script>
 

@@ -10,6 +10,7 @@
 
 <body>
   <div class="print-area">
+
     <div class="shop-header">
       <img src="/images/weldon-paints-logo.png" id="logo" />
       <div class="shop-name-en">Hamza Weldon Paint & Hardware Store</div>
@@ -19,12 +20,18 @@
         <span dir="ltr">0332-9780911</span>(اسماعیل)
         <span dir="ltr">0335-0502041</span>(مبارک شاہ)
       </div>
-      <div class="divider-line">------------------------------</div>
+     <br>
     </div>
 
-    <p><b>Entry Date:</b> <span id="entryDate"><%= currentDate %></span></p>
-    
+    <p><b>Bill ID: </b><span id="displayBillID" style="font-weight:bold;"></span></p>
+    <br>
+    <p><b>Bill Type: </b><span id="displayBillType" style="font-weight:bold;"></span></p>
+    <br>
+    <p><b>Entry Date:</b> <%= currentDate %></p>
+    <br>
+
     <h3>Product Details:</h3>
+
     <table>
       <thead>
         <tr>
@@ -38,8 +45,7 @@
           <th>Total</th>
         </tr>
       </thead>
-      <tbody id="printTableBody">
-        </tbody>
+      <tbody id="printTableBody"></tbody>
     </table>
 
     <div class="footer">
@@ -48,16 +54,17 @@
     </div>
 
     <div class="urdu-footer">
-      پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6
-      کوہاٹ بورڈ ہائی وے چوک
+      پتہ: ملک تاج مارکیٹ، دکان نمبر 5،6 کوہاٹ بورڈ ہائی وے چوک
     </div>
 
-    <div class="thank-you-section">THANK YOU FOR VISITNG</div>
+    <div class="thank-you-section">THANK YOU FOR VISITING</div>
+
     <div class="dev-footer">
-      <span>Software Developed by: M.SHOUKAT(0335 8004900)</span>
+      <span>Software Developed by: MUSADIQ AMAN (03019805993)</span>
     </div>
+
   </div>
 
-   <script src="/javascripts/printProducts.js"></script>
+  <script src="/javascripts/printProducts.js"></script>
 </body>
 </html>
