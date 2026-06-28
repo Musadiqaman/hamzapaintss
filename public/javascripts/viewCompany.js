@@ -1,112 +1,91 @@
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function() {
 
-    // =============================================
-    // 1. ELEMENTS
-    // =============================================
-    const filterSelect = document.getElementById("filter");
-    const fromInput    = document.getElementById("from");
-    const toInput      = document.getElementById("to");
-    const applyBtn     = document.getElementById("apply");
-    const tbody        = document.getElementById("companyTableBody");
-    const tableLoader  = document.getElementById("tableLoader");
+    var filterSelect    = document.getElementById("filter");
+    var fromInput       = document.getElementById("from");
+    var toInput         = document.getElementById("to");
+    var applyBtn        = document.getElementById("apply");
+    var tbody           = document.getElementById("companyTableBody");
+    var tableLoader     = document.getElementById("tableLoader");
+    var editModal       = document.getElementById("editModal");
+    var historyModal    = document.getElementById("historyModal");
+    var editAgentBtn    = document.getElementById("editAgentBtn");
+    var collectiveModal  = document.getElementById("collectiveModal");
+    var collectivePayBtn = document.getElementById("collectivePayBtn");
+    var closeCollective  = document.getElementById("closeCollectiveModal");
+    var submitCollective = document.getElementById("submitCollectivePay");
+    var collectiveResult = document.getElementById("collectiveResult");
+    var collectiveAmount = document.getElementById("collectiveAmount");
 
-    const editModal    = document.getElementById("editModal");
-    const historyModal = document.getElementById("historyModal");
-    const editAgentBtn = document.getElementById("editAgentBtn");
+    var pathParts = window.location.pathname.split('/');
+    var companyId = pathParts[pathParts.length - 1];
 
-    // Company ID URL se nikalo
-    const pathParts   = window.location.pathname.split('/');
-    const companyId   = pathParts[pathParts.length - 1];
-
-    // =============================================
-    // 2. DATE INPUTS TOGGLE
-    // =============================================
-    const toggleDates = () => {
-        const isCustom = filterSelect.value === "custom";
+    var toggleDates = function() {
+        var isCustom = filterSelect.value === "custom";
         if (fromInput) fromInput.style.display = isCustom ? "inline-block" : "none";
         if (toInput)   toInput.style.display   = isCustom ? "inline-block" : "none";
     };
 
-    // =============================================
-    // 3. FETCH DATA
-    // =============================================
-    const fetchData = async () => {
-        if (!companyId || companyId.length < 15) return console.error("Invalid Company ID");
+    var fetchData = async function() {
+        if (!companyId || companyId.length < 15) return;
 
-        const filterVal = filterSelect.value;
-        let paramsObj = { filter: filterVal };
+        var filterVal = filterSelect.value;
+        var paramsObj = { filter: filterVal };
         if (filterVal === "custom") {
             paramsObj.from = fromInput.value;
             paramsObj.to   = toInput.value;
         }
 
-        const params = new URLSearchParams(paramsObj).toString();
-
+        var params = new URLSearchParams(paramsObj).toString();
         if (tableLoader) tableLoader.style.display = "flex";
         tbody.style.opacity = "0.3";
 
         try {
-            const response = await fetch(`/company/view/${companyId}?${params}`, {
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
+            var response = await fetch("/company/view/" + companyId + "?" + params, {
+                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
             });
-            const data = await response.json();
+            var data = await response.json();
 
             if (data.success) {
+                document.getElementById("stat-total").innerText = "Rs " + Number(data.stats.totalOutstandingAmount).toFixed(2);
+                document.getElementById("stat-paid").innerText  = "Rs " + Number(data.stats.totalOutstandingAmountGiven).toFixed(2);
+                document.getElementById("stat-left").innerText  = "Rs " + Number(data.stats.totalOutstandingAmountLeft).toFixed(2);
 
-                // 1. Stats update
-             document.getElementById("stat-total").innerText = `Rs ${Number(data.stats.totalOutstandingAmount).toFixed(2)}`;
-             document.getElementById("stat-paid").innerText  = `Rs ${Number(data.stats.totalOutstandingAmountGiven).toFixed(2)}`;
-            document.getElementById("stat-left").innerText  = `Rs ${Number(data.stats.totalOutstandingAmountLeft).toFixed(2)}`;
-
-                // 2. Table rows
-                let html = '';
-
+                var html = '';
                 if (!data.company.items || data.company.items.length === 0) {
-                    html = `<tr><td colspan="7" style="text-align:center; padding:20px;">No records found.</td></tr>`;
+                    html = '<tr><td colspan="7" style="text-align:center; padding:20px;">No records found.</td></tr>';
                 } else {
-                    data.company.items.forEach(i => {
-                        const dateObj = new Date(i.createdAt);
-                        const pkrDate = dateObj.toLocaleDateString('en-GB',  { timeZone: 'Asia/Karachi' });
-                        const pkrTime = dateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true, timeZone: 'Asia/Karachi' });
+                    data.company.items.forEach(function(i) {
+                        var dateObj  = new Date(i.createdAt);
+                        var pkrDate  = dateObj.toLocaleDateString('en-GB',  { day:'2-digit', month:'2-digit', year:'numeric', timeZone:'Asia/Karachi' });
+                        var pkrTime  = dateObj.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Karachi' });
+                        var status   = i.paidAmount >= i.totalProductAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid');
+                        var leftAmt  = (Number(i.totalProductAmount) - Number(i.paidAmount)).toFixed(2);
+                        var billLink = i.billId
+                            ? '<div style="margin-top:5px;"><a href="/products/bill/' + i.billId._id + '" style="color:#2196F3; text-decoration:none; font-size:11px; font-weight:bold;">View Bill</a></div>'
+                            : '<div style="margin-top:5px;"><small style="color:#999; font-size:11px; font-weight:bold;">No Bill</small></div>';
+                        var deleteBtn = data.role === "admin"
+                            ? '<button class="delete-btn" data-id="' + i._id + '">Delete</button>'
+                            : '';
 
-                        const status  = i.paidAmount >= i.totalProductAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid');
-                        const leftAmt = (Number(i.totalProductAmount) - Number(i.paidAmount)).toFixed(2);
-
-                        const billLink = i.billId
-                            ? `<a href="/products/bill/${i.billId._id}" style="display:block; font-size:11px; color:#2196F3; font-weight:bold; text-decoration:none; margin-top:5px;">📄 View Bill</a>`
-                            : `<small style="display:block; font-size:11px; color:#999; margin-top:5px; font-weight:bold;">No Bill</small>`;
-
-                        html += `
-                        <tr id="row-${i._id}">
-                            <td>${i.totalProductBuy}</td>
-                            <td>Rs ${Number(i.totalProductAmount).toFixed(2)}</td>
-                            <td class="paid-status"><span class="status-tag">${status}</span></td>
-                            <td style="color: #8B5CF6 ; font-weight:bold;" >Rs ${Number(i.paidAmount).toFixed(2)}</td>
-                            <td style="color:red; font-weight:bold;">Rs ${leftAmt}</td>
-                            <td>
-                                <div>${pkrDate}</div>
-                                <small style="color:#2196F3; font-weight:bold;">${pkrTime}</small>
-                                ${billLink}
-                            </td>
-                            <td class="actions">
-                                <button class="pay-btn" data-id="${i._id}">Pay</button>
-                                ${data.role === "admin" ? `<button class="delete-btn" data-id="${i._id}">Delete</button>` : ''}
-                                <div class="pay-box" id="paybox-${i._id}" style="display:none; margin-top:5px;">
-                                    <input class="payinput" type="number" id="payInput-${i._id}" style="width:70px" placeholder="Rs">
-                                    <button class="submit-pay-btn" data-id="${i._id}" id="submit" >Submit</button>
-                                </div>
-                            </td>
-                        </tr>`;
+                        html += '<tr id="row-' + i._id + '">'
+                            + '<td>' + i.totalProductBuy + '</td>'
+                            + '<td>Rs ' + Number(i.totalProductAmount).toFixed(2) + '</td>'
+                            + '<td class="paid-status"><span class="status-tag">' + status + '</span></td>'
+                            + '<td style="color:#8B5CF6; font-weight:bold;">Rs ' + Number(i.paidAmount).toFixed(2) + '</td>'
+                            + '<td style="color:red; font-weight:bold;">Rs ' + leftAmt + '</td>'
+                            + '<td><div>' + pkrDate + '</div><small style="color:#2196F3; font-weight:bold;">' + pkrTime + '</small>' + billLink + '</td>'
+                            + '<td class="actions">'
+                            + '<button class="pay-btn" data-id="' + i._id + '">Pay</button>'
+                            + deleteBtn
+                            + '<div class="pay-box" id="paybox-' + i._id + '" style="display:none; margin-top:5px;">'
+                            + '<input class="payinput" type="number" id="payInput-' + i._id + '" style="width:70px" min="1" placeholder="Pay">'
+                            + '<button class="submit-pay-btn" data-id="' + i._id + '">Submit</button>'
+                            + '</div></td></tr>';
                     });
                 }
-
                 tbody.innerHTML = html;
                 rebindButtons();
             }
-
         } catch (err) {
             console.error("Fetch error:", err);
         } finally {
@@ -115,41 +94,33 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    // =============================================
-    // 4. REBIND BUTTONS
-    // =============================================
     function rebindButtons() {
-
-        // Pay box toggle
-        document.querySelectorAll(".pay-btn").forEach(btn => {
-            btn.onclick = () => {
-                const box = document.getElementById(`paybox-${btn.dataset.id}`);
+        document.querySelectorAll(".pay-btn").forEach(function(btn) {
+            btn.onclick = function() {
+                var box = document.getElementById("paybox-" + btn.dataset.id);
                 box.style.display = box.style.display === "none" ? "block" : "none";
             };
         });
 
-        // Submit payment
-        document.querySelectorAll(".submit-pay-btn").forEach(btn => {
-            btn.onclick = async () => {
-                const id  = btn.dataset.id;
-                const amt = document.getElementById(`payInput-${id}`).value;
+        document.querySelectorAll(".submit-pay-btn").forEach(function(btn) {
+            btn.onclick = async function() {
+                var id  = btn.dataset.id;
+                var amt = document.getElementById("payInput-" + id).value;
                 if (!amt || amt <= 0) return alert("Please enter a valid amount");
-
                 btn.disabled  = true;
                 btn.innerText = "...";
-
                 try {
-                    const res = await fetch(`/company/pay-item/${id}`, {
+                    var res    = await fetch("/company/pay-item/" + id, {
                         method: "POST",
                         headers: { "Content-Type": "application/json" },
                         body: JSON.stringify({ amount: parseFloat(amt) })
                     });
-                    const result = await res.json();
+                    var result = await res.json();
                     if (result.success) {
-                       alert(`✅ Payment Success: Rs ${parseFloat(amt).toFixed(2)}`);
+                        alert("Payment Success: Rs " + parseFloat(amt).toFixed(2));
                         fetchData();
                     } else {
-                        alert("❌ " + result.message);
+                        alert(result.message);
                         btn.disabled  = false;
                         btn.innerText = "Submit";
                     }
@@ -161,88 +132,114 @@ document.addEventListener("DOMContentLoaded", () => {
             };
         });
 
-        // Delete item
-        document.querySelectorAll(".delete-btn").forEach(btn => {
-            btn.onclick = async () => {
+        document.querySelectorAll(".delete-btn").forEach(function(btn) {
+            btn.onclick = async function() {
                 if (!confirm("Are you sure you want to delete this record?")) return;
                 try {
-                    const res    = await fetch(`/company/delete-item/${btn.dataset.id}`, { method: "DELETE" });
-                    const result = await res.json();
+                    var res    = await fetch("/company/delete-item/" + btn.dataset.id, { method: "DELETE" });
+                    var result = await res.json();
                     if (result.success) {
-                        alert("✅ " + result.message);
+                        alert(result.message);
                         fetchData();
                     } else {
                         alert("Error: " + result.message);
                     }
-                } catch (e) {
-                    alert("Delete request failed");
-                }
+                } catch (e) { alert("Delete request failed"); }
             };
         });
     }
 
-    // =============================================
-    // 5. EDIT PROFILE
-    // =============================================
-    if (editAgentBtn) {
-        editAgentBtn.onclick = () => editModal.style.display = "flex";
-    }
+    // Edit Profile
+    if (editAgentBtn) editAgentBtn.onclick = function() { editModal.style.display = "flex"; };
 
-    const saveProfileBtn = document.getElementById("saveAgentBtn");
+    var saveProfileBtn = document.getElementById("saveAgentBtn");
     if (saveProfileBtn) {
-        saveProfileBtn.onclick = async () => {
-            const name  = document.getElementById("editName").value;
-            const phone = document.getElementById("editPhone").value;
-
+        saveProfileBtn.onclick = async function() {
+            var name  = document.getElementById("editName").value;
+            var phone = document.getElementById("editPhone").value;
             try {
-                const res = await fetch(`/company/update/${companyId}`, {
+                var res    = await fetch("/company/update/" + companyId, {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ name, phone })
+                    body: JSON.stringify({ name: name, phone: phone })
                 });
-                const result = await res.json();
-                if (result.success) {
-                    alert("✅ Company Profile Updated!");
-                    location.reload();
-                } else {
-                    alert("❌ Update failed: " + result.message);
-                }
-            } catch (e) {
-                alert("Network Error");
-            }
+                var result = await res.json();
+                if (result.success) { alert("Company Profile Updated!"); location.reload(); }
+                else alert("Update failed: " + result.message);
+            } catch (e) { alert("Network Error"); }
         };
     }
 
-    // =============================================
-    // 6. PAYMENT HISTORY MODAL
-    // =============================================
-    const viewHistoryBtn = document.getElementById("viewHistoryBtn");
+    // Payment History Modal — arrow grouping
+    var viewHistoryBtn = document.getElementById("viewHistoryBtn");
     if (viewHistoryBtn) {
-        viewHistoryBtn.onclick = async () => {
+        viewHistoryBtn.onclick = async function() {
             historyModal.style.display = "flex";
-            const hBody = document.getElementById("historyTableBody");
-            hBody.innerHTML = '<tr><td colspan="2" style="text-align:center;">⌛ Loading...</td></tr>';
+            var hBody = document.getElementById("historyTableBody");
+            hBody.innerHTML = '<tr><td colspan="2" style="text-align:center;">Loading...</td></tr>';
 
             try {
-                const res  = await fetch(`/company/payment-history/${companyId}`);
-                const data = await res.json();
+                var res  = await fetch("/company/payment-history/" + companyId);
+                var data = await res.json();
 
                 if (data.success && data.history && data.history.length > 0) {
-                    hBody.innerHTML = data.history.map(h => {
-                        const d       = new Date(h.createdAt);
-                        const dateStr = d.toLocaleDateString('en-GB', { timeZone: 'Asia/Karachi' });
-                        const timeStr = d.toLocaleTimeString('en-US', {
-                            hour: '2-digit', minute: '2-digit',
-                            hour12: true, timeZone: 'Asia/Karachi'
-                        });
 
-                        return `<tr>
-                            <td>${dateStr}<br><small style="color:#2196F3;">${timeStr}</small></td>
-                            <td style="color:${h.amountPaid < 0 ? 'red' : 'green'}; font-weight:bold;">
-                                Rs ${Number(h.amountPaid).toFixed(2)}
-                            </td>
-                        </tr>`;
-                    }).join('');
+                    // Same 5 seconds ke andar wale group karo
+                    var groups      = [];
+                    var usedIndexes = new Set();
+
+                    data.history.forEach(function(h, i) {
+                        if (usedIndexes.has(i)) return;
+                        var group = [h];
+                        usedIndexes.add(i);
+                        var t1 = new Date(h.createdAt).getTime();
+                        data.history.forEach(function(h2, j) {
+                            if (i === j || usedIndexes.has(j)) return;
+                            var t2 = new Date(h2.createdAt).getTime();
+                            if (Math.abs(t1 - t2) <= 5000) {
+                                group.push(h2);
+                                usedIndexes.add(j);
+                            }
+                        });
+                        groups.push(group);
+                    });
+
+                    var html = '';
+                    groups.forEach(function(group) {
+                        var d       = new Date(group[0].createdAt);
+                        var dateStr = d.toLocaleDateString('en-GB', { timeZone: 'Asia/Karachi' });
+                        var timeStr = d.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Karachi' });
+
+                        if (group.length === 1) {
+                            var h     = group[0];
+                            var color = h.amountPaid < 0 ? 'red' : 'green';
+                            html += '<tr>'
+                                + '<td style="padding:10px; border-bottom:1px solid #eee;">' + dateStr + '<br><small style="color:#2196F3;">' + timeStr + '</small></td>'
+                                + '<td style="padding:10px; border-bottom:1px solid #eee; font-weight:bold; color:' + color + ';">Rs ' + Number(h.amountPaid).toFixed(2) + '</td>'
+                                + '</tr>';
+                        } else {
+                            var total = group.reduce(function(sum, h) { return sum + Number(h.amountPaid); }, 0);
+                            html += '<tr style="background:#e3f2fd;">'
+                                + '<td colspan="2" style="padding:8px 12px; font-weight:bold; color:#1565c0; font-size:13px; border-bottom:1px solid #bbdefb;">'
+                                + 'Collective | ' + dateStr + ' <small style="color:#1976d2;">' + timeStr + '</small>'
+                                + ' Total: <span style="color:#0d47a1;">Rs ' + total.toFixed(2) + '</span>'
+                                + '</td></tr>';
+
+                            group.forEach(function(h, idx) {
+                                var isLast = idx === group.length - 1;
+                                var arrow  = isLast ? 'L- ' : '|- ';
+                                var color  = h.amountPaid < 0 ? 'red' : '#2e7d32';
+                                var border = isLast ? '2px solid #90caf9' : '1px solid #e3f2fd';
+                                html += '<tr style="background:#f8fbff;">'
+                                    + '<td style="padding:6px 12px 6px 22px; color:#555; font-size:13px; border-bottom:' + border + ';">'
+                                    + '<span style="color:#1565c0; font-weight:bold; margin-right:5px;">' + arrow + '</span>Bill ' + (idx + 1) + '</td>'
+                                    + '<td style="padding:6px 12px; font-weight:bold; color:' + color + '; font-size:13px; border-bottom:' + border + ';">'
+                                    + 'Rs ' + Number(h.amountPaid).toFixed(2) + '</td></tr>';
+                            });
+                        }
+                    });
+
+                    hBody.innerHTML = html;
                 } else {
                     hBody.innerHTML = '<tr><td colspan="2" style="text-align:center; padding:20px;">No history records found.</td></tr>';
                 }
@@ -252,25 +249,79 @@ document.addEventListener("DOMContentLoaded", () => {
         };
     }
 
-    // =============================================
-    // 7. INIT
-    // =============================================
+    // Collective Payment
+    if (collectivePayBtn) {
+        collectivePayBtn.onclick = function() {
+            collectiveAmount.value     = "";
+            collectiveResult.innerHTML = "";
+            collectiveModal.style.display = "flex";
+        };
+    }
+
+    if (closeCollective) closeCollective.onclick = function() { collectiveModal.style.display = "none"; };
+
+    if (submitCollective) {
+        submitCollective.onclick = async function() {
+            if (submitCollective.disabled) return;
+
+            var amt = parseFloat(collectiveAmount.value);
+            if (!amt || amt <= 0) {
+                collectiveResult.innerHTML = '<span style="color:red; font-weight:bold;">Valid amount daalo.</span>';
+                return;
+            }
+
+            submitCollective.disabled      = true;
+            submitCollective.style.opacity = "0.6";
+            submitCollective.innerText     = "Processing...";
+            collectiveResult.innerHTML     = "";
+
+            try {
+                var res  = await fetch("/company/collective-pay/" + companyId, {
+                    method:  "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body:    JSON.stringify({ amount: amt })
+                });
+                var data = await res.json();
+
+                if (data.success) {
+                    collectiveResult.innerHTML = '<p style="color:green; font-weight:bold; margin:0;">' + data.message + '</p>';
+                    setTimeout(function() {
+                        collectiveModal.style.display  = "none";
+                        submitCollective.disabled      = false;
+                        submitCollective.style.opacity = "1";
+                        submitCollective.innerText     = "Submit Payment";
+                        fetchData();
+                    }, 1500);
+                } else {
+                    collectiveResult.innerHTML = '<span style="color:red; font-weight:bold;">' + data.message + '</span>';
+                    submitCollective.disabled      = false;
+                    submitCollective.style.opacity = "1";
+                    submitCollective.innerText     = "Submit Payment";
+                }
+            } catch (err) {
+                console.error(err);
+                collectiveResult.innerHTML = '<span style="color:red; font-weight:bold;">Network error.</span>';
+                submitCollective.disabled      = false;
+                submitCollective.style.opacity = "1";
+                submitCollective.innerText     = "Submit Payment";
+            }
+        };
+    }
+
+    // Init
     toggleDates();
     rebindButtons();
+    if (applyBtn)     applyBtn.addEventListener("click", fetchData);
+    if (filterSelect) filterSelect.addEventListener("change", toggleDates);
 
-    if (applyBtn)      applyBtn.addEventListener("click", fetchData);
-    if (filterSelect)  filterSelect.addEventListener("change", toggleDates);
+    var closeEdit = document.getElementById("closeEditModal");
+    var closeHist = document.getElementById("closeHistoryModal");
+    if (closeEdit) closeEdit.onclick = function() { editModal.style.display = "none"; };
+    if (closeHist) closeHist.onclick = function() { historyModal.style.display = "none"; };
 
-    const closeEdit = document.getElementById("closeEditModal");
-    const closeHist = document.getElementById("closeHistoryModal");
-
-    if (closeEdit) closeEdit.onclick = () => editModal.style.display = "none";
-    if (closeHist) closeHist.onclick = () => historyModal.style.display = "none";
-
-    window.onclick = (e) => {
-        if (e.target == editModal)    editModal.style.display    = "none";
-        if (e.target == historyModal) historyModal.style.display = "none";
+    window.onclick = function(e) {
+        if (e.target === editModal)       editModal.style.display       = "none";
+        if (e.target === historyModal)    historyModal.style.display    = "none";
+        if (e.target === collectiveModal) collectiveModal.style.display = "none";
     };
 });
-
-

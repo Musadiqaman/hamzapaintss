@@ -450,81 +450,83 @@ router.get('/refund', isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
     res.render('refundProducts', { role });
 });
 
-
 router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
     try {
-        let { stockID, refundQuantity, returnCash } = req.body;
+        let { stockID, refundQuantity } = req.body;
+        // returnCash completely hata diya — system khud calculate karega
+
         stockID = stockID ? stockID.trim() : "";
         const qty = parseInt(refundQuantity);
 
         if (!stockID || isNaN(qty) || qty <= 0) {
-            return res.status(200).json({ success: false, message: "❌ Invalid Input. Stock ID and Quantity are required." });
+            return res.status(200).json({ success: false, message: "Invalid Input. Stock ID and Quantity are required." });
         }
 
         const product = await Product.findOne({ stockID });
         if (!product) {
-            return res.status(200).json({ success: false, message: "❌ Product not found." });
+            return res.status(200).json({ success: false, message: "Product not found." });
         }
 
         if (qty > product.remaining) {
             return res.status(200).json({
                 success: false,
-                message: `❌ Short Stock! Available: ${product.remaining}`
+                message: "Short Stock! Available: " + product.remaining
             });
         }
 
-        const productRate     = product.rate || 0;
+        const productRate      = product.rate || 0;
         const refundAmountFull = qty * productRate;
 
-        let finalRefundAmount     = 0;
-        let shouldCreateHistory   = false;
+        let finalRefundAmount   = 0;
+        let shouldCreateHistory = false;
+        let overpaidAmount      = 0;
+        let refundType          = "";
 
         // =============================================
-        // CASE: Company se Odhar liya hua product
+        // CASE 1: Company se Obrai liya hua product
         // =============================================
         if (product.companyItemId) {
-
             const companyItem = await CompanayItem.findById(product.companyItemId);
 
             if (companyItem) {
+                const oldPaidAmount    = companyItem.paidAmount || 0;
+                const oldTotalAmount   = companyItem.totalProductAmount || 0;
 
-                // ✅ Hamesha khata kam hoga — payment se independent
-                companyItem.totalProductBuy    -= qty;
-                companyItem.totalProductAmount -= refundAmountFull;
+                // Pehle outstanding kam karo
+                const newTotalAmount = Math.max(0, oldTotalAmount - refundAmountFull);
 
-                if (companyItem.totalProductBuy    < 0) companyItem.totalProductBuy    = 0;
+                // KEY LOGIC: outstanding kam hone ke baad overpaid check karo
+                overpaidAmount = parseFloat((oldPaidAmount - newTotalAmount).toFixed(2));
+
+                if (overpaidAmount > 0) {
+                    // Company ko paid kia tha aur ab overpaid ho gaya — wapas lo ya adjust karo
+                    refundType          = "obrai_return_cash";
+                    finalRefundAmount   = overpaidAmount;
+                    shouldCreateHistory = true;
+
+                    // Negative history — sirf overpaid amount ki
+                    await new CompanyPaymentHistory({
+                        companyId:     companyItem.company,
+                        companyItemId: companyItem._id,
+                        amountPaid:    -overpaidAmount,
+                        paymentDate:   new Date()
+                    }).save();
+
+                    companyItem.paidAmount = Math.max(0, oldPaidAmount - overpaidAmount);
+
+                } else {
+                    // Kuch paid nahi tha ya outstanding se kam paid tha — sirf khata kam
+                    refundType          = "obrai_no_return";
+                    finalRefundAmount   = 0;
+                    shouldCreateHistory = false;
+                }
+
+                // Outstanding update karo
+                companyItem.totalProductBuy    = Math.max(0, (companyItem.totalProductBuy || 0) - qty);
+                companyItem.totalProductAmount = newTotalAmount;
                 if (companyItem.totalProductAmount < 0) companyItem.totalProductAmount = 0;
 
-                // ✅ Tick lagaya hai — paisa wapas mangna hai
-                if (returnCash === true || returnCash === "true") {
-
-                    if (companyItem.paidAmount > 0) {
-
-                        const amountToAdjust = Math.min(companyItem.paidAmount, refundAmountFull);
-
-                        if (amountToAdjust > 0) {
-
-                            // Negative entry — jo paid tha wo unpaid ho jaye
-                            await new CompanyPaymentHistory({
-                                companyId:     companyItem.company,
-                                companyItemId: companyItem._id,
-                                amountPaid:    -amountToAdjust,
-                                paymentDate:   new Date()
-                            }).save();
-
-                            companyItem.paidAmount -= amountToAdjust;
-                            if (companyItem.paidAmount < 0) companyItem.paidAmount = 0;
-
-                            finalRefundAmount   = amountToAdjust;
-                            shouldCreateHistory = true;
-                        }
-                    }
-                    // agar paidAmount === 0 hai — kuch paid hi nahi tha
-                    // toh history nahi banegi, sirf khata kam hoga (upar ho gaya)
-                }
-                // tick nahi laga — sirf khata kam hoga, history nahi banegi
-
-                // PaidStatus update karo
+                // PaidStatus recalculate
                 companyItem.paidStatus =
                     companyItem.totalProductAmount === 0 ? "Paid"
                     : companyItem.paidAmount >= companyItem.totalProductAmount ? "Paid"
@@ -536,27 +538,24 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
 
         } else {
             // =============================================
-            // CASE: Cash par khareeda hua product
-            // Hamesha pura cash wapas — history banegi
+            // CASE 2: Cash par khareeda hua product
+            // Hamesha pura cash wapas
             // =============================================
+            refundType          = "cash_purchase";
             finalRefundAmount   = refundAmountFull;
             shouldCreateHistory = true;
         }
 
-        // =============================================
-        // Product update — hamesha hoga
-        // =============================================
-        product.remaining       -= qty;
-        product.refundQuantity   = (product.refundQuantity || 0) + qty;
-        product.refundStatus     = product.refundQuantity >= product.totalProduct
+        // Product update — hamesha
+        product.remaining      -= qty;
+        product.refundQuantity  = (product.refundQuantity || 0) + qty;
+        product.refundStatus    = product.refundQuantity >= product.totalProduct
             ? "Fully Refunded"
             : "Partially Refunded";
-        product.syncedToAtlas    = false;
+        product.syncedToAtlas   = false;
         await product.save();
 
-        // =============================================
-        // RefundProductHistory — sirf jab cash exchange hua ho
-        // =============================================
+        // RefundProductHistory — sirf jab cash exchange hua
         if (shouldCreateHistory) {
             await new RefundProductHistory({
                 productId:    product._id,
@@ -565,11 +564,23 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
             }).save();
         }
 
+        // User message — clear aur readable
+        let userMessage = "";
+        if (refundType === "cash_purchase") {
+            userMessage = "Cash refund complete. Company se Rs. " + finalRefundAmount.toFixed(2) + " wapas lo.";
+        } else if (refundType === "obrai_return_cash") {
+            userMessage = "Obrai kam hua. Company ko zyada paid tha — Rs. " + overpaidAmount.toFixed(2) + " company se wapas lo ya doosri cheez le lo.";
+        } else {
+            userMessage = "Company ka obrai Rs. " + refundAmountFull.toFixed(2) + " kam hua. Company ko kuch wapas nahi karna.";
+        }
+
         res.json({
-            success: true,
-            message: "✅ Refund successful. Stock and Company records updated.",
-            billId:  product.billId || null,
-            isPaid:  shouldCreateHistory,
+            success:      true,
+            message:      userMessage,
+            refundType,
+            overpaidAmount,
+            billId:       product.billId || null,
+            isPaid:       shouldCreateHistory,
             refundDetail: {
                 stockID:    product.stockID,
                 brandName:  product.brandName,
@@ -585,10 +596,11 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
         });
 
     } catch (err) {
-        console.error("❌ Company Refund Error:", err);
-        res.status(500).json({ success: false, message: "❌ Internal Server Error" });
+        console.error("Company Refund Error:", err);
+        res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 });
+
 
 
 

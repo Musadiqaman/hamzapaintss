@@ -17,6 +17,10 @@
     <div class="top-actions">
       <button id="editAgentBtn">✏️ Edit Profile</button>
       <button id="viewHistoryBtn">📜 Payment History</button>
+      <button id="collectivePayBtn" style="background:#1565c0; color:white; border:none;
+        padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:bold; font-size:14px;">
+        💰 Collective Payment
+      </button>
     </div>
 
     <!-- Edit Modal -->
@@ -61,6 +65,38 @@
       </div>
     </div>
 
+    <!-- Collective Payment Modal -->
+    <div id="collectiveModal" class="custom-modal">
+      <div class="modal-content">
+        <div class="modal-header" style="background:#1565c0; color:white; padding:16px 20px; font-size:16px; font-weight:bold; border-radius:8px 8px 0 0;">
+          💰 Collective Payment
+        </div>
+        <div class="modal-body">
+          <p style="color:#555; font-size:14px; margin-bottom:16px;">
+            Ek amount daalo — system automatically purane bill se shuru karke saare Obrai bills mein distribute karega.
+          </p>
+          <div class="form-group">
+            <label style="font-weight:bold; color:#333; display:block; margin-bottom:6px;">Total Amount (Rs.)</label>
+            <input type="number" id="collectiveAmount" min="1" placeholder="e.g. 5000"
+              style="width:100%; padding:10px; border:1px solid #ccc; border-radius:6px; font-size:15px; box-sizing:border-box;">
+          </div>
+          <div id="collectiveResult" style="margin-top:12px; font-size:14px;"></div>
+        </div>
+        <div class="modal-footer">
+          <button id="submitCollectivePay"
+            style="background:#1565c0; color:white; border:none; padding:9px 20px;
+                   border-radius:5px; font-weight:bold; cursor:pointer; font-size:14px;">
+            ✅ Submit Payment
+          </button>
+          <button id="closeCollectiveModal"
+            style="background:#ccc; border:none; padding:9px 16px; border-radius:5px;
+                   cursor:pointer; margin-left:8px; font-size:14px;">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Filter -->
     <div class="filter-container">
       <select id="filter">
@@ -83,8 +119,8 @@
         <p id="stat-total">Rs <%= Number(stats.totalOutstandingAmount).toFixed(2) %></p>
       </div>
       <div class="stat-box">
-        <h3>Paid Obrai✅</h3>
-        <p id="stat-paid" style="color: #8B5CF6 ; font-weight:bold;" >Rs <%= Number(stats.totalOutstandingAmountGiven).toFixed(2) %></p>
+        <h3>Paid Obrai ✅</h3>
+        <p id="stat-paid" style="color:#8B5CF6; font-weight:bold;">Rs <%= Number(stats.totalOutstandingAmountGiven).toFixed(2) %></p>
       </div>
       <div class="stat-box">
         <h3>Left Obrai ⏳</h3>
@@ -113,9 +149,7 @@
         </thead>
         <tbody id="companyTableBody">
           <% if (!company.items || company.items.length === 0) { %>
-            <tr>
-              <td colspan="7" class="no-data">No records found.</td>
-            </tr>
+            <tr><td colspan="7" class="no-data">No records found.</td></tr>
           <% } else { %>
             <% company.items.forEach(i => { %>
               <tr id="row-<%= i._id %>">
@@ -126,29 +160,19 @@
                     <%= i.paidAmount >= i.totalProductAmount ? 'Paid' : (i.paidAmount > 0 ? 'Partially' : 'Unpaid') %>
                   </span>
                 </td>
-                <td style="color: #8B5CF6 ; font-weight:bold;"  >Rs <%= Number(i.paidAmount || 0).toFixed(2) %></td>
-                <td style="color:red ; font-weight:bold;" >Rs <%= (Number(i.totalProductAmount) - Number(i.paidAmount)).toFixed(2) %></td>
+                <td style="color:#8B5CF6; font-weight:bold;">Rs <%= Number(i.paidAmount || 0).toFixed(2) %></td>
+                <td style="color:red; font-weight:bold;">Rs <%= (Number(i.totalProductAmount) - Number(i.paidAmount)).toFixed(2) %></td>
                 <td>
                   <%
                     let dateObj = new Date(i.createdAt);
-                    let pkrDate = dateObj.toLocaleDateString('en-GB', {
-                        day:'2-digit', month:'2-digit', year:'numeric',
-                        timeZone:'Asia/Karachi'
-                    });
-                    let pkrTime = dateObj.toLocaleTimeString('en-US', {
-                        hour:'2-digit', minute:'2-digit', hour12:true,
-                        timeZone:'Asia/Karachi'
-                    });
+                    let pkrDate = dateObj.toLocaleDateString('en-GB', { day:'2-digit', month:'2-digit', year:'numeric', timeZone:'Asia/Karachi' });
+                    let pkrTime = dateObj.toLocaleTimeString('en-US', { hour:'2-digit', minute:'2-digit', hour12:true, timeZone:'Asia/Karachi' });
                   %>
                   <div><%= pkrDate %></div>
                   <small style="color:#2196F3; font-weight:bold;"><%= pkrTime %></small>
-
                   <% if (i.billId) { %>
                     <div style="margin-top:5px;">
-                      <a href="/products/bill/<%= i.billId._id %>"
-                         style="color:#2196F3; text-decoration:none; font-size:11px; font-weight:bold;">
-                         📄 View Bill
-                      </a>
+                      <a href="/products/bill/<%= i.billId._id %>" style="color:#2196F3; text-decoration:none; font-size:11px; font-weight:bold;">View Bill</a>
                     </div>
                   <% } else { %>
                     <div style="margin-top:5px;">
@@ -162,9 +186,8 @@
                     <button class="delete-btn" data-id="<%= i._id %>">Delete</button>
                   <% } %>
                   <div class="pay-box" id="paybox-<%= i._id %>" style="display:none; margin-top:5px;">
-                    <input class="payinput" type="number" id="payInput-<%= i._id %>"
-                           style="width:70px" min="1" placeholder="Pay">
-                    <button class="submit-pay-btn" data-id="<%= i._id %>" id="submit" >Submit</button>
+                    <input class="payinput" type="number" id="payInput-<%= i._id %>" style="width:70px" min="1" placeholder="Pay">
+                    <button class="submit-pay-btn" data-id="<%= i._id %>">Submit</button>
                   </div>
                 </td>
               </tr>
