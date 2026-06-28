@@ -18,38 +18,41 @@
       <div class="form-wrapper">
         <h1>Company Refund (Refund Products)</h1>
 
+        <!-- Info box -->
+            <div style="background:#e8f5e9; border:1px solid #a5d6a7; border-radius:8px;
+                    padding:12px 16px; margin-bottom:20px; font-size:13px; color:#2e7d32;">
+          <strong>ℹ️ Refund Products kaise kaam karta hai:</strong><br>
+          • <strong>Cash khareed:</strong> Poora paisa company se wapas lo<br>
+          • <strong>Obrai (Unpaid):</strong>  Sirf obrai kam hoga, kuch wapas nahi<br>
+          • <strong>Obrai (Partially Paid tha):</strong> Pehle obrai kam hoga, jo zyada tha wo company se wapas lo , ya doosri cheez lo , ya phir Obrai mai adjust karo<br>
+          • <strong>Obrai (Paid tha):</strong> Ya paisay company se wapis lo , ya phir dosray Obrai mai adjust karo , ya phir enkay badlay naye chez lo company se 
+          
+        </div>
+
         <form id="refundForm" class="form-container">
           <input type="text" name="stockID" placeholder="Enter Product StockID" required />
 
           <input min="1" max="1000" type="number" name="refundQuantity"
             placeholder="Enter Quantity of Product" required />
 
-          <div style="display:flex; align-items:center; gap:10px; margin:15px 0 5px 0;
-               background:#fff3e0; padding:12px; border-radius:8px; border:1px solid #ffe0b2;">
-            <input type="checkbox" id="returnCash" name="returnCash"
-              style="width:52px; height:52px; cursor:pointer;">
-            <label for="returnCash"
-              style="font-size:14px; color:#e65100; font-weight:bold; cursor:pointer; user-select:none;">
-              Sirf tab tick karein agar yeh product "Obrai" (udhaar) par liya tha company se, aur iss product ka paisa company ko pay kar diya hai — ab product wapas kar ke company se apna paisa wapas mang rahe hain ya en products ke jaga koi aur product lena chahtay hai. 
-            </label>
-          </div>
+          <!-- Tick wala checkbox hata diya — system khud calculate karta hai -->
 
           <button type="submit" id="add">Refund Now</button>
         </form>
 
         <div id="refundResult" style="margin-top:20px; font-size:16px;"></div>
 
-        <!-- Paisa wapas box — running total of all isPaid refunds this session -->
+        <!-- Paisa wapas box -->
         <div id="cashReturnBox" style="display:none; margin-top:16px;
              background:#e8f5e9; border:1px solid #a5d6a7;
              border-radius:8px; padding:14px;">
           <p style="margin:0; font-size:15px; color:#1b5e20; font-weight:bold;">
-            💵 Company se itna paisa lo:
+            Company se wapas lo ya adjust karo:
             <span id="cashReturnAmount" style="font-size:18px;"></span>
           </p>
         </div>
 
-        <!-- Session table — page refresh tak -->
+        <!-- Session table -->
         <div id="refundTableSection" style="display:none; margin-top:30px;">
           <h3 style="margin-bottom:10px; color:#37474f; font-size:16px;">
             Refunded Products — Is Session Mein
@@ -66,7 +69,7 @@
                   <th style="padding:10px; text-align:center;">Total Qty</th>
                   <th style="padding:10px; text-align:center;">Refund Qty</th>
                   <th style="padding:10px; text-align:right;">Rate</th>
-                  <th style="padding:10px; text-align:right;">Total</th>
+                  <th style="padding:10px; text-align:right;">Wapas / Adjust</th>
                   <th style="padding:10px; text-align:center;">Status</th>
                 </tr>
               </thead>
@@ -75,7 +78,7 @@
                 <tr style="background:#eceff1;">
                   <td colspan="8"
                     style="padding:10px; text-align:right; font-weight:bold; color:#37474f;">
-                    Total Wapas:
+                    Total Wapas / Adjust:
                   </td>
                   <td style="padding:10px; text-align:right; font-weight:bold; color:#c62828;">
                     Rs. <span id="sessionGrandTotal">0.00</span>

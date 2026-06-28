@@ -542,4 +542,109 @@ router.delete("/delete-item/:id", isLoggedIn, allowRoles("admin"), async (req, r
 
 
 
+// ✅ COLLECTIVE PAYMENT — Customer ke saare unpaid bills mein ek saath payment distribute karo
+router.post("/collective-pay/:customerId", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  try {
+    const { customerId } = req.params;
+    const totalAmount = parseFloat(req.body.amount);
+
+    if (!totalAmount || totalAmount <= 0) {
+      return res.json({ success: false, message: "❌ Valid amount darj karo." });
+    }
+
+    // ✅ Saare unpaid/partial items fetch karo — purane pehle
+    const items = await CustomerItem.find({
+      customer: customerId,
+      paidStatus: { $in: ["Unpaid", "Partial"] }
+    }).sort({ createdAt: 1 }); // Purane bills pehle settle honge
+
+    if (!items || items.length === 0) {
+      return res.json({ success: false, message: "❌ Koi outstanding bill nahi mila." });
+    }
+
+    // ✅ Total remaining calculate karo
+    const totalRemaining = items.reduce((sum, i) => {
+      return sum + (Number(i.totalProductAmount) - Number(i.paidAmount));
+    }, 0);
+
+    if (totalAmount > totalRemaining) {
+      return res.json({
+        success: false,
+        message: `❌ Amount zyada hai. Maximum outstanding: Rs. ${totalRemaining.toFixed(2)}`
+      });
+    }
+
+    let amountLeft   = totalAmount;
+    const historyDocs = [];
+    const itemUpdates = [];
+
+    for (const item of items) {
+      if (amountLeft <= 0) break;
+
+      const remainingOnThisBill = Number(item.totalProductAmount) - Number(item.paidAmount);
+      if (remainingOnThisBill <= 0) continue;
+
+      // Is bill pe kitna lagao
+      const payThisBill = Math.min(amountLeft, remainingOnThisBill);
+
+      // Ratio se stock aur profit calculate karo
+      const ratio       = payThisBill / Number(item.totalProductAmount);
+      const paidStock   = parseFloat((ratio * Number(item.totalStockValue)).toFixed(2));
+      const paidProfit  = parseFloat((ratio * Number(item.totalProfitValue)).toFixed(2));
+
+      // Payment history record
+      historyDocs.push({
+        customerId:        item.customer,
+        customerItemId:    item._id,
+        amountPaid:        payThisBill,
+        paidStockValue:    paidStock,
+        paidProfitValue:   paidProfit,
+        originalAmountPaid:        payThisBill,
+        originalPaidStockValue:    paidStock,
+        originalPaidProfitValue:   paidProfit,
+        paymentDate:       new Date()
+      });
+
+      // Item update
+      const newPaid = Number(item.paidAmount) + payThisBill;
+      const newStatus =
+        newPaid >= Number(item.totalProductAmount) ? "Paid"
+        : newPaid > 0 ? "Partial" : "Unpaid";
+
+      itemUpdates.push(
+        CustomerItem.findByIdAndUpdate(item._id, {
+          $set: {
+            paidAmount:    newPaid,
+            paidStatus:    newStatus,
+            syncedToAtlas: false
+          }
+        })
+      );
+
+      amountLeft = parseFloat((amountLeft - payThisBill).toFixed(2));
+    }
+
+    // ✅ Sab ek saath save karo
+    await Promise.all([
+      CustomerPaymentHistory.insertMany(historyDocs),
+      ...itemUpdates
+    ]);
+
+    res.json({
+      success: true,
+      message: `✅ Rs. ${totalAmount.toFixed(2)} successfully distribute ho gaye ${historyDocs.length} bill(s) mein.`,
+      billsSettled: historyDocs.length,
+      amountDistributed: totalAmount
+    });
+
+  } catch (err) {
+    console.error("❌ Collective Pay Error:", err);
+    res.status(500).json({ success: false, message: "❌ Server error." });
+  }
+});
+
+
+
+
+
 export default router;

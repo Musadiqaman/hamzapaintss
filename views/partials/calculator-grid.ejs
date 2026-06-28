@@ -3,7 +3,7 @@
   <label>Refunded Stock <input type="number" value="<%= stats.totalRefundStock.toFixed(2) %>" readonly></label>
   <label>Outstanding Stock <input type="number" value="<%= stats.totalOutstandingStock.toFixed(2) %>" readonly></label>
   <label>Paid Outstand. Stock <input type="number" value="<%= stats.totalPaidOutstandingStock.toFixed(2) %>" readonly></label>
-  <label>Company Refund <input type="number" value="<%= stats.totalCompanyRefund.toFixed(2) %>" readonly></label>
+  <!-- <label>Company Refund <input type="number" value="<%= stats.totalCompanyRefund.toFixed(2) %>" readonly></label> -->
  <hr style="margin: 20px 0;">
   <label>Sales Profit - Sales Loss <input type="number" value="<%= stats.totalSaleProfit.toFixed(2) %>" readonly></label>
   <label>Refunded Profit <input type="number" value="<%= stats.totalRefundProfit.toFixed(2) %>" readonly></label>
@@ -23,7 +23,7 @@
     const pos = stats.totalPaidOutstandingStock;
     const cr  = stats.totalCompanyRefund;
     
-    const realStockValue = ss - rs - os + pos + cr;
+    const realStockValue = ss - rs - os + pos;     
 
     // PROFIT FORMULA
     const sp  = stats.totalSaleProfit;

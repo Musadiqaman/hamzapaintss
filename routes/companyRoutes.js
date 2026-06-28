@@ -524,4 +524,96 @@ router.delete("/delete-item/:id", isLoggedIn, allowRoles("admin"), async (req, r
 });
 
 
+
+
+// ✅ Company Collective Payment — saare unpaid bills mein ek saath distribute karo
+// Customers router mein jo collective-pay route hai, exactly wahi — export default se pehle paste karo
+router.post("/collective-pay/:companyId", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  try {
+    const { companyId } = req.params;
+    const totalAmount = parseFloat(req.body.amount);
+
+    if (!totalAmount || totalAmount <= 0) {
+      return res.json({ success: false, message: "Valid amount darj karo." });
+    }
+
+    // Saare unpaid/partial items fetch karo — purane pehle
+    const items = await CompanayItem.find({
+      company: companyId,
+      paidStatus: { $in: ["Unpaid", "Partial"] }
+    }).sort({ createdAt: 1 });
+
+    if (!items || items.length === 0) {
+      return res.json({ success: false, message: "Koi outstanding bill nahi mila." });
+    }
+
+    const totalRemaining = items.reduce((sum, i) => {
+      return sum + (Number(i.totalProductAmount) - Number(i.paidAmount));
+    }, 0);
+
+    if (totalAmount > totalRemaining) {
+      return res.json({
+        success: false,
+        message: "Amount zyada hai. Maximum outstanding: Rs. " + totalRemaining.toFixed(2)
+      });
+    }
+
+    let amountLeft    = totalAmount;
+    const historyDocs = [];
+    const itemUpdates = [];
+
+    for (const item of items) {
+      if (amountLeft <= 0) break;
+
+      const remainingOnThisBill = Number(item.totalProductAmount) - Number(item.paidAmount);
+      if (remainingOnThisBill <= 0) continue;
+
+      const payThisBill = Math.min(amountLeft, remainingOnThisBill);
+
+      historyDocs.push({
+        companyId:          item.company,
+        companyItemId:      item._id,
+        amountPaid:         payThisBill,
+        originalAmountPaid: payThisBill,
+        paymentDate:        new Date()
+      });
+
+      const newPaid  = Number(item.paidAmount) + payThisBill;
+      const newStatus =
+        newPaid >= Number(item.totalProductAmount) ? "Paid"
+        : newPaid > 0 ? "Partial" : "Unpaid";
+
+      itemUpdates.push(
+        CompanayItem.findByIdAndUpdate(item._id, {
+          $set: {
+            paidAmount:    newPaid,
+            paidStatus:    newStatus,
+            syncedToAtlas: false
+          }
+        })
+      );
+
+      amountLeft = parseFloat((amountLeft - payThisBill).toFixed(2));
+    }
+
+    await Promise.all([
+      CompanyPaymentHistory.insertMany(historyDocs),
+      ...itemUpdates
+    ]);
+
+    res.json({
+      success:           true,
+      message:           "Rs. " + totalAmount.toFixed(2) + " successfully distribute ho gaye " + historyDocs.length + " bill(s) mein.",
+      billsSettled:      historyDocs.length,
+      amountDistributed: totalAmount
+    });
+
+  } catch (err) {
+    console.error("Collective Pay Error:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
+
+
 export default router;

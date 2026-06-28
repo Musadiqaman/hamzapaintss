@@ -410,43 +410,41 @@ router.get('/refund', isLoggedIn, allowRoles("admin", "worker"), (req, res) => {
   res.render('refundSales', { role: req.user.role });
 });
 
+
 router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
   try {
-    let { saleID, productQuantity, returnCash } = req.body;
+    let { saleID, productQuantity } = req.body;
+    // ✅ returnCash completely removed — system khud calculate karega
+
     saleID = saleID ? saleID.trim() : "";
     productQuantity = parseInt(productQuantity);
 
-   if (!saleID || !productQuantity || productQuantity <= 0) {
-  return res.status(200).json({ success: false, message: "❌ Invalid Input. Sale ID and Quantity are required." });
-}
+    if (!saleID || !productQuantity || productQuantity <= 0) {
+      return res.status(200).json({ success: false, message: "❌ Invalid Input. Sale ID and Quantity are required." });
+    }
 
     const sale = await Sale.findOne({ saleID }).lean();
-   if (!sale) {
-  return res.status(200).json({ success: false, message: "❌ Sale record not found." });
-}
+    if (!sale) {
+      return res.status(200).json({ success: false, message: "❌ Sale record not found." });
+    }
 
-    // ✅ Product fetch karo — stockID se, lekin ab fields bhi check karo
     const product = await Product.findOne({ stockID: sale.stockID }).lean();
-    // product empty aa raha tha — isliye sale se hi fields lete hain as fallback
 
     const maxRefundable = sale.quantitySold - (sale.refundQuantity || 0);
-   if (productQuantity > maxRefundable) {
-  return res.status(200).json({
-    success: false,
-    message: `❌ Refund quantity exceeds remaining sold quantity. Max allowed: ${maxRefundable}`
-  });
-}
+    if (productQuantity > maxRefundable) {
+      return res.status(200).json({
+        success: false,
+        message: `❌ Refund quantity exceeds remaining sold quantity. Max allowed: ${maxRefundable}`
+      });
+    }
 
-    const refundQty = productQuantity;
-    const productRate = sale.productRate || (product ? product.rate : 0) || 0;
-    const originalRefundStockValue  = refundQty * productRate;
-    const originalRefundProfitValue = parseFloat(((sale.rate - productRate) * refundQty).toFixed(2));
-    const originalRefundAmountValue = refundQty * sale.rate;
+    const refundQty     = productQuantity;
+    const productRate   = sale.productRate || (product ? product.rate : 0) || 0;
+    const refundAmount  = refundQty * sale.rate;          // total refund value
+    const refundStock   = refundQty * productRate;        // stock cost
+    const refundProfit  = parseFloat(((sale.rate - productRate) * refundQty).toFixed(2));
 
-    let finalRefundAmount = originalRefundAmountValue;
-    let finalRefundStock  = originalRefundStockValue;
-    let finalRefundProfit = originalRefundProfitValue;
-
+    // ✅ Sale update + Stock wapas
     await Promise.all([
       Sale.findByIdAndUpdate(sale._id, {
         $inc: { refundQuantity: refundQty },
@@ -464,49 +462,94 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
         : Promise.resolve()
     ]);
 
-    let isHistoryCreated = false;
+    // ✅ Variables jo response mein jayenge
+    let finalRefundAmount = 0;
+    let finalRefundStock  = 0;
+    let finalRefundProfit = 0;
+    let overpaidAmount    = 0;   // yeh actually wapas karna hai ya adjust karna hai
+    let refundType        = "";  // "cash_sale" | "udhaar_no_return" | "udhaar_partial_return"
 
-    if (sale.customerItemId) {
+    const savePromises = [];
+
+    // ==========================================
+    // CASE 1: Cash Sale (customerItemId nahi hai)
+    // ==========================================
+    if (!sale.customerItemId) {
+      refundType        = "cash_sale";
+      finalRefundAmount = refundAmount;
+      finalRefundStock  = refundStock;
+      finalRefundProfit = refundProfit;
+
+      // Cash sale mein seedha RefundSaleHistory banti hai
+      savePromises.push(new RefundSaleHistory({
+        saleId:       sale._id,
+        refundQty,
+        refundAmount: finalRefundAmount,
+        refundStock:  finalRefundStock,
+        refundProfit: finalRefundProfit
+      }).save());
+
+    // ==========================================
+    // CASE 2 & 3: Udhaar Sale
+    // ==========================================
+    } else {
       const customerItem = await CustomerItem.findById(sale.customerItemId);
+
       if (customerItem) {
-        if (returnCash === true || returnCash === "true") {
-          const amountToAdjust = Math.min(customerItem.paidAmount, originalRefundAmountValue);
-          if (amountToAdjust > 0) {
-            const ratio            = amountToAdjust / customerItem.totalProductAmount;
-            const stockAdjustment  = parseFloat((ratio * customerItem.totalStockValue).toFixed(2));
-            const profitAdjustment = parseFloat((ratio * customerItem.totalProfitValue).toFixed(2));
+        // Pehle outstanding update karo
+        const oldPaidAmount      = customerItem.paidAmount;
+        const oldTotalAmount     = customerItem.totalProductAmount;
+        const newTotalAmount     = oldTotalAmount - refundAmount;       // outstanding kam hua
+        const newTotalStock      = customerItem.totalStockValue  - refundStock;
+        const newTotalProfit     = customerItem.totalProfitValue - refundProfit;
 
-            await new CustomerPaymentHistory({
-              customerId:      customerItem.customer,
-              customerItemId:  customerItem._id,
-              amountPaid:      -amountToAdjust,
-              paidStockValue:  -stockAdjustment,
-              paidProfitValue: -profitAdjustment,
-              paymentDate:     new Date()
-            }).save();
+        // ✅ KEY LOGIC: Pehle outstanding kam karo, phir dekho kuch overpaid hua?
+        overpaidAmount = parseFloat((oldPaidAmount - Math.max(newTotalAmount, 0)).toFixed(2));
 
-            finalRefundAmount = amountToAdjust;
-            finalRefundStock  = stockAdjustment;
-            finalRefundProfit = profitAdjustment;
-            customerItem.paidAmount -= amountToAdjust;
-            isHistoryCreated = true;
-          } else {
-            finalRefundAmount = 0; finalRefundStock = 0; finalRefundProfit = 0;
-          }
+        if (overpaidAmount > 0) {
+          // ✅ CASE 3: Kuch paid tha aur ab overpaid ho gaya — wapas karna hai
+          refundType        = "udhaar_return_cash";
+          finalRefundAmount = overpaidAmount;
+          finalRefundStock  = parseFloat(((overpaidAmount / oldTotalAmount) * customerItem.totalStockValue).toFixed(2));
+          finalRefundProfit = parseFloat(((overpaidAmount / oldTotalAmount) * customerItem.totalProfitValue).toFixed(2));
+
+          // Negative payment history — sirf overpaid amount ki
+          await new CustomerPaymentHistory({
+            customerId:      customerItem.customer,
+            customerItemId:  customerItem._id,
+            amountPaid:      -overpaidAmount,
+            paidStockValue:  -finalRefundStock,
+            paidProfitValue: -finalRefundProfit,
+            paymentDate:     new Date()
+          }).save();
+
+          // paidAmount bhi adjust karo
+          customerItem.paidAmount = Math.max(0, oldPaidAmount - overpaidAmount);
+
+          // RefundSaleHistory bhi banao
+          savePromises.push(new RefundSaleHistory({
+            saleId:       sale._id,
+            refundQty,
+            refundAmount: finalRefundAmount,
+            refundStock:  finalRefundStock,
+            refundProfit: finalRefundProfit
+          }).save());
+
         } else {
-          finalRefundAmount = 0; finalRefundStock = 0; finalRefundProfit = 0;
+          // ✅ CASE 2: Kuch paid nahi tha ya paid se kam hai — sirf outstanding kam
+          refundType        = "udhaar_no_return";
+          finalRefundAmount = 0;
+          finalRefundStock  = 0;
+          finalRefundProfit = 0;
         }
 
+        // CustomerItem update karo
         customerItem.totalProductSold   -= refundQty;
-        customerItem.totalProductAmount -= originalRefundAmountValue;
-        customerItem.totalStockValue    -= originalRefundStockValue;
-        customerItem.totalProfitValue   -= originalRefundProfitValue;
+        customerItem.totalProductAmount  = Math.max(0, newTotalAmount);
+        customerItem.totalStockValue     = Math.max(0, newTotalStock);
+        customerItem.totalProfitValue    = Math.max(0, newTotalProfit);
 
-        if (customerItem.paidAmount         < 0) customerItem.paidAmount = 0;
-        if (customerItem.totalProductAmount < 0) customerItem.totalProductAmount = 0;
-        if (customerItem.totalStockValue    < 0) customerItem.totalStockValue = 0;
-        if (customerItem.totalProfitValue   < 0) customerItem.totalProfitValue = 0;
-
+        // paidStatus recalculate
         customerItem.paidStatus =
           customerItem.totalProductAmount === 0 ? "Paid"
           : customerItem.paidAmount >= customerItem.totalProductAmount ? "Paid"
@@ -517,26 +560,13 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
       }
     }
 
-    const shouldCreateHistory = !sale.customerItemId ||
-      ((returnCash === true || returnCash === "true") && isHistoryCreated);
-
-    const savePromises = [];
-
-    if (shouldCreateHistory) {
-      savePromises.push(new RefundSaleHistory({
-        saleId: sale._id, refundQty,
-        refundAmount: finalRefundAmount,
-        refundStock:  finalRefundStock,
-        refundProfit: finalRefundProfit
-      }).save());
-    }
-
+    // ✅ Agent Item update (agar linked hai)
     if (sale.agentItemId) {
       savePromises.push(
         AgentItem.findById(sale.agentItemId).then(async agentItem => {
           if (!agentItem) return;
           agentItem.totalProductSold   -= refundQty;
-          agentItem.totalProductAmount -= originalRefundAmountValue;
+          agentItem.totalProductAmount -= refundAmount;
           const newCommission = (agentItem.totalProductAmount * agentItem.percentage) / 100;
           agentItem.percentageAmount = Math.round(newCommission * 100) / 100;
           agentItem.paidStatus =
@@ -550,11 +580,22 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
 
     if (savePromises.length) await Promise.all(savePromises);
 
+    // ✅ Response message — clear aur readable
+    let userMessage = "";
+    if (refundType === "cash_sale") {
+      userMessage = `✅ Cash refund complete. Customer ko Rs. ${finalRefundAmount.toFixed(2)} wapas karo.`;
+    } else if (refundType === "udhaar_return_cash") {
+      userMessage = `✅ Khata kam hua. Customer ne zyada diya tha — Rs. ${overpaidAmount.toFixed(2)} wapas karo ya doosre bill mein adjust karo.`;
+    } else {
+      userMessage = `✅ Khata Rs. ${refundAmount.toFixed(2)} kam hua. Customer ko kuch wapas nahi karna.`;
+    }
+
     res.json({
-      success: true,
-      message: "✅ Refund successful. Stock, Customer History, and Khata updated perfectly.",
-      billId:  sale.billId || null,
-      isPaid:  shouldCreateHistory,
+      success:      true,
+      message:      userMessage,
+      refundType,
+      overpaidAmount,
+      billId:       sale.billId || null,
       saleDetail: {
         saleID:      sale.saleID,
         productName: sale.itemName   || "",
@@ -564,7 +605,7 @@ router.post('/refund', isLoggedIn, allowRoles("admin", "worker"), async (req, re
         soldQty:     sale.quantitySold,
         qty:         refundQty,
         rate:        sale.rate,
-        total:       originalRefundAmountValue,
+        total:       refundAmount,
         cashAmount:  finalRefundAmount
       }
     });

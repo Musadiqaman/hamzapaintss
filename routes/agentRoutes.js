@@ -504,6 +504,88 @@ router.delete("/delete-item/:id", isLoggedIn, allowRoles("admin"), async (req, r
 });
 
 
+// Agent Collective Payment — export default se pehle paste karo
+router.post("/collective-pay/:agentId", isLoggedIn, allowRoles("admin", "worker"), async (req, res) => {
+  try {
+    const { agentId } = req.params;
+    const totalAmount = parseFloat(req.body.amount);
+
+    if (!totalAmount || totalAmount <= 0) {
+      return res.json({ success: false, message: "Valid amount darj karo." });
+    }
+
+    // Saare unpaid/partial items — purane pehle
+    const items = await AgentItem.find({
+      agent: agentId,
+      paidStatus: { $in: ["Unpaid", "Partial"] }
+    }).sort({ createdAt: 1 });
+
+    if (!items || items.length === 0) {
+      return res.json({ success: false, message: "Koi outstanding commission nahi mili." });
+    }
+
+    const totalRemaining = items.reduce(function(sum, i) {
+      return sum + (Number(i.percentageAmount) - Number(i.paidAmount));
+    }, 0);
+
+    if (totalAmount > totalRemaining) {
+      return res.json({
+        success: false,
+        message: "Amount zyada hai. Maximum outstanding: Rs. " + totalRemaining.toFixed(2)
+      });
+    }
+
+    let amountLeft    = totalAmount;
+    const historyDocs = [];
+    const itemUpdates = [];
+
+    for (const item of items) {
+      if (amountLeft <= 0) break;
+
+      const remainingOnThis = Number(item.percentageAmount) - Number(item.paidAmount);
+      if (remainingOnThis <= 0) continue;
+
+      const payThis = Math.min(amountLeft, remainingOnThis);
+
+      historyDocs.push({
+        agentId:     item.agent,
+        agentItemId: item._id,
+        amountPaid:  payThis,
+        paymentDate: new Date()
+      });
+
+      const newPaid   = Number(item.paidAmount) + payThis;
+      const newStatus = newPaid >= Number(item.percentageAmount) ? "Paid"
+                      : newPaid > 0 ? "Partial" : "Unpaid";
+
+      itemUpdates.push(
+        AgentItem.findByIdAndUpdate(item._id, {
+          $set: { paidAmount: newPaid, paidStatus: newStatus, syncedToAtlas: false }
+        })
+      );
+
+      amountLeft = parseFloat((amountLeft - payThis).toFixed(2));
+    }
+
+    await Promise.all([
+      AgentPaymentHistory.insertMany(historyDocs),
+      ...itemUpdates
+    ]);
+
+    res.json({
+      success:           true,
+      message:           "Rs. " + totalAmount.toFixed(2) + " successfully distribute ho gaye " + historyDocs.length + " commission(s) mein.",
+      billsSettled:      historyDocs.length,
+      amountDistributed: totalAmount
+    });
+
+  } catch (err) {
+    console.error("Agent Collective Pay Error:", err);
+    res.status(500).json({ success: false, message: "Server error." });
+  }
+});
+
+
 
 
 
