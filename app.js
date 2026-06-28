@@ -691,7 +691,7 @@ app.use(
 
 const originPermissions = isProduction
   ? {
-      "https://paintsstore.vercel.app": {
+      "https://hamzapaints.vercel.app": {
         default: ["GET"],
         routes: {
           "/auth/login":      ["POST"],
